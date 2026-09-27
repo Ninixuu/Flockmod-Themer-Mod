@@ -601,22 +601,33 @@ html:not(.flockmodCustomizationsDisabled) .fmCheckbox > div {
 
 /* =========================================================
    COLORS PANEL — GENERAL — TEXT COLOR 1 (opt-in)
-   Primary / section title text: User list, Tool options,
-   Presets, Color wheel, Layers headers.
+   Primary heading-style text.
    ========================================================= */
 
-html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) .containerTitle {
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) .containerTitle,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) .sub-title,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h1,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h2,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h3,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h4,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h5,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) h6 {
     color: var(--flockmod-custom-text1, #fff) !important;
 }
 
+
 /* =========================================================
    COLORS PANEL — GENERAL — TEXT COLOR 2 (opt-in)
-   Smaller text within Tool Options: size, opacity, blur, etc.
-   NOTE: same caveat as Text Color 1 above — verify selectors.
+   Everything else (excluding brand title, chat, user list names).
    ========================================================= */
 
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .optionTitle,
-html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .optionField {
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .optionField,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .headerCaption,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .nameBox,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .typeBox,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar select,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
     color: var(--flockmod-custom-text2, #fff) !important;
 }
 
