@@ -1,0 +1,644 @@
+/* =========================================================
+   FLOCKMOD CUSTOMIZER
+   ========================================================= */
+
+
+/* =========================================================
+   THEME MOD MENU
+   ========================================================= */
+
+/* Mod Menu button */
+
+.themeModMenuButton {
+    color: inherit !important;
+}
+
+
+/* =========================================================
+   THEME MOD MENU DIALOG
+   ========================================================= */
+
+.dialog[name="themeModMenu"] {
+    font-family: Rubik, sans-serif !important;
+    font-size: .8rem !important;
+    letter-spacing: .03rem !important;
+    color: #fff !important;
+    background-color: #1d1e22 !important;
+    border: 1px solid #707379 !important;
+}
+
+
+/* Title bar */
+
+.dialog[name="themeModMenu"] .dialogTitlebar {
+    font-family: Rubik, sans-serif !important;
+    font-size: .8rem !important;
+    letter-spacing: .03rem !important;
+    height: 37px !important;
+    line-height: 37px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: #4f4f55 !important;
+    color: #fff !important;
+    transition: background-color .5s ease !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+.dialog[name="themeModMenu"] .dialogTitlebar {
+    flex-shrink: 0;
+}
+
+
+/* Title */
+
+.dialog[name="themeModMenu"] .dialogTitle {
+    line-height: 37px !important;
+    font-size: .9rem !important;
+    color: #fff !important;
+    border: 0 !important;
+    padding-bottom: .25rem !important;
+    padding-left: .75rem !important;
+    overflow: auto !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+.themeModMenuButton svg {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.themeModMenuButton {
+    color: rgb(180, 182, 186) !important;
+}
+
+.themeModMenuButton:hover {
+    color: rgb(255, 255, 255) !important;
+}
+
+/* Keep resize handles behind the dialog */
+.dialog[name="themeModMenu"] {
+    z-index: 99999 !important;
+}
+
+.dialog[name="themeModMenu"] .dialogSize {
+    z-index: 10004 !important;
+}
+
+.dialog[name="themeModMenu"] {
+    border-width: 2px !important;
+}
+
+
+/* =========================================================
+   THEME MOD MENU BACKDROP
+   ========================================================= */
+
+.themeModBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 99998;
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   THEME MOD MENU CONTENT
+   ========================================================= */
+
+.themeModDialogInner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.themeModContent {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.themeModSidebar {
+    width: 130px;
+    height: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #242529;
+    border-right: 1px solid #4f5156;
+    padding: 6px 0;
+}
+
+.themeModSidebarItem {
+    display: block;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0;
+    background: transparent;
+    color: #b4b6ba;
+    text-align: left;
+    font-family: Rubik, sans-serif;
+    font-size: .8rem;
+    letter-spacing: .03rem;
+    cursor: pointer;
+}
+
+.themeModSidebarItem:hover {
+    background-color: #36383d;
+    color: #fff;
+}
+
+.themeModSidebarItem.active {
+    background-color: #4f5156;
+    color: #fff;
+}
+
+.themeModPanel {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    background-color: #1d1e22;
+    color: #fff;
+}
+
+.themeModMainColumn {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.themeModSectionTitle {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.themeModSubsectionTitle {
+    margin-top: 14px;
+    margin-bottom: 2px;
+    font-size: .85rem;
+    font-weight: 500;
+    color: #b4b6ba;
+    letter-spacing: .03rem;
+}
+
+.themeModSpacingSubsection {
+    margin-top: 18px;
+}
+
+.themeModSectionContent {
+    display: none;
+    min-width: 0;
+}
+
+.themeModSectionContent[data-theme-panel="general"] {
+    display: block;
+}
+
+.themeModSectionsScroll {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+}
+
+.themeModSectionsScroll {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+}
+
+.themeModSidebarFill {
+    flex: 1;
+    background-color: #242529;
+}
+
+
+
+
+/* =========================================================
+   GENERAL SETTINGS
+   ========================================================= */
+
+.themeModSetting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 0;
+    border-bottom: 1px solid #36383d;
+}
+
+.themeModSetting.themeModNoDivider {
+    border-bottom: none;
+}
+
+.themeModSettingText {
+    min-width: 0;
+}
+
+.themeModSettingName {
+    font-size: .8rem;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.themeModSettingDescription {
+    font-size: .7rem;
+    color: #9b9da2;
+}
+
+.themeModSelect {
+    width: 150px;
+    height: 30px;
+    flex-shrink: 0;
+    padding: 0 8px;
+    border: 1px solid #4f5156;
+    border-radius: 2px;
+    background-color: #242529;
+    color: #b4b6ba;
+    font-family: Rubik, sans-serif;
+    font-size: .75rem;
+    letter-spacing: .03rem;
+    cursor: pointer;
+    outline: none;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar,
+html:not(.flockmodCustomizationsDisabled) #bottombar,
+html:not(.flockmodCustomizationsDisabled) .dialog {
+    font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .optiontitle {
+    font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif) !important;
+}
+
+.themeModSelect:hover {
+    border-color: #707379;
+    color: #fff;
+}
+
+.themeModSelect:focus {
+    border-color: #707379;
+}
+
+
+/* =========================================================
+   THEME MOD RANGE CONTROLS
+   ========================================================= */
+
+.themeModRangeControl {
+    width: 210px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.themeModRange {
+    width: 160px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    accent-color: #707379;
+    cursor: pointer;
+}
+
+.themeModRangeValue {
+    width: 40px;
+    flex-shrink: 0;
+    font-size: .7rem;
+    color: #b4b6ba;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   THEME MOD TOGGLE
+   ========================================================= */
+
+.themeModToggle {
+    position: relative;
+    display: inline-block;
+    width: 86px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.themeModToggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.themeModToggleTrack {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+    background-color: #242529;
+    border: 1px solid #4f5156;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.themeModToggleOption {
+    position: relative;
+    z-index: 2;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+    color: #8f9298;
+    transition: color 0.15s ease;
+}
+
+.themeModToggleThumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 1;
+}
+
+.themeModToggle input:checked + .themeModToggleTrack .themeModToggleThumb {
+    transform: translateX(58px);
+}
+
+.themeModToggleTrack {
+    overflow: hidden;
+}
+
+.themeModToggleOption {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+    color: #ffffff;
+    transform: translateY(-50%);
+    transition: opacity 0.4s ease;
+}
+
+.themeModToggleOn {
+    left: 10px;
+}
+
+.themeModToggleOff {
+    right: 10px;
+}
+
+.themeModToggle input:not(:checked) + .themeModToggleTrack .themeModToggleOn {
+    opacity: 0;
+}
+
+.themeModToggle input:not(:checked) + .themeModToggleTrack .themeModToggleOff {
+    opacity: 1;
+}
+
+.themeModToggle input:checked + .themeModToggleTrack .themeModToggleOn {
+    opacity: 1;
+}
+
+.themeModToggle input:checked + .themeModToggleTrack .themeModToggleOff {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   THEME MOD ACTIONS
+   ========================================================= */
+
+.themeModActions {
+    display: none;
+    flex-shrink: 0;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    min-height: 44px;
+    background-color: #242529;
+    border-top: 1px solid #4f5156;
+}
+
+.themeModResetButton,
+.themeModApplyButton {
+    height: 30px;
+    min-width: 80px;
+    padding: 0 12px;
+
+    border: 1px solid #4f5156;
+    border-radius: 2px;
+
+    background-color: #303136;
+    color: #b4b6ba;
+
+    font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif);
+    font-size: .75rem;
+    letter-spacing: .03rem;
+
+    cursor: pointer;
+    outline: none;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+}
+
+.themeModResetButton:hover,
+.themeModApplyButton:hover {
+    background-color: #3a3b40;
+    border-color: #707379;
+    color: #fff;
+}
+
+.themeModResetButton:active,
+.themeModApplyButton:active {
+    background-color: #28292d;
+}
+
+.themeModApplyButton {
+    background-color: #4f5156;
+    color: #fff;
+}
+
+.themeModApplyButton:hover {
+    background-color: #5c5e64;
+}
+
+
+/* =========================================================
+   FLOCKMOD UI FONT SIZE
+   ========================================================= */
+
+html:not(.flockmodCustomizationsDisabled) .optionTitle {
+    font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .containerTitle {
+    font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .headerCaption {
+    font-size: calc(12.8px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .sub-title {
+    font-size: calc(17.6px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .optionField {
+    font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar select {
+    font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
+    font-size: calc(10.24px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .nameBox,
+html:not(.flockmodCustomizationsDisabled) .typeBox {
+    font-size: calc(11.52px * var(--flockmod-custom-ui-font-size, 1)) !important;
+}
+
+
+/* =========================================================
+   FLOCKMOD UI FONT WEIGHT
+   ========================================================= */
+
+html:not(.flockmodCustomizationsDisabled) .optionTitle,
+html:not(.flockmodCustomizationsDisabled) .containerTitle {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .headerCaption {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .optionField {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar select {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .nameBox,
+html:not(.flockmodCustomizationsDisabled) .typeBox {
+    font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
+}
+
+
+/* =========================================================
+   FLOCKMOD UI SPACING
+   ========================================================= */
+
+html:not(.flockmodCustomizationsDisabled) .optionBG {
+    padding-top: calc(3px * var(--flockmod-ui-spacing, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .optionTitle {
+    padding-left: calc(6px * var(--flockmod-ui-spacing, 1)) !important;
+    line-height: calc(25px * var(--flockmod-ui-spacing, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .layerButton {
+    padding: calc(10px * var(--flockmod-ui-spacing, 1)) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .layerButton {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+
+/* =========================================================
+   FLOCKMOD CHECKBOX NATIVE SIZE
+   ========================================================= */
+
+html:not(.flockmodCustomizationsDisabled) .fmCheckbox,
+html:not(.flockmodCustomizationsDisabled) .fmCheckbox > div {
+    font-size: 16px !important;
+}
+
+/* =========================================================
+   COLORS PANEL — ACCENT COLOR
+   ========================================================= */
+
+html:not(.flockmodCustomizationsDisabled) .selectedLayer {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .layerPreview:hover {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .selectedTool {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #topbarProgress .bar {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .badge-danger {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) .tablePagination.selected {
+    background-color: var(--flockmod-custom-accent, #4f5156) !important;
+}
+
+
+/* =========================================================
+   COLORS PANEL — TEXT COLOR (opt-in only)
+   ========================================================= */
+
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) #sidebar,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) body,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h1,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h2,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h3,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h4,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h5,
+html.flockmodTextColorActive:not(.flockmodCustomizationsDisabled) h6 {
+    color: var(--flockmod-custom-text, #fff) !important;
+}

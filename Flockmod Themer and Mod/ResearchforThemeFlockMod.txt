@@ -1,0 +1,873 @@
+/* =========================
+   SIDEBAR
+   ========================= */
+
+#sidebar {
+    background: hotpink !important;
+}
+
+#sidebar > div.sidebarTools > div {
+    background: hotpink !important;
+}
+
+#sidebarCollapse {
+    background: hotpink !important;
+    border: 2px solid deeppink !important;
+}
+
+/* Sidebar section titles */
+
+#sidebar .containerTitle {
+    background: #ff8fab !important;
+}
+
+#sidebar .containerTitle > span > span {
+    color: white !important;
+}
+
+#sidebar .containerTitle > span > i {
+    color: white !important;
+}
+
+/* =========================
+   DRAWING TOOLS
+   ========================= */
+
+#drawingTools > a.btn {
+    background: hotpink !important;
+}
+
+#drawingTools > a.btn.selectedTool {
+    background: hotpink !important;
+    border: 2px solid deeppink !important;
+}
+
+#drawingTools > a.btn:hover {
+    background: deeppink !important;
+}
+
+#drawingTools > a.btn > i {
+    color: hotpink !important;
+}
+
+/* =========================
+   TOOL OPTIONS
+   ========================= */
+
+#sidebar > div.sidebarAdvanced > div.os-padding > div > div > div.container-fluid > div:nth-child(3) > div:nth-child(2) > div.containerContent {
+    background: hotpink !important;
+}
+
+#sidebar > div.sidebarAdvanced > div.os-padding > div > div > div.container-fluid > div:nth-child(3) > div:nth-child(2) > div.containerContent > div.os-padding > div > div > div > div {
+    background: hotpink !important;
+}
+
+/* Sliders */
+
+.fmSlider {
+    background: hotpink !important;
+}
+
+.fmSlider .fmSelectedArea {
+    background: deeppink !important;
+}
+
+.fmSlider .fmThumb {
+    background: #ffb6c1 !important;
+}
+
+/* Dropdowns */
+
+#sidebar select {
+    background: hotpink !important;
+    color: white !important;
+}
+
+/* Pressure checkbox */
+
+#option_pressure .fmCheckbox {
+    background: hotpink !important;
+}
+
+/* Toggle switches */
+
+#option_togglepressureopacity .fmOn,
+#option_locktransparency .fmOn {
+    background: deeppink !important;
+}
+
+#option_togglepressureopacity .fmOff,
+#option_locktransparency .fmOff {
+    background: hotpink !important;
+}
+
+#option_togglepressureopacity .fmThumb,
+#option_locktransparency .fmThumb {
+    background: #ffb6c1 !important;
+}
+
+/* Native FlockMod switches */
+#sidebar .fmOn {
+    background: deeppink !important;
+}
+
+#sidebar .fmOff {
+    background: hotpink !important;
+}
+
+#sidebar .fmThumb {
+    background: #ffb6c1 !important;
+}
+
+/* Tool Options action buttons */
+#sidebar .optionField > a {
+    background: hotpink !important;
+}
+
+#sidebar .optionField {
+    border: 1px solid deeppink !important;
+}
+
+/* =========================
+   PRESETS
+   ========================= */
+
+#presetsBox > p {
+    color: white !important;
+}
+
+/* =========================
+   USER LIST
+   ========================= */
+
+#userlist > tr {
+    background: hotpink !important;
+}
+
+#userlist > tr:nth-child(even) {
+    background: #ffb6c1 !important;
+}
+
+#sidebar > div.sidebarAdvanced > div.os-padding > div > div > div.container-fluid > div:nth-child(3) > div:nth-child(1) > div.containerContent {
+    background: hotpink !important;
+}
+
+#userlist > tr.someoneelse.selected {
+    background-color: #ff5c8a !important;
+}
+
+#userlist > tr.myself.selected {
+    background-color: #ff5c8a !important;
+}
+
+/* =========================
+   LAYERS
+   ========================= */
+
+#previewList > div > div {
+    background: hotpink !important;
+}
+
+#previewList > nav > div {
+    background: hotpink !important;
+}
+
+#previewList > div > div.selectedLayer {
+    border: 2px solid deeppink !important;
+}
+
+.containerFooter {
+    background: hotpink !important;
+}
+
+/* Layer action buttons */
+#previewList > nav > div a.layerButton > i {
+    color: hotpink !important;
+}
+
+/* Layer action button hover */
+#previewList > nav > div a.layerButton:hover {
+    background: #ffb6c1 !important;
+}
+
+/* Layer visibility & lock icons */
+#previewList > div > div .layerPreviewContent > a:nth-child(2) > i,
+#previewList > div > div .layerPreviewContent > a:nth-child(3) > i {
+    color: white !important;
+}
+
+#previewList > div > div .layerPreviewContent > span {
+    color: white !important;
+}
+
+/* =========================
+   TOP / ACTIVITY BAR
+   ========================= */
+
+#topbar > nav > div {
+    background: hotpink !important;
+}
+
+#navbar-topmost > div {
+    background: hotpink !important;
+}
+
+/* Top bar button icons */
+#navbar-topmost > ul > li > a > i {
+    color: white !important;
+}
+
+/* Top bar notification badge */
+#navbar-topmost > ul > li:nth-child(2) > a > span.badge.badge-pill.badge-secondary {
+    background: blue !important;
+    color: white !important;
+}
+
+/* FlockMod brand title */
+#topbar > nav > div > span {
+    color: white !important;
+}
+
+/* FlockMod version text */
+#topbar > nav > div > span > sup {
+    color: white !important;
+}
+
+/* =========================
+   MENUS & POPUPS
+   ========================= */
+
+/* Settings help icons */
+#dialogContainer .helpButton > i {
+    color: white !important;
+}
+
+#dialogContainer .maximizeButton > i {
+    color: white !important;
+}
+
+/* Settings title bar close icon */
+#dialogContainer .closeButton > i {
+    color: white !important;
+}
+
+/* Popup content area */
+#dialogContainer .dynamicDialogArea {
+    background: hotpink !important;
+}
+
+/* Popup dropdowns */
+#dialogContainer select {
+    background: #ffb6c1 !important;
+}
+
+/* Popup header */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(1) > div {
+    background: #ff8fab !important;
+}
+
+/* Popup Settings sidebar */
+#dialogContainer > div:nth-child(5) > div > div.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition > div.os-padding > div > div > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.col-2 {
+    background-color: hotpink !important;
+}
+
+/* Popup Settings checkmarked buttons */
+#dialogContainer .checkLabel.fmCheckbox {
+    background-color: #ffb6c1 !important;
+}
+
+/* Popup Export button */
+#exportSettings {
+    background-color: #ffb6c1 !important;
+}
+
+/* Popup Import button */
+#importSettings {
+    background-color: #ffb6c1 !important;
+}
+
+/* Popup Apply Changes button */
+#applySettings {
+    background-color: #ffb6c1 !important;
+}
+
+/* Popup Settings sidebar links */
+#dialogContainer .subcontentOption.menuIcon {
+    background-color: #ffb6c1 !important;
+}
+
+#dialogContainer .subcontentOption.menuIcon.selected {
+    background-color: #ff8fab !important;
+}
+
+/* Hotkeys search bar */
+#configShurtcuts .fmTableFilter input {
+    background-color: #ffb6c1 !important;
+}
+
+/* Hotkeys search button */
+#configShurtcuts .fmTableFilter .input-group-text.darkInput {
+    background-color: #ffb6c1 !important;
+}
+
+/* Hotkeys search icon */
+#configShurtcuts .fmTableFilter .input-group-text.darkInput > i {
+    color: white !important;
+}
+
+/* Hotkeys table header */
+#configShurtcuts > div.tableHeader > div > div > div:nth-child(3),
+#configShurtcuts > div.tableHeader > div > div > div:nth-child(6),
+#configShurtcuts > div.tableHeader > div > div > div:nth-child(7) {
+    background-color: #ff8fab !important;
+}
+
+/* Hotkeys table alternating rows */
+#configShurtcuts tr.regularRow:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#configShurtcuts tr.regularRow:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Hotkeys table body */
+#configShurtcuts > div.dataBody {
+    background-color: hotpink !important;
+}
+
+/* Hotkeys Load Defaults button */
+#loadDefaults {
+    background-color: #ffb6c1 !important;
+}
+
+/* Hotkeys pagination */
+#configShurtcuts li.tablePaginationItem.regularPage > a {
+    background-color: #ffb6c1 !important;
+}
+
+#configShurtcuts li.tablePaginationItem.regularPage.currentPage > a {
+    background-color: #ff8fab !important;
+}
+
+/* Hotkeys pagination arrows */
+#configShurtcuts > div.dataBody > div:nth-child(2) > nav > ul > li:nth-child(1) > a,
+#configShurtcuts > div.dataBody > div:nth-child(2) > nav > ul > li:nth-child(6) > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* Hotkeys scrollbar */
+#configShurtcuts {
+    scrollbar-color: #ff8fab hotpink !important;
+}
+
+/* Hotkeys table header background */
+#configShurtcuts .headerTable {
+    background-color: #ff8fab !important;
+}
+
+/* Hotkeys Apply Changes button */
+#editShortcut {
+    background-color: #ffb6c1 !important;
+}
+
+/* Chat popup sidebar */
+#dialogContainer > div:nth-child(4) > div > div:nth-child(2) > div > div > div.row.h-100 > div.sidebar.h-100.p-0.col-3 {
+    background-color: hotpink !important;
+}
+
+#dialogContainer .channelTitle.channelTypeRoom {
+    background-color: #ffb6c1 !important;
+}
+
+/* Chat input */
+#dialogContainer .chatText input {
+    background-color: #ffb6c1 !important;
+}
+
+/* Chat emoji button */
+#dialogContainer .chatText button.newEmoji {
+    background-color: #ffb6c1 !important;
+}
+
+/* Chat send button */
+#dialogContainer .chatText button:nth-child(3) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Chat message timestamps */
+#chatMessages .msgTime {
+    color: white !important;
+}
+
+/* Chat event text */
+#chatMessages .eventBlock .msgText {
+    color: white !important;
+}
+
+/* Private Message button */
+#dialogContainer .chatText2 > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* Private Message popup */
+#dialogContainer > div:nth-child(4) > div > div:nth-child(2) > div.submodal > div {
+    background-color: hotpink !important;
+}
+
+#dialogContainer > div:nth-child(4) > div > div:nth-child(2) > div.submodal > div > div > div > div {
+    background-color: hotpink !important;
+}
+
+/* Private Message popup buttons */
+#dialogContainer .bottomButtons > a.btn-success.me-2,
+#dialogContainer .bottomButtons > a.btn-danger.subcloseButton {
+    background-color: #ffb6c1 !important;
+}
+
+/* =========================
+   ABOUT US / SPECIAL THANKS
+   ========================= */
+
+/* Special Thanks table body */
+#specialThanks > div.dataBody > div.tableBody {
+    background-color: hotpink !important;
+}
+
+/* Special Thanks table header */
+#specialThanks > div.tableHeader > div > div > div:nth-child(2) {
+    background-color: #ff8fab !important;
+}
+
+/* Special Thanks alternating rows */
+#thanksTable > tbody > tr.regularRow:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#thanksTable > tbody > tr.regularRow:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+/* About Us action buttons */
+#dialogContainer .col-7 > div.d-grid.gap-2 > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* =========================
+   ROOM MANAGER
+   ========================= */
+
+/* Private Room toggle */
+#privateRoom > div.fmOn.checkLabel {
+    background-color: #ff8fab !important;
+}
+
+#privateRoom > div.fmOff.checkLabel {
+    background-color: hotpink !important;
+}
+
+#privateRoom .fmThumb {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager number boxes */
+#dialogContainer .dynamicDialogArea input[name="number"] {
+    background-color: #ffb6c1 !important;
+}
+
+#dialogContainer .dynamicDialogArea button.btn.darkInput {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Description */
+#dialogContainer > div:nth-child(8) > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-10 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-overflow.os-host-overflow-y.os-host-transition.scrollNotBottom > div.os-padding > div > div > form > div:nth-child(2) > div > p > textarea {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager sidebar content */
+#dialogContainer > div:nth-child(8) > div > div:nth-child(2) > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition.os-host-overflow.os-host-overflow-x.col-2 > div.os-padding > div > div {
+    background-color: hotpink !important;
+}
+
+/* Room Manager special setting label */
+#dialogContainer .dynamicDialogArea form > div:nth-child(4) > div:nth-child(1) > div > div > div > div > span {
+    background-color: #ff8fab !important;
+}
+
+/* Room Manager password box */
+#dialogContainer .dynamicDialogArea input[name="password"] {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager setting label */
+#dialogContainer > div:nth-child(8) > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-10 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-overflow.os-host-overflow-y.os-host-transition > div.os-padding > div > div > form > div:nth-child(4) > div:nth-child(2) > div > span {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room appearance buttons */
+#dialogContainer .dynamicDialogArea a.btn.selected {
+    background-color: #ff8fab !important;
+}
+
+#dialogContainer .dynamicDialogArea a.btn:not(.selected):not(.btn-success):not(.btn-danger) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Unregister Room */
+#unregRoom {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff table body */
+#staffTable > div.dataBody {
+    background-color: hotpink !important;
+}
+
+/* Staff table header */
+#staffTable > div.tableHeader > div {
+    background-color: #ff8fab !important;
+}
+
+/* Staff table alternating rows */
+#staffTable .regularRow:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#staffTable .regularRow:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff filter search box */
+#staffTable > div.pb-2.fmTableFilter > div > div > input {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff filter search background */
+#staffTable > div.pb-2.fmTableFilter > div > div > span.input-group-text.darkInput {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff filter search icon */
+#staffTable > div.pb-2.fmTableFilter > div > div > span.input-group-text.darkInput > i {
+    color: white !important;
+}
+
+/* Staff pagination — unselected page numbers */
+#staffTable li.tablePaginationItem.regularPage:not(.currentPage) > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff pagination — selected page number */
+#staffTable li.tablePaginationItem.currentPage > a {
+    background-color: #ff8fab !important;
+}
+
+/* Staff pagination — left arrow */
+#staffTable > div.dataBody > div:nth-child(2) > nav > ul > li:nth-child(1) > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* Staff pagination — right arrow */
+#staffTable > div.dataBody > div:nth-child(2) > nav > ul > li:nth-child(4) > a {
+    background-color: #ffb6c1 !important;
+}
+
+/* Add User */
+#addUser {
+    background-color: #ffb6c1 !important;
+}
+
+/* Remove User */
+#removeUser {
+    background-color: #ffb6c1 !important;
+}
+
+/* Remove User text */
+#removeUser > span {
+    color: white !important;
+}
+
+/* Remove User icon */
+#removeUser > i {
+    color: white !important;
+}
+
+/* Edit User icon */
+#editUser > i {
+    color: white !important;
+}
+
+/* Edit User text */
+#editUser > span {
+    color: white !important;
+}
+
+/* Apply Privileges */
+#applyPrivileges {
+    background-color: #ffb6c1 !important;
+}
+
+/* Apply Privileges */
+#applyPrivileges {
+    background-color: #ffb6c1 !important;
+}
+
+/* Privileges table — alternating rows */
+#privilegesTable > tbody > tr:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#privilegesTable > tbody > tr:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Privileges table header */
+#privilegeContent > div.tableHeader > div > div {
+    background-color: #ff8fab !important;
+}
+
+/* Room Description — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-11 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-overflow.os-host-overflow-y.scrollNotBottom.os-host-transition > div.os-padding > div > div > form > div:nth-child(2) > div > p > textarea {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager sidebar — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition.col-1 > div.os-padding > div > div {
+    background-color: hotpink !important;
+}
+
+/* Room Manager setting label — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-11 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-overflow.os-host-overflow-y.os-host-transition.scrollNotBottom > div.os-padding > div > div > form > div:nth-child(4) > div:nth-child(2) > div > span {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Description — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-11 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-overflow.os-host-overflow-y.scrollNotBottom.os-host-transition > div.os-padding > div > div > form > div:nth-child(2) > div > p > textarea {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager sidebar — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition.col-1 > div.os-padding > div > div {
+    background-color: hotpink !important;
+}
+
+/* Room Manager setting label — shrunk layout */
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div:nth-child(2) > div > div > div > div.dynamicDialogArea.h-100.p-3.col-11 > div > div.dialogContentArea.os-host.os-theme-light.os-host-resize-disabled.os-host-overflow.os-host-overflow-y.os-host-transition.scrollNotBottom > div.os-padding > div > div > form > div:nth-child(4) > div:nth-child(2) > div > span {
+    background-color: #ffb6c1 !important;
+}
+
+/* Room Manager — Room table alternating rows */
+#roomTable > tbody > tr:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#roomTable > tbody > tr:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+/* Tools table body */
+#toolsContent > div.dataBody > div.tableBody {
+    background-color: hotpink !important;
+}
+
+/* Tools table header */
+#toolsContent > div.tableHeader > div > div {
+    background-color: #ff8fab !important;
+}
+
+/* Bans filter */
+#banContent > div.pb-2.fmTableFilter > div > div > input {
+    background-color: #ffb6c1 !important;
+}
+
+#banContent > div.pb-2.fmTableFilter > div > div > span.input-group-text.darkInput {
+    background-color: #ffb6c1 !important;
+}
+
+#banContent > div.pb-2.fmTableFilter > div > div > span.input-group-text.darkInput > i {
+    color: white !important;
+}
+
+/* Bans table body */
+#banContent > div.dataBody {
+    background-color: hotpink !important;
+}
+
+/* Bans table header */
+#banContent > div.tableHeader > div > div {
+    background-color: #ff8fab !important;
+}
+
+/* Bans table — alternating rows */
+#banManagerTable > tbody > tr:nth-child(odd) {
+    background-color: hotpink !important;
+}
+
+#banManagerTable > tbody > tr:nth-child(even) {
+    background-color: #ffb6c1 !important;
+}
+
+#applyChanges {
+    background-color: #ffb6c1 !important;
+}
+
+#addBan {
+    background-color: #ffb6c1 !important;
+}
+
+#removeBan {
+    background-color: #ffb6c1 !important;
+}
+
+/* =========================
+   HOVER / SELECTED STATES
+   ========================= */
+
+/* Top bar button hover */
+#navbar-topmost > ul > li > a:hover {
+    background: #ffb6c1 !important;
+}
+
+/* User list hover */
+#userlistBox #userlist > tr:hover {
+    background: #ffb6c1 !important;
+}
+
+/* =========================
+   BOTTOM BAR
+   ========================= */
+
+#bottombar > nav > div {
+    background: hotpink !important;
+}
+
+#bottombar .nav-link > i {
+    color: hotpink !important;
+}
+
+#bottombar .nav-separator {
+    background: hotpink !important;
+}
+
+#bottombar > nav > div > ul:nth-child(1) > li:nth-child(1) > a {
+    color: hotpink !important;
+}
+
+/* Message notification badge */
+#bottombar > nav > div > ul:nth-child(3) > li:nth-child(7) > a > span {
+    background: lime !important;
+    color: black !important;
+}
+
+/* Bottom bar hover */
+#bottombar .nav-link:hover {
+    background: #ffb6c1 !important;
+}
+
+/* =========================
+   QUICK ACTIONS MENU
+   ========================= */
+
+body > ul {
+    background-color: hotpink !important;
+}
+
+body > ul.context-menu-list.context-menu-root > li.context-menu-item {
+    background-color: #ffb6c1 !important;
+}
+
+body > ul.context-menu-list.context-menu-root > li.context-menu-item:hover {
+    background-color: #ff69b4 !important;
+}
+
+/* =========================
+   UNDO POPUP
+   ========================= */
+
+#dialogContainer > div:nth-child(7) > div > div.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition > div.os-padding > div > div > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.col-2.os-host.os-theme-light.os-host-overflow.os-host-overflow-x.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition > div.os-padding > div > div {
+    background-color: hotpink !important;
+}
+
+#undoNow {
+    background-color: #ffb6c1 !important;
+}
+
+#selectionTool > div.fmOff.checkLabel {
+    background-color: hotpink !important;
+}
+
+#selectionTool > div.fmOn.checkLabel {
+    background-color: #ff8fab !important;
+}
+
+#selectionTool > div.fmThumb {
+    background-color: #ffb6c1 !important;
+}
+
+#dialogContainer > div.dialogHolder.fullscreen.dialogModal > div > div.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition > div.os-padding > div > div > div > div > div > div.sidebar.h-100.p-0.pt-3.pb-3.os-host.os-theme-light.os-host-resize-disabled.os-host-scrollbar-horizontal-hidden.os-host-scrollbar-vertical-hidden.os-host-transition.col-1 > div.os-padding > div > div {
+    background-color: hotpink !important;
+}
+
+.btn:hover {
+    background-color: #e91e63 !important;
+}
+
+/* =========================
+   THEME MOD MENU
+   ========================= */
+
+   /* Mod Menu */
+#bottombar .modMenuButton {
+    color: hotpink !important;
+}
+
+#bottombar .modMenuButton.active {
+    color: #ff8fab !important;
+}
+
+#bottombar > nav > div > ul:nth-child(3) > li:nth-child(10) > a {
+    background-color: hotpink !important;
+}
+
+/* Mod Menu hover */
+#bottombar > nav > div > ul:nth-child(3) > li:nth-child(10) > a:hover {
+    background-color: #e91e63 !important;
+}
+
+/* Theme Mod Menu Dialog */
+
+.dialog[name="themeModMenu"] {
+    font-family: Rubik, sans-serif !important;
+    font-size: .8rem !important;
+    letter-spacing: .03rem !important;
+    color: #fff !important;
+    background-color: #1d1e22 !important;
+    border: 1px solid #707379 !important;
+}
+
+.dialog[name="themeModMenu"] .dialogTitlebar {
+    font-family: Rubik, sans-serif !important;
+    font-size: .8rem !important;
+    letter-spacing: .03rem !important;
+    height: 37px !important;
+    line-height: 37px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: #4f4f55 !important;
+    color: #fff !important;
+    transition: background-color .5s ease !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
+
+.dialog[name="themeModMenu"] .dialogTitle {
+    line-height: 37px !important;
+    font-size: .9rem !important;
+    color: #fff !important;
+    border: 0 !important;
+    padding-bottom: .25rem !important;
+    padding-left: .75rem !important;
+    overflow: auto !important;
+    user-select: none !important;
+    touch-action: none !important;
+}
