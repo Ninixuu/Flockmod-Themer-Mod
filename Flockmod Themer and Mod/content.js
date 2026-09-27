@@ -84,26 +84,47 @@
         }
     }
 
-    function applyAccentColorPreview(color) {
-    document.documentElement.style.setProperty(
-        "--flockmod-custom-accent",
-        color
-    );
-}
+    function applySelectedColorPreview(color) {
+        document.documentElement.style.setProperty(
+            "--flockmod-custom-selected",
+            color
+        );
+    }
 
-function applyTextColorEnabledPreview(enabled) {
-    document.documentElement.classList.toggle(
-        "flockmodTextColorActive",
-        enabled
-    );
-}
+    function applyHoverColorPreview(color) {
+        document.documentElement.style.setProperty(
+            "--flockmod-custom-hover",
+            color
+        );
+    }
 
-function applyTextColorPreview(color) {
-    document.documentElement.style.setProperty(
-        "--flockmod-custom-text",
-        color
-    );
-}
+    function applyText1ColorEnabledPreview(enabled) {
+        document.documentElement.classList.toggle(
+            "flockmodText1ColorActive",
+            enabled
+        );
+    }
+
+    function applyText1ColorPreview(color) {
+        document.documentElement.style.setProperty(
+            "--flockmod-custom-text1",
+            color
+        );
+    }
+
+    function applyText2ColorEnabledPreview(enabled) {
+        document.documentElement.classList.toggle(
+            "flockmodText2ColorActive",
+            enabled
+        );
+    }
+
+    function applyText2ColorPreview(color) {
+        document.documentElement.style.setProperty(
+            "--flockmod-custom-text2",
+            color
+        );
+    }
 
     function applySavedFont() {
         const savedFont =
@@ -163,29 +184,53 @@ function applyTextColorPreview(color) {
         }
     }
 
-    function applySavedAccentColor() {
-    const savedAccent =
-        localStorage.getItem("flockmodCustomAccentColor") || "#4f5156";
+    function applySavedSelectedColor() {
+        const savedSelected =
+            localStorage.getItem("flockmodCustomSelectedColor") || "#4f5156";
 
-    if (customizationsEnabled) {
-        applyAccentColorPreview(savedAccent);
+        if (customizationsEnabled) {
+            applySelectedColorPreview(savedSelected);
+        }
     }
-}
 
-function applySavedTextColor() {
-    const savedTextEnabled =
-        localStorage.getItem("flockmodCustomTextColorEnabled") === "true";
+    function applySavedHoverColor() {
+        const savedHover =
+            localStorage.getItem("flockmodCustomHoverColor") || "#4f5156";
 
-    const savedTextColor =
-        localStorage.getItem("flockmodCustomTextColor") || "#ffffff";
-
-    if (customizationsEnabled) {
-        applyTextColorEnabledPreview(savedTextEnabled);
-        applyTextColorPreview(savedTextColor);
-    } else {
-        applyTextColorEnabledPreview(false);
+        if (customizationsEnabled) {
+            applyHoverColorPreview(savedHover);
+        }
     }
-}
+
+    function applySavedText1Color() {
+        const savedEnabled =
+            localStorage.getItem("flockmodCustomText1ColorEnabled") === "true";
+
+        const savedColor =
+            localStorage.getItem("flockmodCustomText1Color") || "#ffffff";
+
+        if (customizationsEnabled) {
+            applyText1ColorEnabledPreview(savedEnabled);
+            applyText1ColorPreview(savedColor);
+        } else {
+            applyText1ColorEnabledPreview(false);
+        }
+    }
+
+    function applySavedText2Color() {
+        const savedEnabled =
+            localStorage.getItem("flockmodCustomText2ColorEnabled") === "true";
+
+        const savedColor =
+            localStorage.getItem("flockmodCustomText2Color") || "#ffffff";
+
+        if (customizationsEnabled) {
+            applyText2ColorEnabledPreview(savedEnabled);
+            applyText2ColorPreview(savedColor);
+        } else {
+            applyText2ColorEnabledPreview(false);
+        }
+    }
 
     function addModButton() {
         const bottomBar = document.querySelector(
@@ -515,53 +560,90 @@ function applySavedTextColor() {
                         >
 
     <div class="themeModSubsectionTitle">
-        Accent Color
+        General
     </div>
 
     <div class="themeModSetting themeModNoDivider">
 
         <div class="themeModSettingText">
             <div class="themeModSettingName">
-                Accent Color
+                Text Color 1
             </div>
 
             <div class="themeModSettingDescription">
-                Choose the accent color used by the Theme Mod menu.
+                Override primary section title text (User list, Tool options, Presets, Color wheel, Layers).
             </div>
         </div>
 
-        <input
-            type="color"
-            id="themeModUIAccentColor"
-            value="#4f5156"
-        >
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="themeModText1ColorEnabled">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="themeModUIText1Color" value="#ffffff">
 
     </div>
 
     <div class="themeModSetting themeModNoDivider">
 
-    <div class="themeModSettingText">
-        <div class="themeModSettingName">
-            Text Color
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                Text Color 2
+            </div>
+
+            <div class="themeModSettingDescription">
+                Override smaller text within Tool Options (size, opacity, blur, etc).
+            </div>
         </div>
 
-        <div class="themeModSettingDescription">
-            Override the sidebar and heading text color. May reduce readability on Light theme.
-        </div>
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="themeModText2ColorEnabled">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="themeModUIText2Color" value="#ffffff">
+
     </div>
 
-    <label class="themeModToggle" style="margin-right: 10px;">
-        <input type="checkbox" id="themeModTextColorEnabled">
-        <span class="themeModToggleTrack">
-            <span class="themeModToggleOption themeModToggleOff">OFF</span>
-            <span class="themeModToggleOption themeModToggleOn">ON</span>
-            <span class="themeModToggleThumb"></span>
-        </span>
-    </label>
+    <div class="themeModSetting themeModNoDivider">
 
-    <input type="color" id="themeModUITextColor" value="#ffffff">
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                Selected Colors
+            </div>
 
-</div>
+            <div class="themeModSettingDescription">
+                Color used for selected states (selected layer, selected tool, pagination).
+            </div>
+        </div>
+
+        <input type="color" id="themeModUISelectedColor" value="#4f5156">
+
+    </div>
+
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                Hover Colors
+            </div>
+
+            <div class="themeModSettingDescription">
+                Color used for hover states across FlockMod.
+            </div>
+        </div>
+
+        <input type="color" id="themeModUIHoverColor" value="#4f5156">
+
+    </div>
 
 </div>
 
@@ -776,48 +858,92 @@ if (customizationsEnabled) {
     );
 }
 
-const accentColorInput =
-    dialog.querySelector("#themeModUIAccentColor");
+const selectedColorInput =
+    dialog.querySelector("#themeModUISelectedColor");
 
-const savedAccent =
-    localStorage.getItem("flockmodCustomAccentColor") || "#4f5156";
+const savedSelectedColor =
+    localStorage.getItem("flockmodCustomSelectedColor") || "#4f5156";
 
-accentColorInput.value = savedAccent;
-
-if (customizationsEnabled) {
-    applyAccentColorPreview(savedAccent);
-}
-
-accentColorInput.addEventListener("input", () => {
-    applyAccentColorPreview(accentColorInput.value);
-});
-
-const textColorEnabledToggle =
-    dialog.querySelector("#themeModTextColorEnabled");
-
-const textColorInput =
-    dialog.querySelector("#themeModUITextColor");
-
-const savedTextEnabled =
-    localStorage.getItem("flockmodCustomTextColorEnabled") === "true";
-
-const savedTextColor =
-    localStorage.getItem("flockmodCustomTextColor") || "#ffffff";
-
-textColorEnabledToggle.checked = savedTextEnabled;
-textColorInput.value = savedTextColor;
+selectedColorInput.value = savedSelectedColor;
 
 if (customizationsEnabled) {
-    applyTextColorEnabledPreview(savedTextEnabled);
-    applyTextColorPreview(savedTextColor);
+    applySelectedColorPreview(savedSelectedColor);
 }
 
-textColorEnabledToggle.addEventListener("change", () => {
-    applyTextColorEnabledPreview(textColorEnabledToggle.checked);
+selectedColorInput.addEventListener("input", () => {
+    applySelectedColorPreview(selectedColorInput.value);
 });
 
-textColorInput.addEventListener("input", () => {
-    applyTextColorPreview(textColorInput.value);
+const hoverColorInput =
+    dialog.querySelector("#themeModUIHoverColor");
+
+const savedHoverColor =
+    localStorage.getItem("flockmodCustomHoverColor") || "#4f5156";
+
+hoverColorInput.value = savedHoverColor;
+
+if (customizationsEnabled) {
+    applyHoverColorPreview(savedHoverColor);
+}
+
+hoverColorInput.addEventListener("input", () => {
+    applyHoverColorPreview(hoverColorInput.value);
+});
+
+const text1ColorEnabledToggle =
+    dialog.querySelector("#themeModText1ColorEnabled");
+
+const text1ColorInput =
+    dialog.querySelector("#themeModUIText1Color");
+
+const savedText1Enabled =
+    localStorage.getItem("flockmodCustomText1ColorEnabled") === "true";
+
+const savedText1Color =
+    localStorage.getItem("flockmodCustomText1Color") || "#ffffff";
+
+text1ColorEnabledToggle.checked = savedText1Enabled;
+text1ColorInput.value = savedText1Color;
+
+if (customizationsEnabled) {
+    applyText1ColorEnabledPreview(savedText1Enabled);
+    applyText1ColorPreview(savedText1Color);
+}
+
+text1ColorEnabledToggle.addEventListener("change", () => {
+    applyText1ColorEnabledPreview(text1ColorEnabledToggle.checked);
+});
+
+text1ColorInput.addEventListener("input", () => {
+    applyText1ColorPreview(text1ColorInput.value);
+});
+
+const text2ColorEnabledToggle =
+    dialog.querySelector("#themeModText2ColorEnabled");
+
+const text2ColorInput =
+    dialog.querySelector("#themeModUIText2Color");
+
+const savedText2Enabled =
+    localStorage.getItem("flockmodCustomText2ColorEnabled") === "true";
+
+const savedText2Color =
+    localStorage.getItem("flockmodCustomText2Color") || "#ffffff";
+
+text2ColorEnabledToggle.checked = savedText2Enabled;
+text2ColorInput.value = savedText2Color;
+
+if (customizationsEnabled) {
+    applyText2ColorEnabledPreview(savedText2Enabled);
+    applyText2ColorPreview(savedText2Color);
+}
+
+text2ColorEnabledToggle.addEventListener("change", () => {
+    applyText2ColorEnabledPreview(text2ColorEnabledToggle.checked);
+});
+
+text2ColorInput.addEventListener("input", () => {
+    applyText2ColorPreview(text2ColorInput.value);
 });
 
         fontSelect.addEventListener("change", () => {
@@ -916,18 +1042,33 @@ textColorInput.addEventListener("input", () => {
             );
 
             localStorage.setItem(
-                "flockmodCustomAccentColor",
-                accentColorInput.value
+                "flockmodCustomSelectedColor",
+                selectedColorInput.value
             );
 
             localStorage.setItem(
-                "flockmodCustomTextColorEnabled",
-                textColorEnabledToggle.checked
+                "flockmodCustomHoverColor",
+                hoverColorInput.value
             );
 
             localStorage.setItem(
-                "flockmodCustomTextColor",
-                textColorInput.value
+                "flockmodCustomText1ColorEnabled",
+                text1ColorEnabledToggle.checked
+            );
+
+            localStorage.setItem(
+                "flockmodCustomText1Color",
+                text1ColorInput.value
+            );
+
+            localStorage.setItem(
+                "flockmodCustomText2ColorEnabled",
+                text2ColorEnabledToggle.checked
+            );
+
+            localStorage.setItem(
+                "flockmodCustomText2Color",
+                text2ColorInput.value
             );
         });
 
@@ -1002,39 +1143,75 @@ textColorInput.addEventListener("input", () => {
                 "5"
             );
 
-            accentColorInput.value =
+            selectedColorInput.value =
                 "#4f5156";
 
-            applyAccentColorPreview(
+            applySelectedColorPreview(
                 "#4f5156"
             );
 
             localStorage.setItem(
-                "flockmodCustomAccentColor",
+                "flockmodCustomSelectedColor",
                 "#4f5156"
             );
 
-            textColorEnabledToggle.checked =
+            hoverColorInput.value =
+                "#4f5156";
+
+            applyHoverColorPreview(
+                "#4f5156"
+            );
+
+            localStorage.setItem(
+                "flockmodCustomHoverColor",
+                "#4f5156"
+            );
+
+            text1ColorEnabledToggle.checked =
                 false;
 
-            applyTextColorEnabledPreview(
+            applyText1ColorEnabledPreview(
                 false
             );
 
             localStorage.setItem(
-                "flockmodCustomTextColorEnabled",
+                "flockmodCustomText1ColorEnabled",
                 "false"
             );
 
-            textColorInput.value =
+            text1ColorInput.value =
                 "#ffffff";
 
-            applyTextColorPreview(
+            applyText1ColorPreview(
                 "#ffffff"
             );
 
             localStorage.setItem(
-                "flockmodCustomTextColor",
+                "flockmodCustomText1Color",
+                "#ffffff"
+            );
+
+            text2ColorEnabledToggle.checked =
+                false;
+
+            applyText2ColorEnabledPreview(
+                false
+            );
+
+            localStorage.setItem(
+                "flockmodCustomText2ColorEnabled",
+                "false"
+            );
+
+            text2ColorInput.value =
+                "#ffffff";
+
+            applyText2ColorPreview(
+                "#ffffff"
+            );
+
+            localStorage.setItem(
+                "flockmodCustomText2Color",
                 "#ffffff"
             );
         });
@@ -1494,31 +1671,58 @@ textColorInput.addEventListener("input", () => {
                     savedRadius
                 );
 
-                const savedAccent2 =
+                const savedSelected2 =
                     localStorage.getItem(
-                        "flockmodCustomAccentColor"
+                        "flockmodCustomSelectedColor"
                     ) || "#4f5156";
 
-                applyAccentColorPreview(
-                    savedAccent2
+                applySelectedColorPreview(
+                    savedSelected2
                 );
 
-                const savedTextEnabled2 =
+                const savedHover2 =
                     localStorage.getItem(
-                        "flockmodCustomTextColorEnabled"
+                        "flockmodCustomHoverColor"
+                    ) || "#4f5156";
+
+                applyHoverColorPreview(
+                    savedHover2
+                );
+
+                const savedText1Enabled2 =
+                    localStorage.getItem(
+                        "flockmodCustomText1ColorEnabled"
                     ) === "true";
 
-                const savedTextColor2 =
+                const savedText1Color2 =
                     localStorage.getItem(
-                        "flockmodCustomTextColor"
+                        "flockmodCustomText1Color"
                     ) || "#ffffff";
 
-                applyTextColorEnabledPreview(
-                    savedTextEnabled2
+                applyText1ColorEnabledPreview(
+                    savedText1Enabled2
                 );
 
-                applyTextColorPreview(
-                    savedTextColor2
+                applyText1ColorPreview(
+                    savedText1Color2
+                );
+
+                const savedText2Enabled2 =
+                    localStorage.getItem(
+                        "flockmodCustomText2ColorEnabled"
+                    ) === "true";
+
+                const savedText2Color2 =
+                    localStorage.getItem(
+                        "flockmodCustomText2Color"
+                    ) || "#ffffff";
+
+                applyText2ColorEnabledPreview(
+                    savedText2Enabled2
+                );
+
+                applyText2ColorPreview(
+                    savedText2Color2
                 );
 
                 dialog.remove();
@@ -1646,6 +1850,10 @@ textColorInput.addEventListener("input", () => {
         applySavedFontSize();
         applySavedFontWeight();
         applySavedSpacing();
+        applySavedSelectedColor();
+        applySavedHoverColor();
+        applySavedText1Color();
+        applySavedText2Color();
     }
 
     function initialize() {
