@@ -630,7 +630,8 @@ html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar sele
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .subcontentOption,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .checkCaption,
-html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) label {
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) label,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .fmThumb {
     color: var(--flockmod-custom-text2, #fff) !important;
 }
 
@@ -677,9 +678,13 @@ html.flockmodTopBarTextColorActive:not(.flockmodCustomizationsDisabled) .topbarB
 
 /* =========================================================
    COLORS PANEL — SIDEBAR — PRIMARY SIDEBAR COLOR (opt-in)
+   Sidebar background, plus slider/switch thumbs (hover falls
+   back to the native theme's thumb hover color).
    ========================================================= */
 
-html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar {
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar,
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider:not(.readOnly) > .fmThumb:not(:hover),
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch:not(.readOnly) > .fmThumb:not(:hover) {
     background-color: var(--flockmod-custom-sidebar-primary, #1d1e22) !important;
 }
 
@@ -703,6 +708,21 @@ html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) .toolba
 
 html.flockmodSidebarCollapserActive:not(.flockmodCustomizationsDisabled) #sidebar .containerSidebar .containerFooter {
     background-color: var(--flockmod-custom-sidebar-collapser, #3a3c43) !important;
+}
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — ACCENT 2 (opt-in)
+   Unselected layers, dropdowns, switch off states, empty
+   slider tracks, checkbox backgrounds. (Selected and hover
+   layers are left to Selected Colors / Hover Colors.)
+   ========================================================= */
+
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) #sidebar .layerPreview:not(.selectedLayer):not(:hover),
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) #sidebar select,
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider:not(.readOnly),
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch:not(.readOnly) .fmOff,
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) #sidebar .fmCheckbox:not(.readOnly) > .simpleBox {
+    background-color: var(--flockmod-custom-sidebar-inactive, #3a3c43) !important;
 }
 
 

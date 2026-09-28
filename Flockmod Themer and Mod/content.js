@@ -4,7 +4,7 @@
     const MOD_BUTTON_SELECTOR = ".themeModMenuButton";
     const MOD_DIALOG_SELECTOR = '.dialog[name="themeModMenu"]';
 
-        const SIDEBAR_COLOR_SETTINGS = [
+            const SIDEBAR_COLOR_SETTINGS = [
         {
             cls: "flockmodSidebarPrimaryActive",
             cssVar: "--flockmod-custom-sidebar-primary",
@@ -14,7 +14,7 @@
             lsColor: "flockmodCustomSidebarPrimaryColor",
             defaultColor: "#1d1e22",
             name: "Primary Sidebar Color",
-            description: "Main sidebar background."
+            description: "Main sidebar background and slider/switch thumbs."
         },
         {
             cls: "flockmodSidebarSecondaryActive",
@@ -46,8 +46,19 @@
             lsEnabled: "flockmodCustomSidebarAccentEnabled",
             lsColor: "flockmodCustomSidebarAccentColor",
             defaultColor: "#378de4",
-            name: "Accent Color",
+            name: "Accent 1",
             description: "Sidebar border, slider fills, and switch on-states."
+        },
+        {
+            cls: "flockmodSidebarInactiveActive",
+            cssVar: "--flockmod-custom-sidebar-inactive",
+            toggleId: "themeModSidebarInactiveEnabled",
+            inputId: "themeModUISidebarInactive",
+            lsEnabled: "flockmodCustomSidebarInactiveEnabled",
+            lsColor: "flockmodCustomSidebarInactiveColor",
+            defaultColor: "#3a3c43",
+            name: "Accent 2",
+            description: "Unselected layers, dropdowns, switch off states, empty slider tracks, and checkbox backgrounds."
         },
         {
             cls: "flockmodSidebarIconActive",
