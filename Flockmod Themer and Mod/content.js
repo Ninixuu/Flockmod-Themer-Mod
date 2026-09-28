@@ -4,6 +4,126 @@
     const MOD_BUTTON_SELECTOR = ".themeModMenuButton";
     const MOD_DIALOG_SELECTOR = '.dialog[name="themeModMenu"]';
 
+        const SIDEBAR_COLOR_SETTINGS = [
+        {
+            cls: "flockmodSidebarPrimaryActive",
+            cssVar: "--flockmod-custom-sidebar-primary",
+            toggleId: "themeModSidebarPrimaryEnabled",
+            inputId: "themeModUISidebarPrimary",
+            lsEnabled: "flockmodCustomSidebarPrimaryEnabled",
+            lsColor: "flockmodCustomSidebarPrimaryColor",
+            defaultColor: "#1d1e22",
+            name: "Primary Sidebar Color",
+            description: "Main sidebar background."
+        },
+        {
+            cls: "flockmodSidebarSecondaryActive",
+            cssVar: "--flockmod-custom-sidebar-secondary",
+            toggleId: "themeModSidebarSecondaryEnabled",
+            inputId: "themeModUISidebarSecondary",
+            lsEnabled: "flockmodCustomSidebarSecondaryEnabled",
+            lsColor: "flockmodCustomSidebarSecondaryColor",
+            defaultColor: "#2f3136",
+            name: "Secondary Sidebar Color",
+            description: "Section backgrounds inside the sidebar (User list, Tool options, Layers, etc)."
+        },
+        {
+            cls: "flockmodSidebarCollapserActive",
+            cssVar: "--flockmod-custom-sidebar-collapser",
+            toggleId: "themeModSidebarCollapserEnabled",
+            inputId: "themeModUISidebarCollapser",
+            lsEnabled: "flockmodCustomSidebarCollapserEnabled",
+            lsColor: "flockmodCustomSidebarCollapserColor",
+            defaultColor: "#3a3c43",
+            name: "Collapser Color",
+            description: "The bars at the bottom of each sidebar section (the ones with the grip lines)."
+        },
+        {
+            cls: "flockmodSidebarAccentActive",
+            cssVar: "--flockmod-custom-sidebar-accent",
+            toggleId: "themeModSidebarAccentEnabled",
+            inputId: "themeModUISidebarAccent",
+            lsEnabled: "flockmodCustomSidebarAccentEnabled",
+            lsColor: "flockmodCustomSidebarAccentColor",
+            defaultColor: "#378de4",
+            name: "Accent Color",
+            description: "Sidebar border, slider fills, and switch on-states."
+        },
+        {
+            cls: "flockmodSidebarIconActive",
+            cssVar: "--flockmod-custom-sidebar-icon",
+            toggleId: "themeModSidebarIconEnabled",
+            inputId: "themeModUISidebarIcon",
+            lsEnabled: "flockmodCustomSidebarIconEnabled",
+            lsColor: "flockmodCustomSidebarIconColor",
+            defaultColor: "#acb3ba",
+            name: "Sidebar Icon Color",
+            description: "Section title icons, collapse arrows, and layer action icons."
+        }
+    ];
+
+    function applySidebarColorPreview(setting, enabled, color) {
+        document.documentElement.classList.toggle(
+            setting.cls,
+            enabled
+        );
+
+        document.documentElement.style.setProperty(
+            setting.cssVar,
+            color
+        );
+    }
+
+    function getSavedSidebarColor(setting) {
+        return {
+            enabled:
+                localStorage.getItem(setting.lsEnabled) === "true",
+            color:
+                localStorage.getItem(setting.lsColor) || setting.defaultColor
+        };
+    }
+
+    function applySavedSidebarColors() {
+        SIDEBAR_COLOR_SETTINGS.forEach((setting) => {
+            const saved = getSavedSidebarColor(setting);
+
+            applySidebarColorPreview(
+                setting,
+                customizationsEnabled ? saved.enabled : false,
+                saved.color
+            );
+        });
+    }
+
+    function buildSidebarColorRowsHTML() {
+        return SIDEBAR_COLOR_SETTINGS.map((setting) => `
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                ${setting.name}
+            </div>
+
+            <div class="themeModSettingDescription">
+                ${setting.description}
+            </div>
+        </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="${setting.toggleId}">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
+
+    </div>
+        `).join("");
+    }
+
     function applyFontSizePreview(size) {
         const numericSize = Number(size);
 
@@ -126,6 +246,20 @@
         );
     }
 
+    function applyTopBarTextColorEnabledPreview(enabled) {
+        document.documentElement.classList.toggle(
+            "flockmodTopBarTextColorActive",
+            enabled
+        );
+    }
+
+    function applyTopBarTextColorPreview(color) {
+        document.documentElement.style.setProperty(
+            "--flockmod-custom-topbar-text",
+            color
+        );
+    }
+
     function applySavedFont() {
         const savedFont =
             localStorage.getItem("flockmodCustomUIFont") || "default";
@@ -229,6 +363,21 @@
             applyText2ColorPreview(savedColor);
         } else {
             applyText2ColorEnabledPreview(false);
+        }
+    }
+
+    function applySavedTopBarTextColor() {
+        const savedEnabled =
+            localStorage.getItem("flockmodCustomTopBarTextColorEnabled") === "true";
+
+        const savedColor =
+            localStorage.getItem("flockmodCustomTopBarTextColor") || "#ffffff";
+
+        if (customizationsEnabled) {
+            applyTopBarTextColorEnabledPreview(savedEnabled);
+            applyTopBarTextColorPreview(savedColor);
+        } else {
+            applyTopBarTextColorEnabledPreview(false);
         }
     }
 
@@ -571,7 +720,7 @@
             </div>
 
             <div class="themeModSettingDescription">
-                Override primary section title text (User list, Tool options, Presets, Color wheel, Layers).
+                Override primary heading-style text (section titles, "Special thanks," native headings).
             </div>
         </div>
 
@@ -596,7 +745,7 @@
             </div>
 
             <div class="themeModSettingDescription">
-                Override smaller text within Tool Options (size, opacity, blur, etc).
+                Override most other text (tool options, settings menus, checkbox labels). Excludes the top bar brand title, chat, and user list names.
             </div>
         </div>
 
@@ -642,6 +791,41 @@
         </div>
 
         <input type="color" id="themeModUIHoverColor" value="#4f5156">
+
+    </div>
+
+        <div class="themeModSubsectionTitle themeModSpacingSubsection">
+        Sidebar
+    </div>
+
+    ${buildSidebarColorRowsHTML()}
+
+    <div class="themeModSubsectionTitle themeModSpacingSubsection">
+        Top Bar
+    </div>
+
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                Text Color
+            </div>
+
+            <div class="themeModSettingDescription">
+                Override the top bar icon buttons (Configuration, Chat, Fullscreen, Leave room).
+            </div>
+        </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="themeModTopBarTextColorEnabled">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="themeModUITopBarTextColor" value="#ffffff">
 
     </div>
 
@@ -946,6 +1130,57 @@ text2ColorInput.addEventListener("input", () => {
     applyText2ColorPreview(text2ColorInput.value);
 });
 
+const topBarTextColorEnabledToggle =
+    dialog.querySelector("#themeModTopBarTextColorEnabled");
+
+const topBarTextColorInput =
+    dialog.querySelector("#themeModUITopBarTextColor");
+
+const savedTopBarTextEnabled =
+    localStorage.getItem("flockmodCustomTopBarTextColorEnabled") === "true";
+
+const savedTopBarTextColor =
+    localStorage.getItem("flockmodCustomTopBarTextColor") || "#ffffff";
+
+topBarTextColorEnabledToggle.checked = savedTopBarTextEnabled;
+topBarTextColorInput.value = savedTopBarTextColor;
+
+if (customizationsEnabled) {
+    applyTopBarTextColorEnabledPreview(savedTopBarTextEnabled);
+    applyTopBarTextColorPreview(savedTopBarTextColor);
+}
+
+topBarTextColorEnabledToggle.addEventListener("change", () => {
+    applyTopBarTextColorEnabledPreview(topBarTextColorEnabledToggle.checked);
+});
+
+topBarTextColorInput.addEventListener("input", () => {
+    applyTopBarTextColorPreview(topBarTextColorInput.value);
+});
+
+const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
+    const toggle = dialog.querySelector(`#${setting.toggleId}`);
+    const input = dialog.querySelector(`#${setting.inputId}`);
+    const saved = getSavedSidebarColor(setting);
+
+    toggle.checked = saved.enabled;
+    input.value = saved.color;
+
+    if (customizationsEnabled) {
+        applySidebarColorPreview(setting, saved.enabled, saved.color);
+    }
+
+    toggle.addEventListener("change", () => {
+        applySidebarColorPreview(setting, toggle.checked, input.value);
+    });
+
+    input.addEventListener("input", () => {
+        applySidebarColorPreview(setting, toggle.checked, input.value);
+    });
+
+    return { setting, toggle, input };
+});
+
         fontSelect.addEventListener("change", () => {
             const selectedFont =
                 fontSelect.value;
@@ -1070,6 +1305,21 @@ text2ColorInput.addEventListener("input", () => {
                 "flockmodCustomText2Color",
                 text2ColorInput.value
             );
+
+            localStorage.setItem(
+                "flockmodCustomTopBarTextColorEnabled",
+                topBarTextColorEnabledToggle.checked
+            );
+
+            localStorage.setItem(
+                "flockmodCustomTopBarTextColor",
+                topBarTextColorInput.value
+            );
+
+                        sidebarColorControls.forEach(({ setting, toggle, input }) => {
+                localStorage.setItem(setting.lsEnabled, toggle.checked);
+                localStorage.setItem(setting.lsColor, input.value);
+            });
         });
 
         resetButton.addEventListener("click", () => {
@@ -1214,6 +1464,40 @@ text2ColorInput.addEventListener("input", () => {
                 "flockmodCustomText2Color",
                 "#ffffff"
             );
+
+            topBarTextColorEnabledToggle.checked =
+                false;
+
+            applyTopBarTextColorEnabledPreview(
+                false
+            );
+
+            localStorage.setItem(
+                "flockmodCustomTopBarTextColorEnabled",
+                "false"
+            );
+
+            topBarTextColorInput.value =
+                "#ffffff";
+
+            applyTopBarTextColorPreview(
+                "#ffffff"
+            );
+
+            localStorage.setItem(
+                "flockmodCustomTopBarTextColor",
+                "#ffffff"
+            );
+
+                        sidebarColorControls.forEach(({ setting, toggle, input }) => {
+                toggle.checked = false;
+                input.value = setting.defaultColor;
+
+                applySidebarColorPreview(setting, false, setting.defaultColor);
+
+                localStorage.setItem(setting.lsEnabled, "false");
+                localStorage.setItem(setting.lsColor, setting.defaultColor);
+            });
         });
 
         return dialog;
@@ -1725,6 +2009,34 @@ text2ColorInput.addEventListener("input", () => {
                     savedText2Color2
                 );
 
+                const savedTopBarTextEnabled2 =
+                    localStorage.getItem(
+                        "flockmodCustomTopBarTextColorEnabled"
+                    ) === "true";
+
+                const savedTopBarTextColor2 =
+                    localStorage.getItem(
+                        "flockmodCustomTopBarTextColor"
+                    ) || "#ffffff";
+
+                applyTopBarTextColorEnabledPreview(
+                    savedTopBarTextEnabled2
+                );
+
+                applyTopBarTextColorPreview(
+                    savedTopBarTextColor2
+                );
+
+                    SIDEBAR_COLOR_SETTINGS.forEach((setting) => {
+                    const saved = getSavedSidebarColor(setting);
+
+                    applySidebarColorPreview(
+                        setting,
+                        saved.enabled,
+                        saved.color
+                    );
+                });
+
                 dialog.remove();
             }
         );
@@ -1854,6 +2166,8 @@ text2ColorInput.addEventListener("input", () => {
         applySavedHoverColor();
         applySavedText1Color();
         applySavedText2Color();
+        applySavedTopBarTextColor();
+        applySavedSidebarColors();
     }
 
     function initialize() {

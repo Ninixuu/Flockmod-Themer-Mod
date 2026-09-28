@@ -627,7 +627,10 @@ html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .headerCaptio
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .nameBox,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .typeBox,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar select,
-html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .subcontentOption,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .checkCaption,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) label {
     color: var(--flockmod-custom-text2, #fff) !important;
 }
 
@@ -636,7 +639,7 @@ html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .btn
    COLORS PANEL — GENERAL — SELECTED COLORS
    (was "Accent Color" — now scoped to selection states only.
    #topbarProgress .bar and .badge-danger were dropped here;
-   revisit once Top Bar Colors exists.)
+   revisit once Top Bar Colors covers more than text.)
    ========================================================= */
 
 html:not(.flockmodCustomizationsDisabled) .selectedLayer {
@@ -658,4 +661,76 @@ html:not(.flockmodCustomizationsDisabled) .tablePagination.selected {
 
 html:not(.flockmodCustomizationsDisabled) .layerPreview:hover {
     background-color: var(--flockmod-custom-hover, #4f5156) !important;
+}
+
+
+/* =========================================================
+   COLORS PANEL — TOP BAR — TEXT COLOR (opt-in)
+   Top bar icon buttons (Configuration, Chat, Fullscreen,
+   Leave room). Icon uses color:inherit, so this covers
+   both the icon and its label text.
+   ========================================================= */
+
+html.flockmodTopBarTextColorActive:not(.flockmodCustomizationsDisabled) .topbarButtons .nav-link {
+    color: var(--flockmod-custom-topbar-text, #fff) !important;
+}
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — PRIMARY SIDEBAR COLOR (opt-in)
+   ========================================================= */
+
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar {
+    background-color: var(--flockmod-custom-sidebar-primary, #1d1e22) !important;
+}
+
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — SECONDARY SIDEBAR COLOR (opt-in)
+   Section content areas, Layers list + header bar, tool strip.
+   ========================================================= */
+
+html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) #sidebar .boxBgContainer .containerContent,
+html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) #sidebar .os-content:has(> #previewList),
+html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar,
+html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) .toolbar:has(> #drawingTools) {
+    background-color: var(--flockmod-custom-sidebar-secondary, #2f3136) !important;
+}
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — COLLAPSER COLOR (opt-in)
+   The .containerFooter bars at the bottom of each section.
+   ========================================================= */
+
+html.flockmodSidebarCollapserActive:not(.flockmodCustomizationsDisabled) #sidebar .containerSidebar .containerFooter {
+    background-color: var(--flockmod-custom-sidebar-collapser, #3a3c43) !important;
+}
+
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — ACCENT COLOR (opt-in)
+   Sidebar left border, slider fill, switch on-state.
+   ========================================================= */
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) #sidebar {
+    border-left-color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider:not(.readOnly) > .fmSelectedArea,
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch:not(.readOnly) .fmOn {
+    background-color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+
+/* =========================================================
+   COLORS PANEL — SIDEBAR — SIDEBAR ICON COLOR (opt-in)
+   ========================================================= */
+
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .containerTitle i,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarCollapseIcon,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarCollapseIcon i,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .layerPreview a,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .containerFooter i,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:not(.disabled),
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #drawingTools a {
+    color: var(--flockmod-custom-sidebar-icon, #acb3ba) !important;
 }
