@@ -1,6 +1,8 @@
 # Flockmod-Themer-Mod
 A chrome extension made to mod flockmod and make it customizable
 
+NOTE: Yes! this will work for the new update that just released!
+
 How to download:
 
   1. Click the Green Code button on the github page
