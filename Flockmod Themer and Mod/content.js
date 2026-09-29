@@ -47,7 +47,7 @@
             lsColor: "flockmodCustomSidebarAccentColor",
             defaultColor: "#378de4",
             name: "Accent 1",
-            description: "Sidebar border, slider fills, and switch on-states."
+            description: "Sidebar border, and slider fills and switch on-states in the sidebar and popups."
         },
         {
             cls: "flockmodSidebarInactiveActive",
@@ -73,6 +73,152 @@
         }
     ];
 
+    const POPUP_COLOR_SETTINGS = [
+        {
+            cls: "flockmodPopupBackgroundActive",
+            cssVar: "--flockmod-custom-popup-background",
+            toggleId: "themeModPopupBackgroundEnabled",
+            inputId: "themeModUIPopupBackground",
+            lsEnabled: "flockmodCustomPopupBackgroundEnabled",
+            lsColor: "flockmodCustomPopupBackgroundColor",
+            defaultColor: "#1d1e22",
+            name: "Popup Background",
+            description: "Popup window background, inactive title bars, dropdown and right-click menus."
+        },
+        {
+            cls: "flockmodPopupContentActive",
+            cssVar: "--flockmod-custom-popup-content",
+            toggleId: "themeModPopupContentEnabled",
+            inputId: "themeModUIPopupContent",
+            lsEnabled: "flockmodCustomPopupContentEnabled",
+            lsColor: "flockmodCustomPopupContentColor",
+            defaultColor: "#2f3136",
+            name: "Popup Content Color",
+            description: "The main content area inside popups, and the selected chat channel."
+        },
+        {
+            cls: "flockmodPopupTitleBarActive",
+            cssVar: "--flockmod-custom-popup-titlebar",
+            toggleId: "themeModPopupTitleBarEnabled",
+            inputId: "themeModUIPopupTitleBar",
+            lsEnabled: "flockmodCustomPopupTitleBarEnabled",
+            lsColor: "flockmodCustomPopupTitleBarColor",
+            defaultColor: "#4f4f55",
+            name: "Title Bar Color",
+            description: "Title bar of the active (focused) popup."
+        },
+        {
+            cls: "flockmodPopupTitleTextActive",
+            cssVar: "--flockmod-custom-popup-titletext",
+            toggleId: "themeModPopupTitleTextEnabled",
+            inputId: "themeModUIPopupTitleText",
+            lsEnabled: "flockmodCustomPopupTitleTextEnabled",
+            lsColor: "flockmodCustomPopupTitleTextColor",
+            defaultColor: "#ffffff",
+            name: "Title Bar Text & Icons",
+            description: "Popup titles and the help/maximize/close buttons."
+        },
+        {
+            cls: "flockmodPopupBorderActive",
+            cssVar: "--flockmod-custom-popup-border",
+            toggleId: "themeModPopupBorderEnabled",
+            inputId: "themeModUIPopupBorder",
+            lsEnabled: "flockmodCustomPopupBorderEnabled",
+            lsColor: "flockmodCustomPopupBorderColor",
+            defaultColor: "#707379",
+            name: "Border Color",
+            description: "Popup borders and resize edges, menu borders, chat room tab edges."
+        },
+        {
+            cls: "flockmodPopupFieldActive",
+            cssVar: "--flockmod-custom-popup-field",
+            toggleId: "themeModPopupFieldEnabled",
+            inputId: "themeModUIPopupField",
+            lsEnabled: "flockmodCustomPopupFieldEnabled",
+            lsColor: "flockmodCustomPopupFieldColor",
+            defaultColor: "#43444a",
+            name: "Field Color",
+            description: "Text boxes, dropdowns, the chat input, and slider/switch tracks inside popups."
+        },
+        {
+            cls: "flockmodPopupButtonActive",
+            cssVar: "--flockmod-custom-popup-button",
+            toggleId: "themeModPopupButtonEnabled",
+            inputId: "themeModUIPopupButton",
+            lsEnabled: "flockmodCustomPopupButtonEnabled",
+            lsColor: "flockmodCustomPopupButtonColor",
+            defaultColor: "#7c7f87",
+            name: "Button Color",
+            description: "Popup buttons (chat send/emoji, New PM, etc)."
+        },
+        {
+            cls: "flockmodPopupButtonTextActive",
+            cssVar: "--flockmod-custom-popup-buttontext",
+            toggleId: "themeModPopupButtonTextEnabled",
+            inputId: "themeModUIPopupButtonText",
+            lsEnabled: "flockmodCustomPopupButtonTextEnabled",
+            lsColor: "flockmodCustomPopupButtonTextColor",
+            defaultColor: "#ffffff",
+            name: "Button Text & Icons",
+            description: "Text and icons on popup buttons, and the chat font size arrows."
+        }
+    ];
+
+    const CHAT_COLOR_SETTINGS = [
+        {
+            cls: "flockmodChatChannelsActive",
+            cssVar: "--flockmod-custom-chat-channels",
+            toggleId: "themeModChatChannelsEnabled",
+            inputId: "themeModUIChatChannels",
+            lsEnabled: "flockmodCustomChatChannelsEnabled",
+            lsColor: "flockmodCustomChatChannelsColor",
+            defaultColor: "#1d1e22",
+            name: "Channel List Color",
+            description: "Background of the channel list on the left of the chat."
+        },
+        {
+            cls: "flockmodChatMessageActive",
+            cssVar: "--flockmod-custom-chat-message",
+            toggleId: "themeModChatMessageEnabled",
+            inputId: "themeModUIChatMessage",
+            lsEnabled: "flockmodCustomChatMessageEnabled",
+            lsColor: "flockmodCustomChatMessageColor",
+            defaultColor: "#ffffff",
+            name: "Message Text",
+            description: "Chat message text. Usernames keep their role colors."
+        },
+        {
+            cls: "flockmodChatEventActive",
+            cssVar: "--flockmod-custom-chat-event",
+            toggleId: "themeModChatEventEnabled",
+            inputId: "themeModUIChatEvent",
+            lsEnabled: "flockmodCustomChatEventEnabled",
+            lsColor: "flockmodCustomChatEventColor",
+            defaultColor: "#808080",
+            name: "System Message Text",
+            description: "Event messages like joins and friend requests. MOTD and GM messages keep their native colors."
+        },
+        {
+            cls: "flockmodChatTimestampActive",
+            cssVar: "--flockmod-custom-chat-timestamp",
+            toggleId: "themeModChatTimestampEnabled",
+            inputId: "themeModUIChatTimestamp",
+            lsEnabled: "flockmodCustomChatTimestampEnabled",
+            lsColor: "flockmodCustomChatTimestampColor",
+            defaultColor: "#808080",
+            name: "Timestamp Color",
+            description: "The time next to each message."
+        }
+    ];
+
+    /* Every toggle+picker color that shares the sidebar-style wiring
+       (init / preview / apply / reset / close / load). */
+    const TOGGLE_COLOR_SETTINGS = [
+        ...SIDEBAR_COLOR_SETTINGS,
+        ...POPUP_COLOR_SETTINGS,
+        ...CHAT_COLOR_SETTINGS
+    ];
+
     function applySidebarColorPreview(setting, enabled, color) {
         document.documentElement.classList.toggle(
             setting.cls,
@@ -95,7 +241,7 @@
     }
 
     function applySavedSidebarColors() {
-        SIDEBAR_COLOR_SETTINGS.forEach((setting) => {
+        TOGGLE_COLOR_SETTINGS.forEach((setting) => {
             const saved = getSavedSidebarColor(setting);
 
             applySidebarColorPreview(
@@ -106,8 +252,8 @@
         });
     }
 
-    function buildSidebarColorRowsHTML() {
-        return SIDEBAR_COLOR_SETTINGS.map((setting) => `
+    function buildSidebarColorRowsHTML(list = SIDEBAR_COLOR_SETTINGS) {
+        return list.map((setting) => `
     <div class="themeModSetting themeModNoDivider">
 
         <div class="themeModSettingText">
@@ -190,6 +336,17 @@
         defaultColor: "#378de4",
         name: "Progress Bar Color",
         description: "The loading/progress bar at the top."
+    },
+    {
+        cls: "flockmodTopBarActivityActive",
+        cssVar: "--flockmod-custom-topbar-activity",
+        toggleId: "themeModTopBarActivityEnabled",
+        inputId: "themeModUITopBarActivity",
+        lsEnabled: "flockmodCustomTopBarActivityEnabled",
+        lsColor: "flockmodCustomTopBarActivityColor",
+        defaultColor: "#2e2f35",
+        name: "Activity Bar Color",
+        description: "The bar around the latest activity (PM/EVENT/MOTD tags keep their colors)."
     }
 ];
 
@@ -326,6 +483,226 @@ function buildBottomBarColorRowsHTML() {
     `).join("");
 }
 
+/* =========================================================
+   SIMPLE COLORING
+   A handful of main colors that fill in the detailed ones.
+   Saved separately from the detailed settings, so switching
+   modes never erases a detailed theme.
+   ========================================================= */
+
+const SIMPLE_MODE_LS = "flockmodSimpleColoringEnabled";
+
+const SIMPLE_COLOR_SETTINGS = [
+    {
+        key: "background",
+        toggleId: "themeModSimpleBackgroundEnabled",
+        inputId: "themeModUISimpleBackground",
+        lsEnabled: "flockmodSimpleBackgroundEnabled",
+        lsColor: "flockmodSimpleBackgroundColor",
+        defaultColor: "#1d1e22",
+        name: "Background",
+        description: "Sidebar background, top bar, bottom bar, popup windows, menus and the chat channel list."
+    },
+    {
+        key: "surface",
+        toggleId: "themeModSimpleSurfaceEnabled",
+        inputId: "themeModUISimpleSurface",
+        lsEnabled: "flockmodSimpleSurfaceEnabled",
+        lsColor: "flockmodSimpleSurfaceColor",
+        defaultColor: "#2f3136",
+        name: "Surface",
+        description: "Section boxes, unselected layers, dropdowns, collapsers, bar button hovers, the activity bar, plus popup content, title bars, fields, buttons and borders."
+    },
+    {
+        key: "accent",
+        toggleId: "themeModSimpleAccentEnabled",
+        inputId: "themeModUISimpleAccent",
+        lsEnabled: "flockmodSimpleAccentEnabled",
+        lsColor: "flockmodSimpleAccentColor",
+        defaultColor: "#378de4",
+        name: "Accent",
+        description: "Selected states, slider fills, switches, progress bar. Hover is made from it automatically."
+    },
+    {
+        key: "text",
+        toggleId: "themeModSimpleTextEnabled",
+        inputId: "themeModUISimpleText",
+        lsEnabled: "flockmodSimpleTextEnabled",
+        lsColor: "flockmodSimpleTextColor",
+        defaultColor: "#ffffff",
+        name: "Text",
+        description: "Headings, bar text, popup titles, buttons and chat messages. Smaller text, timestamps and system messages use softer versions."
+    },
+    {
+        key: "icons",
+        toggleId: "themeModSimpleIconsEnabled",
+        inputId: "themeModUISimpleIcons",
+        lsEnabled: "flockmodSimpleIconsEnabled",
+        lsColor: "flockmodSimpleIconsColor",
+        defaultColor: "#acb3ba",
+        name: "Icons",
+        description: "Sidebar icons, grippers, tool icons and the color switch button."
+    }
+];
+
+function isSimpleModeSaved() {
+    return localStorage.getItem(SIMPLE_MODE_LS) === "true";
+}
+
+function getSavedSimpleValues() {
+    const values = {};
+
+    SIMPLE_COLOR_SETTINGS.forEach((setting) => {
+        values[setting.key] = {
+            enabled: localStorage.getItem(setting.lsEnabled) === "true",
+            color: localStorage.getItem(setting.lsColor) || setting.defaultColor
+        };
+    });
+
+    return values;
+}
+
+/* Small color helpers used to make the "derived" shades */
+
+function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(rgb) {
+    return "#" + rgb
+        .map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0"))
+        .join("");
+}
+
+function mixHex(a, b, amount) {
+    const A = hexToRgb(a);
+    const B = hexToRgb(b);
+    return rgbToHex(A.map((v, i) => v + (B[i] - v) * amount));
+}
+
+function isDarkHex(hex) {
+    const [r, g, b] = hexToRgb(hex);
+    return (0.299 * r + 0.587 * g + 0.114 * b) < 140;
+}
+
+/* Nudges a color away from itself: lighter on dark colors,
+   darker on light colors — so it works for light themes too. */
+function liftHex(hex, amount) {
+    return mixHex(hex, isDarkHex(hex) ? "#ffffff" : "#000000", amount);
+}
+
+function setColorTarget(cls, cssVar, enabled, color) {
+    document.documentElement.classList.toggle(cls, enabled);
+    document.documentElement.style.setProperty(cssVar, color);
+}
+
+function applySimpleColors(values) {
+    const bg = values.background;
+    const sf = values.surface;
+    const ac = values.accent;
+    const tx = values.text;
+    const ic = values.icons;
+
+    const bgColor = bg.enabled ? bg.color : "#1d1e22";
+    const surfaceColor = sf.enabled ? sf.color : "#2f3136";
+
+    /* Background */
+    setColorTarget("flockmodSidebarPrimaryActive", "--flockmod-custom-sidebar-primary", bg.enabled, bg.color);
+    setColorTarget("flockmodTopBarBackgroundActive", "--flockmod-custom-topbar-background", bg.enabled, bg.color);
+    setColorTarget("flockmodBottomBarBackgroundActive", "--flockmod-custom-bottombar-background", bg.enabled, bg.color);
+
+    /* Surface */
+    setColorTarget("flockmodSidebarSecondaryActive", "--flockmod-custom-sidebar-secondary", sf.enabled, sf.color);
+    setColorTarget("flockmodSidebarInactiveActive", "--flockmod-custom-sidebar-inactive", sf.enabled, liftHex(surfaceColor, 0.08));
+    setColorTarget("flockmodSidebarCollapserActive", "--flockmod-custom-sidebar-collapser", sf.enabled, liftHex(surfaceColor, 0.15));
+    setColorTarget("flockmodTopBarHoverActive", "--flockmod-custom-topbar-hover", sf.enabled, sf.color);
+    setColorTarget("flockmodBottomBarHoverActive", "--flockmod-custom-bottombar-hover", sf.enabled, sf.color);
+    setColorTarget("flockmodTopBarActivityActive", "--flockmod-custom-topbar-activity", sf.enabled, sf.color);
+
+    /* Accent (+ hover made from it) */
+    setColorTarget("flockmodSidebarAccentActive", "--flockmod-custom-sidebar-accent", ac.enabled, ac.color);
+    setColorTarget("flockmodTopBarProgressActive", "--flockmod-custom-topbar-progress", ac.enabled, ac.color);
+    setColorTarget("flockmodBottomBarSelectedActive", "--flockmod-custom-bottombar-selected", ac.enabled, ac.color);
+
+    /* Accent OFF in simple mode = native selected/hover states */
+    document.documentElement.classList.toggle("flockmodSelectedColorActive", ac.enabled);
+    document.documentElement.classList.toggle("flockmodHoverColorActive", ac.enabled);
+
+    document.documentElement.style.setProperty(
+        "--flockmod-custom-selected",
+        ac.enabled ? ac.color : "#4f5156"
+    );
+
+    document.documentElement.style.setProperty(
+        "--flockmod-custom-hover",
+        ac.enabled ? mixHex(ac.color, surfaceColor, 0.6) : "#4f5156"
+    );
+
+    /* Text (small text = a softer version) */
+    const softText = mixHex(tx.color, bgColor, 0.25);
+
+    setColorTarget("flockmodText1ColorActive", "--flockmod-custom-text1", tx.enabled, tx.color);
+    setColorTarget("flockmodText2ColorActive", "--flockmod-custom-text2", tx.enabled, softText);
+    setColorTarget("flockmodTopBarTextColorActive", "--flockmod-custom-topbar-text", tx.enabled, tx.color);
+    setColorTarget("flockmodTopBarBrandActive", "--flockmod-custom-topbar-brand", tx.enabled, tx.color);
+    setColorTarget("flockmodBottomBarTextColorActive", "--flockmod-custom-bottombar-text", tx.enabled, softText);
+
+    /* Popups & Menus */
+    setColorTarget("flockmodPopupBackgroundActive", "--flockmod-custom-popup-background", bg.enabled, bg.color);
+    setColorTarget("flockmodPopupContentActive", "--flockmod-custom-popup-content", sf.enabled, sf.color);
+    setColorTarget("flockmodPopupTitleBarActive", "--flockmod-custom-popup-titlebar", sf.enabled, liftHex(surfaceColor, 0.15));
+    setColorTarget("flockmodPopupBorderActive", "--flockmod-custom-popup-border", sf.enabled, liftHex(surfaceColor, 0.3));
+    setColorTarget("flockmodPopupFieldActive", "--flockmod-custom-popup-field", sf.enabled, liftHex(surfaceColor, 0.08));
+    setColorTarget("flockmodPopupButtonActive", "--flockmod-custom-popup-button", sf.enabled, liftHex(surfaceColor, 0.25));
+    setColorTarget("flockmodPopupTitleTextActive", "--flockmod-custom-popup-titletext", tx.enabled, tx.color);
+    setColorTarget("flockmodPopupButtonTextActive", "--flockmod-custom-popup-buttontext", tx.enabled, tx.color);
+
+    /* Chat (usernames are never touched) */
+    setColorTarget("flockmodChatChannelsActive", "--flockmod-custom-chat-channels", bg.enabled, bg.color);
+    setColorTarget("flockmodChatMessageActive", "--flockmod-custom-chat-message", tx.enabled, tx.color);
+    setColorTarget("flockmodChatEventActive", "--flockmod-custom-chat-event", tx.enabled, mixHex(tx.color, bgColor, 0.5));
+    setColorTarget("flockmodChatTimestampActive", "--flockmod-custom-chat-timestamp", tx.enabled, mixHex(tx.color, bgColor, 0.45));
+
+    /* Icons */
+    setColorTarget("flockmodSidebarIconActive", "--flockmod-custom-sidebar-icon", ic.enabled, ic.color);
+}
+
+function applySavedSimpleColorsIfActive() {
+    if (customizationsEnabled && isSimpleModeSaved()) {
+        applySimpleColors(getSavedSimpleValues());
+    }
+}
+
+function buildSimpleColorRowsHTML() {
+    return SIMPLE_COLOR_SETTINGS.map((setting) => `
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                ${setting.name}
+            </div>
+
+            <div class="themeModSettingDescription">
+                ${setting.description}
+            </div>
+        </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="${setting.toggleId}">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
+
+    </div>
+    `).join("");
+}
+
     function applyFontSizePreview(size) {
         const numericSize = Number(size);
 
@@ -404,6 +781,21 @@ function buildBottomBarColorRowsHTML() {
              "--flockmod-ui-radius"
             );
         }
+    }
+
+    /* Selected / Hover were always on before they had toggles,
+       so "never saved" counts as ON to keep existing setups the same. */
+    function isSavedOnByDefault(key) {
+        const value = localStorage.getItem(key);
+        return value === null ? true : value === "true";
+    }
+
+    function applySelectedEnabledPreview(enabled) {
+        document.documentElement.classList.toggle("flockmodSelectedColorActive", enabled);
+    }
+
+    function applyHoverEnabledPreview(enabled) {
+        document.documentElement.classList.toggle("flockmodHoverColorActive", enabled);
     }
 
     function applySelectedColorPreview(color) {
@@ -510,6 +902,10 @@ function buildBottomBarColorRowsHTML() {
         const savedSelected =
             localStorage.getItem("flockmodCustomSelectedColor") || "#4f5156";
 
+        applySelectedEnabledPreview(
+            isSavedOnByDefault("flockmodCustomSelectedColorEnabled")
+        );
+
         if (customizationsEnabled) {
             applySelectedColorPreview(savedSelected);
         }
@@ -518,6 +914,10 @@ function buildBottomBarColorRowsHTML() {
     function applySavedHoverColor() {
         const savedHover =
             localStorage.getItem("flockmodCustomHoverColor") || "#4f5156";
+
+        applyHoverEnabledPreview(
+            isSavedOnByDefault("flockmodCustomHoverColorEnabled")
+        );
 
         if (customizationsEnabled) {
             applyHoverColorPreview(savedHover);
@@ -720,6 +1120,29 @@ function buildBottomBarColorRowsHTML() {
 
                             </div>
 
+                            <div class="themeModSetting">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Simple coloring
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        Theme with a few main colors instead of every detailed one. Your detailed colors are kept and come back when this is off.
+                                    </div>
+                                </div>
+
+                                <label class="themeModToggle">
+                                    <input type="checkbox" id="themeModSimpleMode">
+                                    <span class="themeModToggleTrack">
+                                        <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                                        <span class="themeModToggleOption themeModToggleOn">ON</span>
+                                        <span class="themeModToggleThumb"></span>
+                                    </span>
+                                </label>
+
+                            </div>
+
                         </div>
 
                         <div class="themeModSectionContent" data-theme-panel="interface">
@@ -881,6 +1304,18 @@ function buildBottomBarColorRowsHTML() {
                             data-theme-panel="colors"
                         >
 
+    <div class="themeModSimpleColors">
+
+        <div class="themeModSubsectionTitle">
+            Simple Colors
+        </div>
+
+        ${buildSimpleColorRowsHTML()}
+
+    </div>
+
+    <div class="themeModDetailedColors">
+
     <div class="themeModSubsectionTitle">
         General
     </div>
@@ -918,7 +1353,7 @@ function buildBottomBarColorRowsHTML() {
             </div>
 
             <div class="themeModSettingDescription">
-                Override most other text (tool options, settings menus, checkbox labels). Excludes the top bar brand title, chat, and user list names.
+                Override most other text (tool options, popups and menus, text boxes, checkbox labels). Excludes the top bar brand title, chat messages, and user list names.
             </div>
         </div>
 
@@ -943,9 +1378,18 @@ function buildBottomBarColorRowsHTML() {
             </div>
 
             <div class="themeModSettingDescription">
-                Color used for selected states (selected layer, selected tool, pagination).
+                Selected states (layer, tool, user row, pagination, pressed popup buttons). OFF = native selected look.
             </div>
         </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="themeModSelectedColorEnabled">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
 
         <input type="color" id="themeModUISelectedColor" value="#4f5156">
 
@@ -959,9 +1403,18 @@ function buildBottomBarColorRowsHTML() {
             </div>
 
             <div class="themeModSettingDescription">
-                Color used for hover states across FlockMod.
+                Hover states across FlockMod, including popup buttons, menus and chat channels. OFF = native hovers.
             </div>
         </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="themeModHoverColorEnabled">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
 
         <input type="color" id="themeModUIHoverColor" value="#4f5156">
 
@@ -984,6 +1437,20 @@ function buildBottomBarColorRowsHTML() {
     </div>
 
     ${buildBottomBarColorRowsHTML()}
+
+    <div class="themeModSubsectionTitle themeModSpacingSubsection">
+        Popups &amp; Menus
+    </div>
+
+    ${buildSidebarColorRowsHTML(POPUP_COLOR_SETTINGS)}
+
+    <div class="themeModSubsectionTitle themeModSpacingSubsection">
+        Chat
+    </div>
+
+    ${buildSidebarColorRowsHTML(CHAT_COLOR_SETTINGS)}
+
+    </div><!-- closes themeModDetailedColors -->
 
 </div>
 
@@ -1230,6 +1697,29 @@ hoverColorInput.addEventListener("input", () => {
     applyHoverColorPreview(hoverColorInput.value);
 });
 
+const selectedColorEnabledToggle =
+    dialog.querySelector("#themeModSelectedColorEnabled");
+
+const hoverColorEnabledToggle =
+    dialog.querySelector("#themeModHoverColorEnabled");
+
+selectedColorEnabledToggle.checked =
+    isSavedOnByDefault("flockmodCustomSelectedColorEnabled");
+
+hoverColorEnabledToggle.checked =
+    isSavedOnByDefault("flockmodCustomHoverColorEnabled");
+
+applySelectedEnabledPreview(selectedColorEnabledToggle.checked);
+applyHoverEnabledPreview(hoverColorEnabledToggle.checked);
+
+selectedColorEnabledToggle.addEventListener("change", () => {
+    applySelectedEnabledPreview(selectedColorEnabledToggle.checked);
+});
+
+hoverColorEnabledToggle.addEventListener("change", () => {
+    applyHoverEnabledPreview(hoverColorEnabledToggle.checked);
+});
+
 const text1ColorEnabledToggle =
     dialog.querySelector("#themeModText1ColorEnabled");
 
@@ -1309,7 +1799,7 @@ const topBarColorControls = BAR_COLOR_SETTINGS.map((setting) => {
     return { setting, toggle, input };
 });
 
-const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
+const sidebarColorControls = TOGGLE_COLOR_SETTINGS.map((setting) => {
     const toggle = dialog.querySelector(`#${setting.toggleId}`);
     const input = dialog.querySelector(`#${setting.inputId}`);
     const saved = getSavedSidebarColor(setting);
@@ -1330,6 +1820,83 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
     });
 
     return { setting, toggle, input };
+});
+
+/* ---------- Simple coloring wiring ---------- */
+
+const simpleModeToggle =
+    dialog.querySelector("#themeModSimpleMode");
+
+const simpleColorControls = SIMPLE_COLOR_SETTINGS.map((setting) => {
+    const toggle = dialog.querySelector(`#${setting.toggleId}`);
+    const input = dialog.querySelector(`#${setting.inputId}`);
+    const saved = getSavedSimpleValues()[setting.key];
+
+    toggle.checked = saved.enabled;
+    input.value = saved.color;
+
+    return { setting, toggle, input };
+});
+
+function getSimpleValuesFromInputs() {
+    const values = {};
+
+    simpleColorControls.forEach(({ setting, toggle, input }) => {
+        values[setting.key] = {
+            enabled: toggle.checked,
+            color: input.value
+        };
+    });
+
+    return values;
+}
+
+/* Re-previews the detailed colors from what's currently in
+   their pickers (used when leaving simple mode). */
+function previewDetailedFromInputs() {
+    applySelectedEnabledPreview(selectedColorEnabledToggle.checked);
+    applyHoverEnabledPreview(hoverColorEnabledToggle.checked);
+    applySelectedColorPreview(selectedColorInput.value);
+    applyHoverColorPreview(hoverColorInput.value);
+    applyText1ColorEnabledPreview(text1ColorEnabledToggle.checked);
+    applyText1ColorPreview(text1ColorInput.value);
+    applyText2ColorEnabledPreview(text2ColorEnabledToggle.checked);
+    applyText2ColorPreview(text2ColorInput.value);
+
+    topBarColorControls.forEach(({ setting, toggle, input }) => {
+        applyTopBarColorPreview(setting, toggle.checked, input.value);
+    });
+
+    sidebarColorControls.forEach(({ setting, toggle, input }) => {
+        applySidebarColorPreview(setting, toggle.checked, input.value);
+    });
+}
+
+function refreshColorPreview() {
+    if (simpleModeToggle.checked) {
+        applySimpleColors(getSimpleValuesFromInputs());
+    } else {
+        previewDetailedFromInputs();
+    }
+}
+
+simpleModeToggle.checked = isSimpleModeSaved();
+dialog.classList.toggle("themeModSimpleMode", simpleModeToggle.checked);
+
+if (customizationsEnabled && simpleModeToggle.checked) {
+    applySimpleColors(getSimpleValuesFromInputs());
+}
+
+/* Like "Enable customizations", this toggle saves right away */
+simpleModeToggle.addEventListener("change", () => {
+    localStorage.setItem(SIMPLE_MODE_LS, simpleModeToggle.checked);
+    dialog.classList.toggle("themeModSimpleMode", simpleModeToggle.checked);
+    refreshColorPreview();
+});
+
+simpleColorControls.forEach(({ toggle, input }) => {
+    toggle.addEventListener("change", refreshColorPreview);
+    input.addEventListener("input", refreshColorPreview);
 });
 
         fontSelect.addEventListener("change", () => {
@@ -1438,6 +2005,16 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
             );
 
             localStorage.setItem(
+                "flockmodCustomSelectedColorEnabled",
+                selectedColorEnabledToggle.checked
+            );
+
+            localStorage.setItem(
+                "flockmodCustomHoverColorEnabled",
+                hoverColorEnabledToggle.checked
+            );
+
+            localStorage.setItem(
                 "flockmodCustomText1ColorEnabled",
                 text1ColorEnabledToggle.checked
             );
@@ -1463,6 +2040,11 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
 });
 
                         sidebarColorControls.forEach(({ setting, toggle, input }) => {
+                localStorage.setItem(setting.lsEnabled, toggle.checked);
+                localStorage.setItem(setting.lsColor, input.value);
+            });
+
+            simpleColorControls.forEach(({ setting, toggle, input }) => {
                 localStorage.setItem(setting.lsEnabled, toggle.checked);
                 localStorage.setItem(setting.lsColor, input.value);
             });
@@ -1539,6 +2121,9 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                 "5"
             );
 
+            /* Reset only clears the colors of the mode you are in, so
+               your detailed theme survives a reset in simple mode. */
+            if (!simpleModeToggle.checked) {
             selectedColorInput.value =
                 "#4f5156";
 
@@ -1562,6 +2147,14 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                 "flockmodCustomHoverColor",
                 "#4f5156"
             );
+
+            /* Default for these two is ON (how they always behaved) */
+            selectedColorEnabledToggle.checked = true;
+            hoverColorEnabledToggle.checked = true;
+            applySelectedEnabledPreview(true);
+            applyHoverEnabledPreview(true);
+            localStorage.setItem("flockmodCustomSelectedColorEnabled", "true");
+            localStorage.setItem("flockmodCustomHoverColorEnabled", "true");
 
             text1ColorEnabledToggle.checked =
                 false;
@@ -1631,6 +2224,20 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                 localStorage.setItem(setting.lsEnabled, "false");
                 localStorage.setItem(setting.lsColor, setting.defaultColor);
             });
+            } else {
+            /* Simple mode: only the simple colors reset, detailed stay untouched */
+            simpleColorControls.forEach(({ setting, toggle, input }) => {
+                toggle.checked = false;
+                input.value = setting.defaultColor;
+
+                localStorage.setItem(setting.lsEnabled, "false");
+                localStorage.setItem(setting.lsColor, setting.defaultColor);
+            });
+            }
+
+            /* Simple mode on/off is kept; this just re-previews
+               whichever mode is active with the reset values. */
+            refreshColorPreview();
         });
 
         return dialog;
@@ -2106,6 +2713,14 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                     savedHover2
                 );
 
+                applySelectedEnabledPreview(
+                    isSavedOnByDefault("flockmodCustomSelectedColorEnabled")
+                );
+
+                applyHoverEnabledPreview(
+                    isSavedOnByDefault("flockmodCustomHoverColorEnabled")
+                );
+
                 const savedText1Enabled2 =
                     localStorage.getItem(
                         "flockmodCustomText1ColorEnabled"
@@ -2147,7 +2762,7 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
     applyTopBarColorPreview(setting, saved.enabled, saved.color);
 });
 
-                    SIDEBAR_COLOR_SETTINGS.forEach((setting) => {
+                    TOGGLE_COLOR_SETTINGS.forEach((setting) => {
                     const saved = getSavedSidebarColor(setting);
 
                     applySidebarColorPreview(
@@ -2156,6 +2771,9 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                         saved.color
                     );
                 });
+
+                /* Simple mode (if saved on) sits on top of the detailed colors */
+                applySavedSimpleColorsIfActive();
 
                 dialog.remove();
             }
@@ -2255,7 +2873,18 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
             );
 
         if (existingMenu) {
-            existingMenu.remove();
+            /* Close it the same way the X button does, so unsaved
+               previews are reverted and the backdrop is removed too
+               (an invisible leftover backdrop would block the page). */
+            const closeButton = existingMenu.querySelector(".closeButton");
+
+            if (closeButton) {
+                closeButton.click();
+            } else {
+                existingMenu.remove();
+                document.querySelectorAll(".themeModBackdrop").forEach((el) => el.remove());
+            }
+
             return;
         }
 
@@ -2288,6 +2917,12 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
         applySavedText2Color();
         applySavedTopBarColors();
         applySavedSidebarColors();
+        applySavedSimpleColorsIfActive();
+
+        /* Border radius was only applied when the menu opened — now on page load too */
+        if (customizationsEnabled) {
+            applyRadiusPreview(localStorage.getItem("flockmodCustomUIRadius") || "5");
+        }
     }
 
     function initialize() {

@@ -100,7 +100,7 @@
 .themeModBackdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
+    background: transparent; /* was rgba(0,0,0,.45) — see-through so the theme (and color picking) isn't dimmed; still blocks clicks */
     z-index: 99998;
     pointer-events: auto;
 }
@@ -228,6 +228,19 @@
 .themeModSidebarFill {
     flex: 1;
     background-color: #242529;
+}
+
+/* Simple coloring: swap which set of color rows the Colors panel shows */
+.dialog[name="themeModMenu"] .themeModSimpleColors {
+    display: none;
+}
+
+.dialog[name="themeModMenu"].themeModSimpleMode .themeModSimpleColors {
+    display: block;
+}
+
+.dialog[name="themeModMenu"].themeModSimpleMode .themeModDetailedColors {
+    display: none;
 }
 
 
@@ -646,13 +659,13 @@ html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .fmThumb {
       so they outrank any native rule.
    --------------------------------------------------------- */
  
-html:not(.flockmodCustomizationsDisabled) #sidebar .selectedLayer,
-html:not(.flockmodCustomizationsDisabled) #drawingTools .selectedTool,
-html:not(.flockmodCustomizationsDisabled) .tablePagination.selected,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse.selected,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse.selected > td,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself.selected,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself.selected > td {
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #sidebar .selectedLayer,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #drawingTools .selectedTool,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .tablePagination.selected,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse.selected,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse.selected > td,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.myself.selected,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.myself.selected > td {
     background-color: var(--flockmod-custom-selected, #4f5156) !important;
 }
 
@@ -664,12 +677,12 @@ html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself.selected > td {
       selected color while hovered.
    --------------------------------------------------------- */
  
-html:not(.flockmodCustomizationsDisabled) #sidebar .layerPreview:not(.selectedLayer):hover,
-html:not(.flockmodCustomizationsDisabled) #drawingTools a:not(.selectedTool):hover,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse:not(.selected):hover,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse:not(.selected):hover > td,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself:not(.selected):hover,
-html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself:not(.selected):hover > td {
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar .layerPreview:not(.selectedLayer):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #drawingTools a:not(.selectedTool):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse:not(.selected):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse:not(.selected):hover > td,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.myself:not(.selected):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar tr.myself:not(.selected):hover > td {
     background-color: var(--flockmod-custom-hover, #4f5156) !important;
 }
 
@@ -895,3 +908,167 @@ html.flockmodSidebarCollapserActive:not(.flockmodCustomizationsDisabled) #sideba
     scrollbar-color: var(--flockmod-custom-sidebar-collapser, #3a3c43) transparent;
 }
  
+/* =========================================================
+   COLORS PANEL — POPUPS & MENUS (all opt-in)
+   Every rule skips the mod's own menu via
+   .dialog:not([name="themeModMenu"]).
+   ========================================================= */
+
+/* Popup Background */
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]),
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitlebar.inactive,
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .submodal .subcontent,
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .dropdown-menu,
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .dropdown-item:not(:hover),
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .context-menu-list,
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .context-menu-item:not(:hover) {
+    background-color: var(--flockmod-custom-popup-background, #1d1e22) !important;
+}
+
+/* Popup Content Color */
+html.flockmodPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dynamicDialogArea,
+html.flockmodPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogArea,
+html.flockmodPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .channelTitle.selected {
+    background-color: var(--flockmod-custom-popup-content, #2f3136) !important;
+}
+
+html.flockmodPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .scrollNotBottom:not(.scrollNoOverflow)::after {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0,
+        var(--flockmod-custom-popup-content, #2f3136) 100%
+    ) !important;
+}
+
+/* Title Bar Color (active popup; inactive ones use Popup Background) */
+html.flockmodPopupTitleBarActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitlebar:not(.inactive) {
+    background-color: var(--flockmod-custom-popup-titlebar, #4f4f55) !important;
+}
+
+/* Title Bar Text & Icons */
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitlebar,
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitle,
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitle a,
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitlebar.inactive a {
+    color: var(--flockmod-custom-popup-titletext, #fff) !important;
+}
+
+/* Border Color */
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]),
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .dropdown-menu,
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .context-menu-list,
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .channelTypeRoom {
+    border-color: var(--flockmod-custom-popup-border, #707379) !important;
+}
+
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogSize.dsBar,
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogSize.dsCorner {
+    background-color: var(--flockmod-custom-popup-border, #707379) !important;
+    border-color: var(--flockmod-custom-popup-border, #707379) !important;
+}
+
+/* Field Color (text boxes incl. chat input, dropdowns, slider/switch tracks) */
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .form-control,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .form-control:focus,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .darkInput,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmList > select,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSlider,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch {
+    background-color: var(--flockmod-custom-popup-field, #43444a) !important;
+    border-color: var(--flockmod-custom-popup-field, #43444a) !important;
+}
+
+/* Button Color (hover -> Hover Colors, pressed -> Selected Colors) */
+html.flockmodPopupButtonActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success:not(:disabled):not(.disabled):not(:hover):not(:active):not(.active),
+html.flockmodPopupButtonActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-customlink:not(:hover):not(:focus):not(:active) {
+    background-color: var(--flockmod-custom-popup-button, #7c7f87) !important;
+    border-color: var(--flockmod-custom-popup-button, #7c7f87) !important;
+}
+
+/* Button Text & Icons */
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success,
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success i,
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-customlink,
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-customlink i,
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .chatTitleButton a,
+html.flockmodPopupButtonTextActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .chatTitleButton i {
+    color: var(--flockmod-custom-popup-buttontext, #fff) !important;
+}
+
+/* =========================================================
+   COLORS PANEL — CHAT (all opt-in; usernames never touched,
+   MOTD / GM messages keep their native meaning colors)
+   ========================================================= */
+
+html.flockmodChatChannelsActive:not(.flockmodCustomizationsDisabled) .dialog[name="chat"] .sidebar,
+html.flockmodChatChannelsActive:not(.flockmodCustomizationsDisabled) .dialog[name="chat"] .chatBar {
+    background-color: var(--flockmod-custom-chat-channels, #1d1e22) !important;
+}
+
+html.flockmodChatMessageActive:not(.flockmodCustomizationsDisabled) #chatMessages .messageBlock .msgContent,
+html.flockmodChatMessageActive:not(.flockmodCustomizationsDisabled) #chatMessages .messageBlock .msgText {
+    color: var(--flockmod-custom-chat-message, #fff) !important;
+}
+
+html.flockmodChatEventActive:not(.flockmodCustomizationsDisabled) #chatMessages .eventBlock,
+html.flockmodChatEventActive:not(.flockmodCustomizationsDisabled) #chatMessages .eventBlock .msgText {
+    color: var(--flockmod-custom-chat-event, gray) !important;
+}
+
+html.flockmodChatTimestampActive:not(.flockmodCustomizationsDisabled) #chatMessages .msgTime {
+    color: var(--flockmod-custom-chat-timestamp, gray) !important;
+}
+
+/* =========================================================
+   EXISTING GENERAL COLORS — extended into popups
+   ========================================================= */
+
+/* Text Color 2: popup text, menus, text boxes, channel names */
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dynamicDialogArea,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .form-control,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .darkInput,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmList > select,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .channelCaption,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .closePM,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dropdown-item,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .context-menu-item {
+    color: var(--flockmod-custom-text2, #fff) !important;
+}
+
+/* Text Color 1: the chat's channel title (#public etc) */
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) #chatTitle .title {
+    color: var(--flockmod-custom-text1, #fff) !important;
+}
+
+/* Hover Colors */
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitleButtons a:hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .channelTitle:not(.locked):not(.selected):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-customlink:hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success:not(:disabled):not(.disabled):hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .dropdown-item:hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .context-menu-item:hover {
+    background-color: var(--flockmod-custom-hover, #4f5156) !important;
+    border-color: var(--flockmod-custom-hover, #4f5156) !important;
+}
+
+/* Selected Colors: pressed popup buttons */
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success:not(:disabled):not(.disabled):active,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn-success:not(:disabled):not(.disabled).active {
+    background-color: var(--flockmod-custom-selected, #4f5156) !important;
+    border-color: var(--flockmod-custom-selected, #4f5156) !important;
+}
+
+/* Accent 1: slider fills + switch on-states inside popups */
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSlider > .fmSelectedArea,
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch .fmOn {
+    background-color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+/* =========================================================
+   TOP BAR — ACTIVITY BAR (the bar around the PM / EVENT /
+   MOTD / GM / room tags). The tags keep their native colors.
+   ========================================================= */
+
+html.flockmodTopBarActivityActive:not(.flockmodCustomizationsDisabled) #headerTitle {
+    background-color: var(--flockmod-custom-topbar-activity, #2e2f35) !important;
+}
