@@ -634,6 +634,7 @@ html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) label,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) td.text-center > span[data-i18n="global.lblYou"], /* NEW */
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .userlistIcon:not(.colorbox), /* NEW */
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .userlistIcon:not(.colorbox) i, /* NEW */
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) #presetsBox p,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .fmThumb {
     color: var(--flockmod-custom-text2, #fff) !important;
 }
@@ -805,5 +806,46 @@ html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) .sidebar 
  
 html.flockmodSidebarCollapserActive:not(.flockmodCustomizationsDisabled) #sidebar .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle {
     background: var(--flockmod-custom-sidebar-collapser, #3a3c43) !important;
+}
+
+/* ---------------------------------------------------------
+   7) TOP SIDEBAR BUTTON (#sidebarCollapse) — inverted.
+      Background follows Sidebar Icon Color; the glyph follows
+      Primary Sidebar Color. Both of its states (caret-square-down
+      and angle-double-left) are the same <a>, and the icon uses
+      color:inherit, so these rules cover both.
+   --------------------------------------------------------- */
+
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:hover,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:focus,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:active,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:not(:disabled):not(.disabled):active {
+    background-color: var(--flockmod-custom-sidebar-icon, #acb3ba) !important;
+    border-color: var(--flockmod-custom-sidebar-icon, #acb3ba) !important;
+    box-shadow: none !important;
+}
+
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse,
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:hover,
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:focus,
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:active,
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:not(:disabled):not(.disabled):active {
+    color: var(--flockmod-custom-sidebar-primary, #1d1e22) !important;
+}
+
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse:hover {
+    filter: brightness(1.15);
+}
+
+/* ---------------------------------------------------------
+   8) NATIVE SCROLLBARS (vertical + horizontal) — follows
+      Collapser Color, same as the OverlayScrollbars handles.
+      scrollbar-color is inherited, so this covers every
+      natively scrolling area inside the sidebar.
+   --------------------------------------------------------- */
+
+html.flockmodSidebarCollapserActive:not(.flockmodCustomizationsDisabled) #sidebar {
+    scrollbar-color: var(--flockmod-custom-sidebar-collapser, #3a3c43) transparent;
 }
  
