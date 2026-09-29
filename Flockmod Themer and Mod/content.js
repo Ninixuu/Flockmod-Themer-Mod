@@ -278,6 +278,7 @@
         <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
 
     </div>
+    ${gradientRowHTML(setting)}
         `).join("");
     }
 
@@ -399,6 +400,7 @@ function buildTopBarColorRowsHTML() {
         <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
 
     </div>
+    ${gradientRowHTML(setting)}
     `).join("");
 }
 
@@ -454,6 +456,190 @@ const BAR_COLOR_SETTINGS = [
     ...BOTTOMBAR_COLOR_SETTINGS
 ];
 
+
+/* =========================================================
+   GRADIENTS (Colors panel, detailed mode)
+   A few big background colors can blend into a second color.
+   The gradient starts from the setting's own color (through its
+   CSS variable), so it follows the color picker live. Anything
+   that needs a single color (borders, thumbs, fades) keeps using
+   that first color. Gradients are only drawn in detailed mode.
+   ========================================================= */
+
+const GRADIENT_KEYS = {
+    flockmodSidebarPrimaryActive: "SidebarPrimary",
+    flockmodSidebarSecondaryActive: "SidebarSecondary",
+    flockmodSidebarAccentActive: "SidebarAccent",
+    flockmodTopBarBackgroundActive: "TopBarBackground",
+    flockmodBottomBarBackgroundActive: "BottomBarBackground",
+    flockmodPopupContentActive: "PopupContent",
+    flockmodPopupTitleBarActive: "PopupTitleBar"
+};
+
+function getGradientInfo(setting) {
+    const key = GRADIENT_KEYS[setting.cls];
+
+    if (!key) {
+        return null;
+    }
+
+    return {
+        key,
+        setting,
+        cls: `flockmodGrad${key}Active`,
+        gradVar: `--flockmod-grad-${key}`,
+        lsEnabled: `flockmodCustomGrad${key}Enabled`,
+        lsColor: `flockmodCustomGrad${key}Color`,
+        lsAngle: `flockmodCustomGrad${key}Angle`,
+        toggleId: `themeModGrad${key}Enabled`,
+        inputId: `themeModGrad${key}Color`,
+        angleId: `themeModGrad${key}Angle`,
+        angleValueId: `themeModGrad${key}AngleValue`,
+        defaultColor: liftHex(setting.defaultColor, 0.3),
+        defaultAngle: 180
+    };
+}
+
+function getAllGradientInfos() {
+    return [...TOGGLE_COLOR_SETTINGS, ...BAR_COLOR_SETTINGS]
+        .map(getGradientInfo)
+        .filter(Boolean);
+}
+
+function angleLabel(angle) {
+    return `${angle}°`;
+}
+
+function gradientRowHTML(setting) {
+    const g = getGradientInfo(setting);
+
+    if (!g) {
+        return "";
+    }
+
+    return `
+    <div class="themeModSetting themeModNoDivider themeModGradientRow">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                <i class="fas fa-level-up-alt fa-rotate-90"></i> Gradient
+            </div>
+
+            <div class="themeModSettingDescription">
+                Blends ${setting.name} into a second color. The slider sets the direction.
+            </div>
+        </div>
+
+        <div class="themeModGradientControls">
+            <label class="themeModToggle">
+                <input type="checkbox" id="${g.toggleId}">
+                <span class="themeModToggleTrack">
+                    <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                    <span class="themeModToggleOption themeModToggleOn">ON</span>
+                    <span class="themeModToggleThumb"></span>
+                </span>
+            </label>
+
+            <input type="color" id="${g.inputId}" value="${g.defaultColor}">
+
+            <input type="range" id="${g.angleId}" class="themeModRange" min="0" max="360" step="15" value="${g.defaultAngle}">
+            <span id="${g.angleValueId}" class="themeModRangeValue">${angleLabel(g.defaultAngle)}</span>
+        </div>
+
+    </div>
+    `;
+}
+
+function getSavedGradient(g) {
+    const angle = Number(localStorage.getItem(g.lsAngle));
+
+    return {
+        enabled: localStorage.getItem(g.lsEnabled) === "true",
+        color: localStorage.getItem(g.lsColor) || g.defaultColor,
+        angle: Number.isInteger(angle) && angle >= 0 && angle <= 360 && localStorage.getItem(g.lsAngle) !== null
+            ? angle
+            : g.defaultAngle
+    };
+}
+
+/* Only the class and one variable change, so previews stay cheap */
+function applyGradientPreview(g, enabled, color, angle) {
+    const root = document.documentElement;
+
+    root.classList.toggle(g.cls, Boolean(enabled) && !isSimpleModeSaved());
+    root.style.setProperty(
+        g.gradVar,
+        `linear-gradient(${angle}deg, var(${g.setting.cssVar}), ${color})`
+    );
+}
+
+function applySavedGradients() {
+    getAllGradientInfos().forEach((g) => {
+        const saved = getSavedGradient(g);
+        applyGradientPreview(g, customizationsEnabled && saved.enabled, saved.color, saved.angle);
+    });
+}
+
+function setupGradientControls(dialog) {
+    const controls = getAllGradientInfos().map((g) => {
+        const toggle = dialog.querySelector(`#${g.toggleId}`);
+        const input = dialog.querySelector(`#${g.inputId}`);
+        const angle = dialog.querySelector(`#${g.angleId}`);
+        const angleValue = dialog.querySelector(`#${g.angleValueId}`);
+
+        if (!toggle || !input || !angle) {
+            return null;
+        }
+
+        const saved = getSavedGradient(g);
+        toggle.checked = saved.enabled;
+        input.value = saved.color;
+        angle.value = String(saved.angle);
+        angleValue.textContent = angleLabel(saved.angle);
+
+        const preview = () => {
+            angleValue.textContent = angleLabel(Number(angle.value));
+            applyGradientPreview(g, customizationsEnabled && toggle.checked, input.value, Number(angle.value));
+        };
+
+        toggle.addEventListener("change", preview);
+        input.addEventListener("input", preview);
+        angle.addEventListener("input", preview);
+
+        return { g, toggle, input, angle, angleValue, preview };
+    }).filter(Boolean);
+
+    /* Simple mode hides gradients; re-check when it's switched */
+    const simpleToggle = dialog.querySelector("#themeModSimpleMode");
+
+    if (simpleToggle) {
+        simpleToggle.addEventListener("change", () => {
+            controls.forEach((c) => c.preview());
+        });
+    }
+
+    return {
+        save() {
+            controls.forEach(({ g, toggle, input, angle }) => {
+                localStorage.setItem(g.lsEnabled, toggle.checked);
+                localStorage.setItem(g.lsColor, input.value);
+                localStorage.setItem(g.lsAngle, angle.value);
+            });
+        },
+        reset() {
+            controls.forEach(({ g, toggle, input, angle, preview }) => {
+                toggle.checked = false;
+                input.value = g.defaultColor;
+                angle.value = String(g.defaultAngle);
+                localStorage.setItem(g.lsEnabled, "false");
+                localStorage.setItem(g.lsColor, g.defaultColor);
+                localStorage.setItem(g.lsAngle, String(g.defaultAngle));
+                preview();
+            });
+        }
+    };
+}
+
 function buildBottomBarColorRowsHTML() {
     return BOTTOMBAR_COLOR_SETTINGS.map((setting) => `
     <div class="themeModSetting themeModNoDivider">
@@ -480,6 +666,7 @@ function buildBottomBarColorRowsHTML() {
         <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
 
     </div>
+    ${gradientRowHTML(setting)}
     `).join("");
 }
 
@@ -694,11 +881,20 @@ function buildSimpleColorRowsHTML() {
         <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
 
     </div>
+    ${gradientRowHTML(setting)}
     `).join("");
 }
 
+    /* Each Interface setting only takes over FlockMod's own sizes
+       while it's moved off its default (100% / Regular / 5px). */
+    function setInterfaceActive(cls, active) {
+        document.documentElement.classList.toggle(cls, Boolean(active));
+    }
+
     function applyFontSizePreview(size) {
         const numericSize = Number(size);
+
+        setInterfaceActive("flockmodFontSizeActive", Number.isFinite(numericSize) && numericSize !== 100);
 
         if (
             Number.isFinite(numericSize) &&
@@ -717,6 +913,8 @@ function buildSimpleColorRowsHTML() {
     }
 
     function applyFontWeightPreview(weight) {
+        setInterfaceActive("flockmodFontWeightActive", ["medium", "semibold", "bold"].includes(weight));
+
         if (weight === "medium") {
             document.documentElement.style.setProperty(
                 "--flockmod-custom-ui-font-weight",
@@ -742,6 +940,8 @@ function buildSimpleColorRowsHTML() {
     function applySpacingPreview(spacing) {
         const numericSpacing = Number(spacing);
 
+        setInterfaceActive("flockmodSpacingActive", Number.isFinite(numericSpacing) && numericSpacing !== 100);
+
         if (
             Number.isFinite(numericSpacing) &&
             numericSpacing >= 75 &&
@@ -758,8 +958,14 @@ function buildSimpleColorRowsHTML() {
         }
     }
 
+    function radiusLabel(radius) {
+        return Number(radius) === 5 ? "Default" : `${radius}px`;
+    }
+
     function applyRadiusPreview(radius) {
     const numericRadius = Number(radius);
+
+        setInterfaceActive("flockmodRadiusActive", Number.isFinite(numericRadius) && numericRadius !== 5);
 
         if (
          Number.isFinite(numericRadius) &&
@@ -1494,6 +1700,223 @@ function buildSimpleColorRowsHTML() {
         dialog.addEventListener("change", queueSee);
     }
 
+    /* =========================================================
+       SLIDER THUMB SHAPES (Interface > Slider Thumbs)
+       The thumb is masked into a shape (keeps its color and the
+       number inside). "contain" keeps the shape's proportions.
+       OFF = normal thumbs, which Border Radius still rounds.
+       ========================================================= */
+
+    const THUMB_SHAPE_ENABLED_LS = "flockmodCustomThumbShapeEnabled";
+    const THUMB_SHAPE_LS = "flockmodCustomThumbShape";
+    const THUMB_SHAPE_SIZE_LS = "flockmodCustomThumbShapeSize";
+
+    const THUMB_SHAPES = {
+        circle: { label: "Circle", svg: '<circle cx="50" cy="50" r="50"/>' },
+        heart: {
+            label: "Heart",
+            svg: '<path d="M50 94 C22 72 2 54 2 32 C2 15 15 4 29 4 C39 4 46 10 50 18 C54 10 61 4 71 4 C85 4 98 15 98 32 C98 54 78 72 50 94Z"/>'
+        },
+        star: { label: "Star", svg: '<polygon points="50,2 62,36 98,36 69,58 80,94 50,72 20,94 31,58 2,36 38,36"/>' },
+        diamond: { label: "Diamond", svg: '<polygon points="50,0 100,50 50,100 0,50"/>' },
+        flower: {
+            label: "Flower",
+            svg: '<g transform="translate(50 50)">' +
+                [0, 72, 144, 216, 288].map((deg) =>
+                    `<ellipse cx="0" cy="-24" rx="19" ry="26" transform="rotate(${deg})"/>`
+                ).join("") +
+                '<circle r="18"/></g>'
+        },
+        cat: {
+            label: "Cat",
+            /* round head + two pointy ears */
+            svg: '<ellipse cx="50" cy="60" rx="42" ry="35"/>' +
+                 '<polygon points="10,48 16,2 46,30"/>' +
+                 '<polygon points="90,48 84,2 54,30"/>'
+        },
+        dog: {
+            label: "Dog",
+            /* head + two floppy ears hanging at the sides */
+            svg: '<ellipse cx="50" cy="52" rx="31" ry="38"/>' +
+                 '<ellipse cx="17" cy="42" rx="14" ry="30" transform="rotate(18 17 42)"/>' +
+                 '<ellipse cx="83" cy="42" rx="14" ry="30" transform="rotate(-18 83 42)"/>'
+        },
+        fish: {
+            label: "Fish",
+            /* body + tail, number sits in the body */
+            svg: '<ellipse cx="42" cy="50" rx="40" ry="28"/>' +
+                 '<polygon points="66,50 99,20 92,50 99,80"/>'
+        }
+    };
+
+    /* The mask also cuts off the number, so each shape gets a font size
+       (px) and a nudge (px) that puts the number in the
+       widest part of the shape, where "100" still fits. */
+    const THUMB_TEXT_FIT = {
+        circle:  { size: 10,  x: 0,  y: 0 },
+        heart:   { size: 9,   x: 0,  y: -2 },  /* widest near the top lobes */
+        star:    { size: 7.5, x: 0,  y: 1 },   /* star's middle sits low */
+        diamond: { size: 8,   x: 0,  y: 0 },
+        flower:  { size: 9,   x: 0,  y: 0 },
+        cat:     { size: 9,   x: 0,  y: 2 },   /* face is below the ears */
+        dog:     { size: 9,   x: 0,  y: 1 },
+        fish:    { size: 9,   x: -2, y: 0 }    /* body is left of the tail */
+    };
+
+    const THUMB_SHAPE_CHOICES = Object.keys(THUMB_SHAPES);
+    const thumbMaskCache = new Map();
+
+    async function getThumbMaskURL(shape) {
+        if (thumbMaskCache.has(shape)) {
+            return thumbMaskCache.get(shape);
+        }
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#000">${THUMB_SHAPES[shape].svg}</svg>`;
+        let url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+
+        /* If the site blocks blob: images, use a data: URL instead */
+        if (!(await canLoadImage(url))) {
+            URL.revokeObjectURL(url);
+            url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        }
+
+        thumbMaskCache.set(shape, url);
+        return url;
+    }
+
+    let thumbShapeToken = 0;
+
+    async function applyThumbShape(enabled, shape, size = 100) {
+        const root = document.documentElement;
+        const token = ++thumbShapeToken;
+
+        root.style.setProperty("--flockmod-thumb-size", String(size / 100));
+
+        if (!enabled || !THUMB_SHAPES[shape]) {
+            root.classList.remove("flockmodThumbShapeActive");
+            return;
+        }
+
+        const url = await getThumbMaskURL(shape);
+
+        if (token !== thumbShapeToken) {
+            return;
+        }
+
+        const fit = THUMB_TEXT_FIT[shape] || THUMB_TEXT_FIT.circle;
+        root.style.setProperty("--flockmod-thumb-font", `${fit.size}px`);
+        root.style.setProperty("--flockmod-thumb-text-x", `${fit.x}px`);
+        root.style.setProperty("--flockmod-thumb-text-y", `${fit.y}px`);
+        root.style.setProperty("--flockmod-thumb-mask", `url("${url}")`);
+        root.classList.add("flockmodThumbShapeActive");
+        makeThumbRoom();
+    }
+
+    /* A bigger thumb can be cut off by the box around its slider.
+       Only boxes that are plain "display: block" with hidden overflow
+       are changed (to flow-root + visible, which lays out the same);
+       anything else (flex rows, scroll areas) is left alone. */
+    function makeThumbRoom() {
+        if (!document.documentElement.classList.contains("flockmodThumbShapeActive")) {
+            return;
+        }
+
+        document.querySelectorAll('#sidebar .fmSlider, #sidebar .fmSwitch, .dialog:not([name="themeModMenu"]) .fmSlider').forEach((slider) => {
+            let el = slider.parentElement;
+
+            /* Only the slider's own row. Section boxes (which need their
+               clipping to collapse) and scroll areas are never touched. */
+            if (
+                !el ||
+                el.id === "sidebar" ||
+                el.classList.contains("flockmodThumbRoom") ||
+                el.matches(".containerContent, .boxBgContainer, .containerSidebar, .os-viewport, .os-padding, .os-content, .dynamicDialogArea, .modal-body")
+            ) {
+                return;
+            }
+
+            const style = getComputedStyle(el);
+
+            if (style.display === "block" && style.overflow === "hidden") {
+                el.classList.add("flockmodThumbRoom");
+            }
+        });
+    }
+
+    function readSavedThumbShape() {
+        const shape = localStorage.getItem(THUMB_SHAPE_LS);
+        const size = Number(localStorage.getItem(THUMB_SHAPE_SIZE_LS));
+
+        return {
+            enabled: localStorage.getItem(THUMB_SHAPE_ENABLED_LS) === "true",
+            shape: THUMB_SHAPE_CHOICES.includes(shape) ? shape : "heart",
+            size: Number.isInteger(size) && size >= 100 && size <= 150 ? size : 100
+        };
+    }
+
+    function applySavedThumbShape() {
+        const saved = readSavedThumbShape();
+        applyThumbShape(customizationsEnabled && saved.enabled, saved.shape, saved.size);
+    }
+
+    function buildThumbShapeOptionsHTML() {
+        return THUMB_SHAPE_CHOICES.map((key) =>
+            `<option value="${key}">${THUMB_SHAPES[key].label}</option>`
+        ).join("");
+    }
+
+    function setupThumbShape(dialog) {
+        const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
+        const select = dialog.querySelector("#themeModThumbShape");
+        const preview = dialog.querySelector(".themeModThumbPreview");
+        const sizeSlider = dialog.querySelector("#themeModThumbShapeSize");
+        const sizeValue = dialog.querySelector("#themeModThumbShapeSizeValue");
+
+        if (!toggle || !select) {
+            return;
+        }
+
+        const saved = readSavedThumbShape();
+        toggle.checked = saved.enabled;
+        select.value = saved.shape;
+        sizeSlider.value = String(saved.size);
+        sizeValue.textContent = `${saved.size}%`;
+
+        async function updatePreview() {
+            const url = await getThumbMaskURL(select.value);
+            preview.style.setProperty("--flockmod-thumb-preview", `url("${url}")`);
+        }
+
+        const run = () => {
+            sizeValue.textContent = `${sizeSlider.value}%`;
+            applyThumbShape(toggle.checked, select.value, Number(sizeSlider.value));
+            updatePreview();
+        };
+
+        toggle.addEventListener("change", run);
+        select.addEventListener("change", run);
+        sizeSlider.addEventListener("input", run);
+        updatePreview();
+
+        dialog.querySelector(".themeModApplyButton").addEventListener("click", () => {
+            localStorage.setItem(THUMB_SHAPE_ENABLED_LS, String(toggle.checked));
+            localStorage.setItem(THUMB_SHAPE_LS, select.value);
+            localStorage.setItem(THUMB_SHAPE_SIZE_LS, sizeSlider.value);
+        });
+
+        dialog.querySelector(".themeModResetButton").addEventListener("click", () => {
+            toggle.checked = false;
+            select.value = "heart";
+            sizeSlider.value = "100";
+            localStorage.setItem(THUMB_SHAPE_ENABLED_LS, "false");
+            localStorage.setItem(THUMB_SHAPE_LS, "heart");
+            localStorage.setItem(THUMB_SHAPE_SIZE_LS, "100");
+            run();
+        });
+
+        dialog.querySelector(".closeButton").addEventListener("click", applySavedThumbShape);
+    }
+
     const FONT_LIBRARY_LS = "flockmodFontLibrary";
     const FONT_DB_NAME = "flockmodThemeModFonts";
     const FONT_DB_STORE = "files";
@@ -1666,7 +2089,10 @@ function buildSimpleColorRowsHTML() {
     function applyFontValue(value) {
         const root = document.documentElement;
 
-        if (!value || value === "default" || !isValidFontValue(value)) {
+        const isDefault = !value || value === "default" || !isValidFontValue(value);
+        root.classList.toggle("flockmodFontActive", !isDefault);
+
+        if (isDefault) {
             root.style.removeProperty("--flockmod-custom-ui-font");
             return;
         }
@@ -2100,6 +2526,13 @@ function buildSimpleColorRowsHTML() {
             add(setting.lsColor, "color", setting.defaultColor);
         });
 
+        /* Gradients (added later; codes without them = gradients off) */
+        getAllGradientInfos().forEach((g) => {
+            add(g.lsEnabled, "bool", false);
+            add(g.lsColor, "color", g.defaultColor);
+            add(g.lsAngle, "int", g.defaultAngle, { min: 0, max: 360 });
+        });
+
         add("flockmodCustomText1ColorEnabled", "bool", false);
         add("flockmodCustomText1Color", "color", "#ffffff");
         add("flockmodCustomText2ColorEnabled", "bool", false);
@@ -2122,6 +2555,9 @@ function buildSimpleColorRowsHTML() {
         add("flockmodCustomUIFontSize", "int", 100, { min: 90, max: 110 });
         add("flockmodCustomUISpacing", "int", 100, { min: 75, max: 125 });
         add("flockmodCustomUIRadius", "int", 5, { min: 0, max: 12 });
+        add(THUMB_SHAPE_ENABLED_LS, "bool", false);
+        add(THUMB_SHAPE_LS, "enum", "heart", { choices: THUMB_SHAPE_CHOICES });
+        add(THUMB_SHAPE_SIZE_LS, "int", 100, { min: 100, max: 150 });
 
         themeFieldsCache = fields;
         return fields;
@@ -2974,7 +3410,7 @@ function buildSimpleColorRowsHTML() {
         </div>
 
         <div class="themeModSettingDescription">
-            Adjust the roundness of FlockMod interface elements.
+            Rounds the corners of buttons, text boxes, sliders, section boxes, layers and menus. 5 = FlockMod's own shapes.
         </div>
     </div>
 
@@ -2993,8 +3429,60 @@ function buildSimpleColorRowsHTML() {
             id="themeModUIRadiusValue"
             class="themeModRangeValue"
         >
-            5px
+            Default
         </span>
+    </div>
+
+</div>
+
+<div class="themeModSubsectionTitle themeModSpacingSubsection">
+    Slider Thumbs
+</div>
+
+<div class="themeModSetting themeModNoDivider">
+
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">
+            Custom Thumb Shape
+        </div>
+
+        <div class="themeModSettingDescription">
+            Turns the draggable slider and switch thumbs into a shape (circle, heart, star, diamond, flower, cat, dog, fish). OFF keeps normal thumbs (which Border Radius rounds).
+        </div>
+    </div>
+
+    <label class="themeModToggle" style="margin-right: 10px;">
+        <input type="checkbox" id="themeModThumbShapeEnabled">
+        <span class="themeModToggleTrack">
+            <span class="themeModToggleOption themeModToggleOff">OFF</span>
+            <span class="themeModToggleOption themeModToggleOn">ON</span>
+            <span class="themeModToggleThumb"></span>
+        </span>
+    </label>
+
+    <select id="themeModThumbShape" class="themeModSelect themeModThumbSelect">
+        ${buildThumbShapeOptionsHTML()}
+    </select>
+
+    <span class="themeModThumbPreview" title="Preview"></span>
+
+</div>
+
+<div class="themeModSetting themeModNoDivider">
+
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">
+            Shape Size
+        </div>
+
+        <div class="themeModSettingDescription">
+            Makes shaped thumbs bigger so numbers fit better. Only used while a shape is on.
+        </div>
+    </div>
+
+    <div class="themeModRangeControl">
+        <input type="range" id="themeModThumbShapeSize" class="themeModRange" min="100" max="150" step="5" value="100">
+        <span id="themeModThumbShapeSizeValue" class="themeModRangeValue">100%</span>
     </div>
 
 </div>
@@ -3017,6 +3505,11 @@ function buildSimpleColorRowsHTML() {
     </div>
 
     <div class="themeModDetailedColors">
+
+    <div class="themeModLocalNote">
+        <i class="fas fa-circle-info"></i>
+        <span>Some colors have a Gradient option. It only shows while that color is ON, and only in detailed mode (Simple coloring turns gradients off). Sidebar gradients stretch across the whole sidebar instead of restarting in each section. A background image sits on top of the gradient and covers it (the gradient only shows through see-through parts of the image), and sidebar sections drop their gradient while the sidebar image is see-through, so the image still shows through them. Slider fills and switches use Accent 1's gradient too.</span>
+    </div>
 
     <div class="themeModSubsectionTitle">
         General
@@ -3297,6 +3790,7 @@ function buildSimpleColorRowsHTML() {
         setupJumpNavAndSearch(dialog);
         setupThemesPanel(dialog);
         setupBackgroundsPanel(dialog);
+        setupThumbShape(dialog);
 
         const enabledToggle =
             dialog.querySelector("#themeModEnabled");
@@ -3449,7 +3943,7 @@ radiusSlider.value =
     savedRadius;
 
 radiusValue.textContent =
-    `${savedRadius}px`;
+    radiusLabel(savedRadius);
 
 if (customizationsEnabled) {
     applyRadiusPreview(
@@ -3691,6 +4185,9 @@ simpleColorControls.forEach(({ toggle, input }) => {
     input.addEventListener("input", refreshColorPreview);
 });
 
+/* Gradient rows (under some detailed colors) */
+const gradientControls = setupGradientControls(dialog);
+
         fontSelect.addEventListener("change", () => {
             applyFontValue(fontSelect.value);
         });
@@ -3730,7 +4227,7 @@ simpleColorControls.forEach(({ toggle, input }) => {
                 Number(radiusSlider.value);
 
             radiusValue.textContent =
-                `${selectedRadius}px`;
+                radiusLabel(selectedRadius);
 
             applyRadiusPreview(
                 selectedRadius
@@ -3828,6 +4325,8 @@ simpleColorControls.forEach(({ toggle, input }) => {
                 localStorage.setItem(setting.lsEnabled, toggle.checked);
                 localStorage.setItem(setting.lsColor, input.value);
             });
+
+            gradientControls.save();
         });
 
         /* ---------- Copy to detailed ----------
@@ -3933,7 +4432,7 @@ simpleColorControls.forEach(({ toggle, input }) => {
                 "5";
 
             radiusValue.textContent =
-                "5px";
+                radiusLabel(5);
 
             applyRadiusPreview(
                 "5"
@@ -4067,6 +4566,8 @@ simpleColorControls.forEach(({ toggle, input }) => {
                 localStorage.setItem(setting.lsEnabled, "false");
                 localStorage.setItem(setting.lsColor, setting.defaultColor);
             });
+
+            gradientControls.reset();
             } else {
             /* Simple mode: only the simple colors reset, detailed stay untouched */
             simpleColorControls.forEach(({ setting, toggle, input }) => {
@@ -4605,6 +5106,7 @@ simpleColorControls.forEach(({ toggle, input }) => {
 
                 /* Simple mode (if saved on) sits on top of the detailed colors */
                 applySavedSimpleColorsIfActive();
+                applySavedGradients();
 
                 dialog.remove();
             }
@@ -5036,7 +5538,9 @@ simpleColorControls.forEach(({ toggle, input }) => {
         applySavedTopBarColors();
         applySavedSidebarColors();
         applySavedSimpleColorsIfActive();
+        applySavedGradients();
         applySavedBackgrounds();
+        applySavedThumbShape();
 
         /* Border radius was only applied when the menu opened — now on page load too */
         if (customizationsEnabled) {
@@ -5089,6 +5593,7 @@ simpleColorControls.forEach(({ toggle, input }) => {
         setInterval(() => {
             addModButton();
             checkSeeThroughTargets();
+            makeThumbRoom();     /* for sliders in popups opened later */
         }, 500);
     }
 

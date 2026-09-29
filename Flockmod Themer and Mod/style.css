@@ -294,13 +294,13 @@
     outline: none;
 }
 
-html:not(.flockmodCustomizationsDisabled) #sidebar,
-html:not(.flockmodCustomizationsDisabled) #bottombar,
-html:not(.flockmodCustomizationsDisabled) .dialog {
+html.flockmodFontActive:not(.flockmodCustomizationsDisabled) #sidebar,
+html.flockmodFontActive:not(.flockmodCustomizationsDisabled) #bottombar,
+html.flockmodFontActive:not(.flockmodCustomizationsDisabled) .dialog {
     font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .optiontitle {
+html.flockmodFontActive:not(.flockmodCustomizationsDisabled) .optiontitle {
     font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif) !important;
 }
 
@@ -516,36 +516,36 @@ html:not(.flockmodCustomizationsDisabled) .optiontitle {
    FLOCKMOD UI FONT SIZE
    ========================================================= */
 
-html:not(.flockmodCustomizationsDisabled) .optionTitle {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .optionTitle {
     font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .containerTitle {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .containerTitle {
     font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .headerCaption {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .headerCaption {
     font-size: calc(12.8px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .sub-title {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .sub-title {
     font-size: calc(17.6px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .optionField {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .optionField {
     font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) #sidebar select {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) #sidebar select {
     font-size: calc(11.2px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
     font-size: calc(10.24px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .nameBox,
-html:not(.flockmodCustomizationsDisabled) .typeBox {
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .nameBox,
+html.flockmodFontSizeActive:not(.flockmodCustomizationsDisabled) .typeBox {
     font-size: calc(11.52px * var(--flockmod-custom-ui-font-size, 1)) !important;
 }
 
@@ -554,29 +554,29 @@ html:not(.flockmodCustomizationsDisabled) .typeBox {
    FLOCKMOD UI FONT WEIGHT
    ========================================================= */
 
-html:not(.flockmodCustomizationsDisabled) .optionTitle,
-html:not(.flockmodCustomizationsDisabled) .containerTitle {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .optionTitle,
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .containerTitle {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .headerCaption {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .headerCaption {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .optionField {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .optionField {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) #sidebar select {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) #sidebar select {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) #sidebar .btn span {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .nameBox,
-html:not(.flockmodCustomizationsDisabled) .typeBox {
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .nameBox,
+html.flockmodFontWeightActive:not(.flockmodCustomizationsDisabled) .typeBox {
     font-weight: var(--flockmod-custom-ui-font-weight, 400) !important;
 }
 
@@ -585,22 +585,19 @@ html:not(.flockmodCustomizationsDisabled) .typeBox {
    FLOCKMOD UI SPACING
    ========================================================= */
 
-html:not(.flockmodCustomizationsDisabled) .optionBG {
+html.flockmodSpacingActive:not(.flockmodCustomizationsDisabled) .optionBG {
     padding-top: calc(3px * var(--flockmod-ui-spacing, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .optionTitle {
+html.flockmodSpacingActive:not(.flockmodCustomizationsDisabled) .optionTitle {
     padding-left: calc(6px * var(--flockmod-ui-spacing, 1)) !important;
     line-height: calc(25px * var(--flockmod-ui-spacing, 1)) !important;
 }
 
-html:not(.flockmodCustomizationsDisabled) .layerButton {
-    padding: calc(10px * var(--flockmod-ui-spacing, 1)) !important;
-}
+/* (Layer eye/lock buttons are left out of spacing: forcing a padding
+   on them shifted them off their native position.) */
 
-html:not(.flockmodCustomizationsDisabled) .layerButton {
-    border-radius: var(--flockmod-ui-radius, 5px) !important;
-}
+/* (border radius rules are in the BORDER RADIUS section at the end) */
 
 
 /* =========================================================
@@ -1983,4 +1980,317 @@ html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .dialog:not([
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch .fmOff,
 html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch .fmOff span {
     color: var(--flockmod-custom-text2, #fff) !important;
+}
+
+
+/* =========================================================
+   BORDER RADIUS (Interface > Border Radius)
+   Only active when the slider is moved off 5 (the default),
+   so FlockMod's own shapes are untouched otherwise.
+   ========================================================= */
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .boxBgContainer,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .layerPreview,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .layerButton,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #drawingTools a,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebarCollapse,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar select,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .fmThumb,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSelectedArea,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .fmCheckbox > .simpleBox,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar tr.myself,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar tr.someoneelse,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-nav .nav-link,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .navbar-nav .nav-link,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn:not(.input-group > *),
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .form-control:not(.input-group > *),
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmList > select,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSlider,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmThumb,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSelectedArea,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmCheckbox > .simpleBox,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .tablePagination,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .channelTitle,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .messengerUser,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .subcontentOption,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dropdown-menu,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .context-menu-list {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* Section boxes clip their content to the rounded corners */
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #sidebar .boxBgContainer {
+    overflow: hidden;
+}
+
+/* Grouped fields (icon + box + buttons) only round their outer corners */
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .input-group > :first-child {
+    border-top-left-radius: var(--flockmod-ui-radius, 5px) !important;
+    border-bottom-left-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .input-group > :last-child {
+    border-top-right-radius: var(--flockmod-ui-radius, 5px) !important;
+    border-bottom-right-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* =========================================================
+   SLIDER THUMB SHAPES (Interface > Slider Thumbs)
+   Masking keeps the thumb's own color and number; "contain"
+   keeps the shape's proportions on wide thumbs.
+   ========================================================= */
+
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmThumb,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmThumb {
+    -webkit-mask: var(--flockmod-thumb-mask) center / contain no-repeat;
+    mask: var(--flockmod-thumb-mask) center / contain no-repeat;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    /* Shape Size: grows from the center so it stays lined up. Uses the
+       separate "scale" property, so FlockMod's own positioning is kept. */
+    scale: var(--flockmod-thumb-size, 1);
+    z-index: 2;
+}
+
+/* Little preview next to the shape picker */
+.dialog[name="themeModMenu"] .themeModThumbSelect {
+    width: 110px;
+}
+
+.dialog[name="themeModMenu"] .themeModThumbPreview {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    margin-left: 8px;
+    background-color: var(--flockmod-custom-sidebar-accent, #378de4);
+    -webkit-mask: var(--flockmod-thumb-preview) center / contain no-repeat;
+    mask: var(--flockmod-thumb-preview) center / contain no-repeat;
+}
+
+/* Shaped thumbs can be bigger than their track: let them spill
+   over instead of being cut off. The switch's on/off halves keep
+   the switch's rounded corners so it still looks the same. */
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSlider,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch {
+    overflow: visible !important;
+}
+
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch > .fmOn,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSwitch > .fmOff,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch > .fmOn,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSwitch > .fmOff,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmSlider > .fmSelectedArea,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmSlider > .fmSelectedArea {
+    border-radius: inherit;
+}
+
+/* Shaped thumbs: put the number in the middle of the shape
+   (FlockMod's thumb places it off to one side) */
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) #sidebar .fmThumb,
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .fmThumb {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-indent: 0 !important;
+    /* The mask cuts off anything outside the shape, text included,
+       so the number is shrunk to fit and nudged per shape (set by the
+       script). Scale Size already grows it along with the shape. */
+    font-size: var(--flockmod-thumb-font, 9px) !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important; /* nudge padding mustn't resize the shape */
+    letter-spacing: -0.03em !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    padding-top: max(0px, calc(var(--flockmod-thumb-text-y, 0px) * 2)) !important;
+    padding-bottom: max(0px, calc(var(--flockmod-thumb-text-y, 0px) * -2)) !important;
+    padding-left: max(0px, calc(var(--flockmod-thumb-text-x, 0px) * 2)) !important;
+    padding-right: max(0px, calc(var(--flockmod-thumb-text-x, 0px) * -2)) !important;
+}
+
+/* Boxes that clip the thumb get "flockmodThumbRoom" from the script
+   (only plain block boxes, so row layouts aren't disturbed).
+   flow-root keeps their contents laid out exactly as with
+   overflow: hidden, just without the clipping. */
+html.flockmodThumbShapeActive:not(.flockmodCustomizationsDisabled) .flockmodThumbRoom {
+    overflow: visible !important;
+    display: flow-root !important;
+}
+/* =========================================================
+   LOCKED SWITCHES (".readOnly"), e.g. the lasso / rectangle
+   "Type" switch in Tool Options while a selection is active.
+   FlockMod greys these out with its own colors, and the rules
+   above only covered unlocked switches. These follow the same
+   sidebar colors: ON = Accent 1, OFF = Accent 2,
+   thumb = Primary, labels = Text 2.
+   ========================================================= */
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) > .fmOn {
+    background-color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+html.flockmodSidebarInactiveActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) > .fmOff {
+    background-color: var(--flockmod-custom-sidebar-inactive, #3a3c43) !important;
+}
+
+html.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) > .fmThumb {
+    background-color: var(--flockmod-custom-sidebar-primary, #1d1e22) !important;
+}
+
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) > .checkLabel,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) > .checkLabel span {
+    color: var(--flockmod-custom-text2, #fff) !important;
+}
+
+/* Locked still looks a little locked */
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmSwitch.readOnly:not(.dialog[name="themeModMenu"] *) {
+    opacity: 0.75;
+}
+
+/* =========================================================
+   ROOM LIST (room buttons + the room description box).
+   Not limited to .dialog, since the room list isn't always
+   inside a popup.
+   Boxes = Popup Field, hovered room = Hover Color,
+   text = Text 2, links = Accent 1.
+   ========================================================= */
+
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .roomBox,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .descriptionBox {
+    background-color: var(--flockmod-custom-popup-field, #43444a) !important;
+}
+
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .roomBox:hover {
+    background-color: var(--flockmod-custom-hover, #4f5156) !important;
+}
+
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .roomBox,
+html.flockmodText2ColorActive:not(.flockmodCustomizationsDisabled) .descriptionBox {
+    color: var(--flockmod-custom-text2, #fff) !important;
+}
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .descriptionBox a {
+    color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .roomBox,
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .descriptionBox {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* The box around the room description shows dark corners behind
+   the rounded description box: clear it and round it to match. */
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .roomDescription {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .roomDescription {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* =========================================================
+   GRADIENTS (Colors panel, detailed mode)
+   Each needs both the color's own class (color ON) and its
+   gradient class. The gradient is a background-image drawn over
+   the plain color, which stays as the fallback.
+   Sidebar gradients use "fixed" so every section shows its slice
+   of one gradient instead of restarting per box.
+   ========================================================= */
+
+/* Menu rows */
+.dialog[name="themeModMenu"] .themeModGradientRow {
+    padding-top: 0;
+    padding-left: 14px;
+}
+
+.dialog[name="themeModMenu"] .themeModGradientRow .themeModSettingName i {
+    font-size: .65rem;
+    opacity: .6;
+    margin-right: 4px;
+}
+
+.dialog[name="themeModMenu"] .themeModGradientControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.dialog[name="themeModMenu"] .themeModGradientControls .themeModRange {
+    width: 90px;
+}
+
+/* Sidebar background (Primary) */
+html.flockmodSidebarPrimaryActive.flockmodGradSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar {
+    background-image: var(--flockmod-grad-SidebarPrimary) !important;
+    background-attachment: fixed !important;
+}
+
+/* ...with a sidebar image: image (and its dim) on top, gradient under */
+html.flockmodBgSidebarActive.flockmodSidebarPrimaryActive.flockmodGradSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #sidebar {
+    background-image:
+        linear-gradient(rgba(var(--flockmod-bg-sidebar-shade, 0, 0, 0), var(--flockmod-bg-sidebar-dim, 0)), rgba(var(--flockmod-bg-sidebar-shade, 0, 0, 0), var(--flockmod-bg-sidebar-dim, 0))),
+        var(--flockmod-bg-sidebar-image),
+        var(--flockmod-grad-SidebarPrimary) !important;
+    background-size: auto, var(--flockmod-bg-sidebar-size, cover), auto !important;
+    background-repeat: no-repeat, var(--flockmod-bg-sidebar-repeat, no-repeat), no-repeat !important;
+    background-position: center, center, center !important;
+    background-attachment: scroll, scroll, fixed !important;
+}
+
+/* Sidebar sections (Secondary). Skipped while the sidebar image is
+   see-through, so the image still shows through the sections. */
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled):not(.flockmodBgSidebarSeeThroughActive) #sidebar .boxBgContainer .containerContent,
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled):not(.flockmodBgSidebarSeeThroughActive) #sidebar .os-content:has(> #previewList),
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled):not(.flockmodBgSidebarSeeThroughActive) #sidebar .sidebarNavbar,
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled):not(.flockmodBgSidebarSeeThroughActive) .toolbar:has(> #drawingTools) {
+    background-image: var(--flockmod-grad-SidebarSecondary) !important;
+    background-attachment: fixed !important;
+}
+
+/* The solid "more below" fades would show as bars over a gradient */
+html.flockmodSidebarPrimaryActive.flockmodGradSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) .sidebar .scrollNotBottom:not(.scrollNoOverflow)::after,
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) .containerSidebar .scrollNotBottom:not(.scrollNoOverflow)::after,
+html.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .scrollNotBottom:not(.scrollNoOverflow)::after {
+    background: none !important;
+}
+
+/* Accent 1: slider fills + switch on-sides (sidebar and popups) */
+html.flockmodSidebarAccentActive.flockmodGradSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmSlider:not(.dialog[name="themeModMenu"] *) > .fmSelectedArea,
+html.flockmodSidebarAccentActive.flockmodGradSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmSwitch:not(.dialog[name="themeModMenu"] *) > .fmOn {
+    background-image: var(--flockmod-grad-SidebarAccent) !important;
+}
+
+/* Top bar / bottom bar */
+html.flockmodTopBarBackgroundActive.flockmodGradTopBarBackgroundActive:not(.flockmodCustomizationsDisabled) .topNavbar > .container {
+    background-image: var(--flockmod-grad-TopBarBackground) !important;
+}
+
+html.flockmodBottomBarBackgroundActive.flockmodGradBottomBarBackgroundActive:not(.flockmodCustomizationsDisabled) .bottomNavbar {
+    background-image: var(--flockmod-grad-BottomBarBackground) !important;
+}
+
+/* Popup content + active title bar */
+html.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dynamicDialogArea,
+html.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogArea {
+    background-image: var(--flockmod-grad-PopupContent) !important;
+}
+
+html.flockmodPopupTitleBarActive.flockmodGradPopupTitleBarActive:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .dialogTitlebar:not(.inactive) {
+    background-image: var(--flockmod-grad-PopupTitleBar) !important;
+}
+
+/* See-through chat / messenger: keep their image visible */
+html.flockmodBgChatSeeThroughActive.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog[name="chat"] .dynamicDialogArea,
+html.flockmodBgMessengerSeeThroughActive.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog[name="messenger"] .dynamicDialogArea {
+    background-image: none !important;
 }
