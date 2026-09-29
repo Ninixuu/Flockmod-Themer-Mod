@@ -675,14 +675,60 @@ html:not(.flockmodCustomizationsDisabled) #sidebar tr.myself:not(.selected):hove
 
 
 /* =========================================================
-   COLORS PANEL — TOP BAR — TEXT COLOR (opt-in)
-   Top bar icon buttons (Configuration, Chat, Fullscreen,
-   Leave room). Icon uses color:inherit, so this covers
-   both the icon and its label text.
+   COLORS PANEL — TOP BAR (all opt-in, scoped to the top bar)
    ========================================================= */
 
+/* Button text/icon color (existing setting, unchanged) */
 html.flockmodTopBarTextColorActive:not(.flockmodCustomizationsDisabled) .topbarButtons .nav-link {
     color: var(--flockmod-custom-topbar-text, #fff) !important;
+}
+
+/* Top bar background */
+html.flockmodTopBarBackgroundActive:not(.flockmodCustomizationsDisabled) .topNavbar > .container {
+    background-color: var(--flockmod-custom-topbar-background, #3a3c43) !important;
+}
+
+/* Button hover background (also covers focus/active, like the native rule) */
+html.flockmodTopBarHoverActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-nav .nav-link:hover,
+html.flockmodTopBarHoverActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-nav .nav-link:focus,
+html.flockmodTopBarHoverActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-nav .nav-link:active {
+    background-color: var(--flockmod-custom-topbar-hover, #2e2f35) !important;
+}
+
+/* Brand title + version tag */
+html.flockmodTopBarBrandActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-brand,
+html.flockmodTopBarBrandActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-brand:hover,
+html.flockmodTopBarBrandActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-brand:focus,
+html.flockmodTopBarBrandActive:not(.flockmodCustomizationsDisabled) .topNavbar .navbar-brand sup {
+    color: var(--flockmod-custom-topbar-brand, #fff) !important;
+}
+
+/* Progress bar */
+html.flockmodTopBarProgressActive:not(.flockmodCustomizationsDisabled) #topbarProgress .bar {
+    background-color: var(--flockmod-custom-topbar-progress, #378de4) !important;
+}
+
+/* =========================================================
+   COLORS PANEL — BOTTOM BAR (all opt-in, scoped to the bottom bar)
+   ========================================================= */
+
+html.flockmodBottomBarBackgroundActive:not(.flockmodCustomizationsDisabled) .bottomNavbar {
+    background-color: var(--flockmod-custom-bottombar-background, #5a5960) !important;
+}
+
+html.flockmodBottomBarTextColorActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .nav-text,
+html.flockmodBottomBarTextColorActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .navbar-nav .nav-link {
+    color: var(--flockmod-custom-bottombar-text, #b4b6ba) !important;
+}
+
+html.flockmodBottomBarHoverActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .navbar-nav .nav-link:hover,
+html.flockmodBottomBarHoverActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .navbar-nav .nav-link:focus,
+html.flockmodBottomBarHoverActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .navbar-nav .nav-link:active {
+    background-color: var(--flockmod-custom-bottombar-hover, #4b4a50) !important;
+}
+
+html.flockmodBottomBarSelectedActive:not(.flockmodCustomizationsDisabled) .bottomNavbar .selected {
+    background-color: var(--flockmod-custom-bottombar-selected, #999999) !important;
 }
 
 /* ---------------------------------------------------------

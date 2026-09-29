@@ -135,6 +135,197 @@
         `).join("");
     }
 
+    const TOPBAR_COLOR_SETTINGS = [
+    {
+        cls: "flockmodTopBarBackgroundActive",
+        cssVar: "--flockmod-custom-topbar-background",
+        toggleId: "themeModTopBarBackgroundEnabled",
+        inputId: "themeModUITopBarBackground",
+        lsEnabled: "flockmodCustomTopBarBackgroundEnabled",
+        lsColor: "flockmodCustomTopBarBackgroundColor",
+        defaultColor: "#3a3c43",
+        name: "Top Bar Color",
+        description: "Background of the top bar."
+    },
+    {
+        cls: "flockmodTopBarTextColorActive",
+        cssVar: "--flockmod-custom-topbar-text",
+        toggleId: "themeModTopBarTextColorEnabled",
+        inputId: "themeModUITopBarTextColor",
+        lsEnabled: "flockmodCustomTopBarTextColorEnabled",
+        lsColor: "flockmodCustomTopBarTextColor",
+        defaultColor: "#ffffff",
+        name: "Button Text Color",
+        description: "Override the top bar icon buttons (Configuration, Chat, Fullscreen, Leave room)."
+    },
+    {
+        cls: "flockmodTopBarHoverActive",
+        cssVar: "--flockmod-custom-topbar-hover",
+        toggleId: "themeModTopBarHoverEnabled",
+        inputId: "themeModUITopBarHover",
+        lsEnabled: "flockmodCustomTopBarHoverEnabled",
+        lsColor: "flockmodCustomTopBarHoverColor",
+        defaultColor: "#2e2f35",
+        name: "Button Hover Color",
+        description: "Background of top bar buttons when hovered."
+    },
+    {
+        cls: "flockmodTopBarBrandActive",
+        cssVar: "--flockmod-custom-topbar-brand",
+        toggleId: "themeModTopBarBrandEnabled",
+        inputId: "themeModUITopBarBrand",
+        lsEnabled: "flockmodCustomTopBarBrandEnabled",
+        lsColor: "flockmodCustomTopBarBrandColor",
+        defaultColor: "#ffffff",
+        name: "Brand Title Color",
+        description: "The FlockMod title and version tag in the top bar."
+    },
+    {
+        cls: "flockmodTopBarProgressActive",
+        cssVar: "--flockmod-custom-topbar-progress",
+        toggleId: "themeModTopBarProgressEnabled",
+        inputId: "themeModUITopBarProgress",
+        lsEnabled: "flockmodCustomTopBarProgressEnabled",
+        lsColor: "flockmodCustomTopBarProgressColor",
+        defaultColor: "#378de4",
+        name: "Progress Bar Color",
+        description: "The loading/progress bar at the top."
+    }
+];
+
+function applyTopBarColorPreview(setting, enabled, color) {
+    document.documentElement.classList.toggle(setting.cls, enabled);
+    document.documentElement.style.setProperty(setting.cssVar, color);
+}
+
+function getSavedTopBarColor(setting) {
+    return {
+        enabled: localStorage.getItem(setting.lsEnabled) === "true",
+        color: localStorage.getItem(setting.lsColor) || setting.defaultColor
+    };
+}
+
+function applySavedTopBarColors() {
+    BAR_COLOR_SETTINGS.forEach((setting) => {
+        const saved = getSavedTopBarColor(setting);
+        applyTopBarColorPreview(
+            setting,
+            customizationsEnabled ? saved.enabled : false,
+            saved.color
+        );
+    });
+}
+
+function buildTopBarColorRowsHTML() {
+    return TOPBAR_COLOR_SETTINGS.map((setting) => `
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                ${setting.name}
+            </div>
+
+            <div class="themeModSettingDescription">
+                ${setting.description}
+            </div>
+        </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="${setting.toggleId}">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
+
+    </div>
+    `).join("");
+}
+
+const BOTTOMBAR_COLOR_SETTINGS = [
+    {
+        cls: "flockmodBottomBarBackgroundActive",
+        cssVar: "--flockmod-custom-bottombar-background",
+        toggleId: "themeModBottomBarBackgroundEnabled",
+        inputId: "themeModUIBottomBarBackground",
+        lsEnabled: "flockmodCustomBottomBarBackgroundEnabled",
+        lsColor: "flockmodCustomBottomBarBackgroundColor",
+        defaultColor: "#5a5960",
+        name: "Bottom Bar Color",
+        description: "Background of the bottom bar."
+    },
+    {
+        cls: "flockmodBottomBarTextColorActive",
+        cssVar: "--flockmod-custom-bottombar-text",
+        toggleId: "themeModBottomBarTextColorEnabled",
+        inputId: "themeModUIBottomBarTextColor",
+        lsEnabled: "flockmodCustomBottomBarTextColorEnabled",
+        lsColor: "flockmodCustomBottomBarTextColor",
+        defaultColor: "#b4b6ba",
+        name: "Button Text Color",
+        description: "Bottom bar buttons, icons and text (including the mod menu button)."
+    },
+    {
+        cls: "flockmodBottomBarHoverActive",
+        cssVar: "--flockmod-custom-bottombar-hover",
+        toggleId: "themeModBottomBarHoverEnabled",
+        inputId: "themeModUIBottomBarHover",
+        lsEnabled: "flockmodCustomBottomBarHoverEnabled",
+        lsColor: "flockmodCustomBottomBarHoverColor",
+        defaultColor: "#4b4a50",
+        name: "Button Hover Color",
+        description: "Background of bottom bar buttons when hovered."
+    },
+    {
+        cls: "flockmodBottomBarSelectedActive",
+        cssVar: "--flockmod-custom-bottombar-selected",
+        toggleId: "themeModBottomBarSelectedEnabled",
+        inputId: "themeModUIBottomBarSelected",
+        lsEnabled: "flockmodCustomBottomBarSelectedEnabled",
+        lsColor: "flockmodCustomBottomBarSelectedColor",
+        defaultColor: "#999999",
+        name: "Selected Button Color",
+        description: "Background of a selected/active bottom bar button."
+    }
+];
+
+const BAR_COLOR_SETTINGS = [
+    ...TOPBAR_COLOR_SETTINGS,
+    ...BOTTOMBAR_COLOR_SETTINGS
+];
+
+function buildBottomBarColorRowsHTML() {
+    return BOTTOMBAR_COLOR_SETTINGS.map((setting) => `
+    <div class="themeModSetting themeModNoDivider">
+
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">
+                ${setting.name}
+            </div>
+
+            <div class="themeModSettingDescription">
+                ${setting.description}
+            </div>
+        </div>
+
+        <label class="themeModToggle" style="margin-right: 10px;">
+            <input type="checkbox" id="${setting.toggleId}">
+            <span class="themeModToggleTrack">
+                <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                <span class="themeModToggleOption themeModToggleOn">ON</span>
+                <span class="themeModToggleThumb"></span>
+            </span>
+        </label>
+
+        <input type="color" id="${setting.inputId}" value="${setting.defaultColor}">
+
+    </div>
+    `).join("");
+}
+
     function applyFontSizePreview(size) {
         const numericSize = Number(size);
 
@@ -257,20 +448,6 @@
         );
     }
 
-    function applyTopBarTextColorEnabledPreview(enabled) {
-        document.documentElement.classList.toggle(
-            "flockmodTopBarTextColorActive",
-            enabled
-        );
-    }
-
-    function applyTopBarTextColorPreview(color) {
-        document.documentElement.style.setProperty(
-            "--flockmod-custom-topbar-text",
-            color
-        );
-    }
-
     function applySavedFont() {
         const savedFont =
             localStorage.getItem("flockmodCustomUIFont") || "default";
@@ -374,21 +551,6 @@
             applyText2ColorPreview(savedColor);
         } else {
             applyText2ColorEnabledPreview(false);
-        }
-    }
-
-    function applySavedTopBarTextColor() {
-        const savedEnabled =
-            localStorage.getItem("flockmodCustomTopBarTextColorEnabled") === "true";
-
-        const savedColor =
-            localStorage.getItem("flockmodCustomTopBarTextColor") || "#ffffff";
-
-        if (customizationsEnabled) {
-            applyTopBarTextColorEnabledPreview(savedEnabled);
-            applyTopBarTextColorPreview(savedColor);
-        } else {
-            applyTopBarTextColorEnabledPreview(false);
         }
     }
 
@@ -815,30 +977,13 @@
         Top Bar
     </div>
 
-    <div class="themeModSetting themeModNoDivider">
+        ${buildTopBarColorRowsHTML()}
 
-        <div class="themeModSettingText">
-            <div class="themeModSettingName">
-                Text Color
-            </div>
-
-            <div class="themeModSettingDescription">
-                Override the top bar icon buttons (Configuration, Chat, Fullscreen, Leave room).
-            </div>
-        </div>
-
-        <label class="themeModToggle" style="margin-right: 10px;">
-            <input type="checkbox" id="themeModTopBarTextColorEnabled">
-            <span class="themeModToggleTrack">
-                <span class="themeModToggleOption themeModToggleOff">OFF</span>
-                <span class="themeModToggleOption themeModToggleOn">ON</span>
-                <span class="themeModToggleThumb"></span>
-            </span>
-        </label>
-
-        <input type="color" id="themeModUITopBarTextColor" value="#ffffff">
-
+    <div class="themeModSubsectionTitle themeModSpacingSubsection">
+        Bottom Bar
     </div>
+
+    ${buildBottomBarColorRowsHTML()}
 
 </div>
 
@@ -1141,32 +1286,27 @@ text2ColorInput.addEventListener("input", () => {
     applyText2ColorPreview(text2ColorInput.value);
 });
 
-const topBarTextColorEnabledToggle =
-    dialog.querySelector("#themeModTopBarTextColorEnabled");
+const topBarColorControls = BAR_COLOR_SETTINGS.map((setting) => {
+    const toggle = dialog.querySelector(`#${setting.toggleId}`);
+    const input = dialog.querySelector(`#${setting.inputId}`);
+    const saved = getSavedTopBarColor(setting);
 
-const topBarTextColorInput =
-    dialog.querySelector("#themeModUITopBarTextColor");
+    toggle.checked = saved.enabled;
+    input.value = saved.color;
 
-const savedTopBarTextEnabled =
-    localStorage.getItem("flockmodCustomTopBarTextColorEnabled") === "true";
+    if (customizationsEnabled) {
+        applyTopBarColorPreview(setting, saved.enabled, saved.color);
+    }
 
-const savedTopBarTextColor =
-    localStorage.getItem("flockmodCustomTopBarTextColor") || "#ffffff";
+    toggle.addEventListener("change", () => {
+        applyTopBarColorPreview(setting, toggle.checked, input.value);
+    });
 
-topBarTextColorEnabledToggle.checked = savedTopBarTextEnabled;
-topBarTextColorInput.value = savedTopBarTextColor;
+    input.addEventListener("input", () => {
+        applyTopBarColorPreview(setting, toggle.checked, input.value);
+    });
 
-if (customizationsEnabled) {
-    applyTopBarTextColorEnabledPreview(savedTopBarTextEnabled);
-    applyTopBarTextColorPreview(savedTopBarTextColor);
-}
-
-topBarTextColorEnabledToggle.addEventListener("change", () => {
-    applyTopBarTextColorEnabledPreview(topBarTextColorEnabledToggle.checked);
-});
-
-topBarTextColorInput.addEventListener("input", () => {
-    applyTopBarTextColorPreview(topBarTextColorInput.value);
+    return { setting, toggle, input };
 });
 
 const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
@@ -1317,15 +1457,10 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                 text2ColorInput.value
             );
 
-            localStorage.setItem(
-                "flockmodCustomTopBarTextColorEnabled",
-                topBarTextColorEnabledToggle.checked
-            );
-
-            localStorage.setItem(
-                "flockmodCustomTopBarTextColor",
-                topBarTextColorInput.value
-            );
+            topBarColorControls.forEach(({ setting, toggle, input }) => {
+    localStorage.setItem(setting.lsEnabled, toggle.checked);
+    localStorage.setItem(setting.lsColor, input.value);
+});
 
                         sidebarColorControls.forEach(({ setting, toggle, input }) => {
                 localStorage.setItem(setting.lsEnabled, toggle.checked);
@@ -1476,29 +1611,16 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                 "#ffffff"
             );
 
-            topBarTextColorEnabledToggle.checked =
-                false;
+            topBarColorControls.forEach(({ setting, toggle, input }) => {
+    toggle.checked = false;
+    input.value = setting.defaultColor;
 
-            applyTopBarTextColorEnabledPreview(
-                false
-            );
+    applyTopBarColorPreview(setting, false, setting.defaultColor);
 
-            localStorage.setItem(
-                "flockmodCustomTopBarTextColorEnabled",
-                "false"
-            );
+    localStorage.setItem(setting.lsEnabled, "false");
+    localStorage.setItem(setting.lsColor, setting.defaultColor);
+});
 
-            topBarTextColorInput.value =
-                "#ffffff";
-
-            applyTopBarTextColorPreview(
-                "#ffffff"
-            );
-
-            localStorage.setItem(
-                "flockmodCustomTopBarTextColor",
-                "#ffffff"
-            );
 
                         sidebarColorControls.forEach(({ setting, toggle, input }) => {
                 toggle.checked = false;
@@ -2020,23 +2142,10 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
                     savedText2Color2
                 );
 
-                const savedTopBarTextEnabled2 =
-                    localStorage.getItem(
-                        "flockmodCustomTopBarTextColorEnabled"
-                    ) === "true";
-
-                const savedTopBarTextColor2 =
-                    localStorage.getItem(
-                        "flockmodCustomTopBarTextColor"
-                    ) || "#ffffff";
-
-                applyTopBarTextColorEnabledPreview(
-                    savedTopBarTextEnabled2
-                );
-
-                applyTopBarTextColorPreview(
-                    savedTopBarTextColor2
-                );
+                BAR_COLOR_SETTINGS.forEach((setting) => {
+    const saved = getSavedTopBarColor(setting);
+    applyTopBarColorPreview(setting, saved.enabled, saved.color);
+});
 
                     SIDEBAR_COLOR_SETTINGS.forEach((setting) => {
                     const saved = getSavedSidebarColor(setting);
@@ -2177,7 +2286,7 @@ const sidebarColorControls = SIDEBAR_COLOR_SETTINGS.map((setting) => {
         applySavedHoverColor();
         applySavedText1Color();
         applySavedText2Color();
-        applySavedTopBarTextColor();
+        applySavedTopBarColors();
         applySavedSidebarColors();
     }
 
