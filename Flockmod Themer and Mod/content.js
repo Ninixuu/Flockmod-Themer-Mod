@@ -3939,6 +3939,699 @@ function buildSimpleColorRowsHTML() {
         modItem.closest("li").after(item);
     }
 
+
+    /* =========================================================
+       POPUP DECORATIONS (Interface > Popup Decorations)
+       Little ears / tails / stars / flowers drawn around every
+       FlockMod popup. Each popup gets one small decoration box
+       (pure SVG + CSS, clicks pass straight through). They move
+       and resize with the popup by themselves, hide while a popup
+       is maximized (FlockMod's "dialogMaximized" class) and come
+       back when it's restored.
+       Colors use 4 shared roles, so there are never more than 4
+       pickers: Main, Outline, Details, Sparkle. "Match my theme"
+       reads them from your popups, so they follow any theme.
+       ========================================================= */
+
+    const DECO_LS = {
+        style: "flockmodDecoStyle",
+        placement: "flockmodDecoPlacement",
+        size: "flockmodDecoSize",
+        match: "flockmodDecoMatch",
+        menu: "flockmodDecoMenu",
+        main: "flockmodDecoMainColor",
+        outline: "flockmodDecoOutlineColor",
+        detail: "flockmodDecoDetailColor",
+        sparkle: "flockmodDecoSparkleColor"
+    };
+
+    const DECO_COLOR_DEFAULTS = {
+        main: "#d7b9c4",
+        outline: "#b98fa0",
+        detail: "#f08db0",
+        sparkle: "#ffe08a"
+    };
+
+    /* ---- small SVG builders ---- */
+
+    function decoStar(cx, cy, r, cls, sw = 1.5) {
+        let d = "";
+
+        for (let i = 0; i < 10; i++) {
+            const a = -Math.PI / 2 + i * Math.PI / 5;
+            const rr = i % 2 ? r * 0.45 : r;
+            d += `${i ? "L" : "M"}${(cx + rr * Math.cos(a)).toFixed(1)} ${(cy + rr * Math.sin(a)).toFixed(1)}`;
+        }
+
+        return `<path d="${d}Z" class="${cls} fmdO" stroke-width="${sw}" stroke-linejoin="round"/>`;
+    }
+
+    function decoFlower(cx, cy, r, rot = 0) {
+        let s = `<g transform="translate(${cx} ${cy}) rotate(${rot})">`;
+
+        for (let i = 0; i < 5; i++) {
+            s += `<path d="M0 0 C${-r * 0.55} ${-r * 0.35} ${-r * 0.55} ${-r} 0 ${-r} ` +
+                 `C${r * 0.12} ${-r * 0.88} ${-r * 0.02} ${-r * 0.8} 0 ${-r * 0.84} ` +
+                 `C${r * 0.02} ${-r * 0.8} ${-r * 0.12} ${-r * 0.88} 0 ${-r} ` +
+                 `C${r * 0.55} ${-r} ${r * 0.55} ${-r * 0.35} 0 0Z" transform="rotate(${i * 72})" ` +
+                 `class="fmdD fmdO" stroke-width="1.2"/>`;
+        }
+
+        return `${s}<circle r="${(r * 0.22).toFixed(1)}" class="fmdS"/></g>`;
+    }
+
+    function decoPetal(x, y, s, rot) {
+        return `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" ` +
+               `d="M0 0 C-5 -3 -5 -10 0 -12 C1 -10 -0.5 -9.5 0 -10 C0.5 -9.5 -1 -10 0 -12 C5 -10 5 -3 0 0Z" ` +
+               `class="fmdD fmdO" stroke-width="${(1 / s).toFixed(2)}"/>`;
+    }
+
+    /* A tail drawn as a thick line: outline stroke under a main stroke */
+    function decoStrokeTail(d, outlineW, mainW) {
+        return `<path d="${d}" class="fmdOs" stroke-width="${outlineW}" stroke-linecap="round"/>` +
+               `<path d="${d}" class="fmdMs" stroke-width="${mainW}" stroke-linecap="round"/>`;
+    }
+
+    /* Tails are drawn pointing right (attached at x = 0). For
+       "bottom" they're turned to point down (attached at y = 0). */
+    function tailPiece(tail, placement) {
+        if (placement === "side") {
+            return { w: tail.w, h: tail.h, svg: tail.svg, edge: "right", at: tail.side, inset: tail.inset };
+        }
+
+        return {
+            w: tail.h,
+            h: tail.w,
+            svg: `<g transform="translate(${tail.h} 0) rotate(90)">${tail.svg}</g>`,
+            edge: "bottom",
+            at: tail.bottom,
+            inset: tail.inset
+        };
+    }
+
+    const DECO_TAILS = {
+        cat: { w: 40, h: 96, side: "38%", bottom: "68%", inset: 1,
+            svg: decoStrokeTail("M0 88 C31 88 37 58 22 40 C9 24 14 4 33 4", 10, 6) },
+        dog: { w: 38, h: 48, side: "55%", bottom: "70%", inset: 1,
+            svg: decoStrokeTail("M0 40 C20 40 30 30 30 8", 12, 8) },
+        fox: { w: 56, h: 76, side: "30%", bottom: "62%", inset: 1,
+            svg: '<path d="M0 72 C42 68 56 32 40 2 C36 28 24 44 0 46Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+                 '<path d="M40 2 C44 12 44 20 41 27 C36 25 34 16 40 2Z" class="fmdS"/>' },
+        bunny: { w: 30, h: 30, side: "62%", bottom: "48%", inset: 0,
+            svg: '<circle cx="15" cy="15" r="13" class="fmdS fmdO" stroke-width="2"/>' +
+                 '<circle cx="11" cy="11" r="4.5" fill="#fff" opacity=".55"/>' },
+        bear: { w: 24, h: 24, side: "58%", bottom: "48%", inset: 0,
+            svg: '<circle cx="12" cy="12" r="10" class="fmdM fmdO" stroke-width="2"/>' }
+    };
+
+    /* Ear shapes sit on the top edge (their bottom at y = h) */
+    const EAR_CAT = { w: 40, h: 32, inset: 2,
+        svg: '<path d="M2 32 L16 6 Q20 -1 24 6 L38 32Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+             '<path d="M10 31 L18 15 Q20 12 22 15 L30 31Z" class="fmdD"/>' };
+    const EAR_FOX = { w: 40, h: 38, inset: 2,
+        svg: '<path d="M2 38 L17 5 Q20 0 23 5 L38 38Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+             '<path d="M11 37 L19 17 Q20 15 21 17 L29 37Z" class="fmdD"/>' };
+    const EAR_BEAR = { w: 34, h: 18, inset: 1,
+        svg: '<path d="M1 18 A16 16 0 0 1 33 18Z" class="fmdM fmdO" stroke-width="2"/>' +
+             '<path d="M9 18 A8 8 0 0 1 25 18Z" class="fmdD"/>' };
+    const EAR_BUNNY = { w: 30, h: 58, inset: 6,
+        svg: '<g transform="rotate(-12 15 58)"><ellipse cx="15" cy="31" rx="10" ry="25" class="fmdM fmdO" stroke-width="2"/>' +
+             '<ellipse cx="15" cy="33" rx="5" ry="17" class="fmdD"/></g>' };
+    const EAR_DOG = { w: 30, h: 66,
+        svg: '<path d="M26 2 C12 -2 2 10 2 28 C2 50 8 64 16 64 C23 64 26 52 27 40 C28 26 32 6 26 2Z" class="fmdM fmdO" stroke-width="2"/>' };
+
+    function earPair(ear, at) {
+        return [
+            { ...ear, edge: "top", from: "left", at },
+            { ...ear, edge: "top", from: "right", at, mirror: true }
+        ];
+    }
+
+    /* Each style: menu label, color labels (null = not used, hidden),
+       placement choices, and a pieces(placement) builder. */
+    const DECO_STYLES = {
+        none: { label: "None", placements: [], colors: {}, pieces: () => [] },
+
+        cat: {
+            label: "Cat",
+            placements: ["side", "bottom", "none"],
+            colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: null },
+            pieces: (p) => [...earPair(EAR_CAT, 22), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.cat, p)])]
+        },
+        dog: {
+            label: "Dog",
+            placements: ["bottom", "side", "none"],
+            colors: { main: "Fur", outline: "Outline", detail: null, sparkle: null },
+            /* Floppy ears hang OUTSIDE the corners, so titles stay readable */
+            pieces: (p) => [
+                { ...EAR_DOG, corner: "tl", dx: -22, dy: -8 },
+                { ...EAR_DOG, corner: "tr", dx: -22, dy: -8, mirror: true },
+                ...(p === "none" ? [] : [tailPiece(DECO_TAILS.dog, p)])
+            ]
+        },
+        bunny: {
+            label: "Bunny",
+            placements: ["side", "bottom", "none"],
+            colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: "Pom-pom tail" },
+            pieces: (p) => [...earPair(EAR_BUNNY, 26), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.bunny, p)])]
+        },
+        bear: {
+            label: "Bear",
+            placements: ["bottom", "side", "none"],
+            colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: null },
+            pieces: (p) => [...earPair(EAR_BEAR, 20), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.bear, p)])]
+        },
+        fox: {
+            label: "Fox",
+            placements: ["side", "bottom", "none"],
+            colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: "Tail tip" },
+            pieces: (p) => [...earPair(EAR_FOX, 20), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.fox, p)])]
+        },
+        stars: {
+            label: "Stars",
+            placements: ["left", "right"],
+            colors: { main: null, outline: "Outline", detail: "Small stars", sparkle: "Big stars" },
+            pieces: (p) => decoCornerPieces(p,
+                { w: 72, h: 66, dx: -26, dy: -26,
+                  svg: decoStar(24, 24, 19, "fmdS", 2) + decoStar(54, 11, 7, "fmdD") + decoStar(9, 52, 6, "fmdD") },
+                { w: 62, h: 62, dx: -24, dy: -24,
+                  svg: decoStar(40, 40, 15, "fmdS", 2) + decoStar(14, 50, 6, "fmdD") + decoStar(52, 12, 6, "fmdD") },
+                { w: 16, h: 64, svg: decoStar(8, 8, 4, "fmdS", 1) + decoStar(7, 46, 3.5, "fmdD", 1) })
+        },
+        sakura: {
+            label: "Sakura",
+            placements: ["left", "right"],
+            colors: { main: null, outline: "Outline", detail: "Petals", sparkle: "Flower centers" },
+            pieces: (p) => decoCornerPieces(p,
+                { w: 78, h: 72, dx: -28, dy: -28,
+                  svg: decoFlower(26, 26, 20, 10) + decoFlower(58, 12, 9, 40) + decoPetal(10, 64, 0.9, -30) },
+                { w: 62, h: 64, dx: -22, dy: -24,
+                  svg: decoFlower(38, 38, 14, -15) + decoPetal(10, 56, 0.9, 60) + decoPetal(52, 10, 0.8, 20) },
+                { w: 18, h: 72, svg: decoPetal(9, 14, 0.8, 40) + decoPetal(8, 58, 1, -20) })
+        },
+        witch: {
+            label: "Witch hat",
+            placements: ["left", "right"],
+            colors: { main: "Hat", outline: "Outline", detail: "Band", sparkle: "Stars" },
+            pieces: (p) => {
+                const hat = {
+                    w: 76, h: 56, edge: "top", from: p === "right" ? "right" : "left", at: 10, inset: 5,
+                    mirror: p === "right",
+                    svg: '<g transform="rotate(-14 40 52)">' +
+                         '<path d="M40 4 C52 10 58 24 64 46 L22 46 C28 30 30 14 40 4Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+                         '<path d="M40 4 C34 0 26 2 22 8" fill="none" class="fmdOs" stroke-width="4" stroke-linecap="round"/>' +
+                         '<rect x="25" y="38" width="36" height="7" rx="2" class="fmdD"/>' +
+                         '<ellipse cx="43" cy="47" rx="32" ry="6" class="fmdM fmdO" stroke-width="2"/></g>'
+                };
+                const sparkles = {
+                    w: 40, h: 40, corner: p === "right" ? "bl" : "br", dx: -18, dy: -18,
+                    mirror: p === "right",
+                    svg: decoStar(24, 24, 7, "fmdS", 1.2) + decoStar(10, 8, 4, "fmdS", 1)
+                };
+                return [hat, sparkles];
+            }
+        }
+    };
+
+    const DECO_STYLE_CHOICES = Object.keys(DECO_STYLES);
+    const DECO_PLACEMENT_CHOICES = ["side", "bottom", "none", "left", "right"];
+    const DECO_PLACEMENT_LABELS = {
+        side: "Tail on the side",
+        bottom: "Tail at the bottom",
+        none: "No tail",
+        left: "Top-left corner",
+        right: "Top-right corner"
+    };
+
+    /* Corner styles: a main cluster on the chosen top corner, a
+       smaller one on the opposite bottom corner, and a few tiny
+       ones trailing down the opposite side */
+    function decoCornerPieces(p, main, opposite, trail) {
+        const right = p === "right";
+        return [
+            { ...main, corner: right ? "tr" : "tl", mirror: right },
+            { ...opposite, corner: right ? "bl" : "br", mirror: right },
+            { ...trail, edge: right ? "left" : "right", at: "34%", inset: -8 }
+        ];
+    }
+
+    /* ---- settings ---- */
+
+    function readSavedDeco() {
+        const style = localStorage.getItem(DECO_LS.style);
+        const placement = localStorage.getItem(DECO_LS.placement);
+        const size = Number(localStorage.getItem(DECO_LS.size));
+        const colors = {};
+
+        Object.keys(DECO_COLOR_DEFAULTS).forEach((key) => {
+            const v = localStorage.getItem(DECO_LS[key]);
+            colors[key] = /^#[0-9a-f]{6}$/i.test(v || "") ? v : DECO_COLOR_DEFAULTS[key];
+        });
+
+        const st = {
+            style: DECO_STYLES[style] ? style : "none",
+            placement: DECO_PLACEMENT_CHOICES.includes(placement) ? placement : "side",
+            size: Number.isInteger(size) && size >= 70 && size <= 150 ? size : 100,
+            match: localStorage.getItem(DECO_LS.match) !== "false",   /* default ON */
+            menu: localStorage.getItem(DECO_LS.menu) === "true",
+            colors
+        };
+
+        return normalizeDecoPlacement(st);
+    }
+
+    function normalizeDecoPlacement(st) {
+        const allowed = DECO_STYLES[st.style].placements;
+
+        if (allowed.length && !allowed.includes(st.placement)) {
+            st.placement = allowed[0];
+        }
+
+        return st;
+    }
+
+    let liveDeco = null;
+
+    function applySavedDeco() {
+        applyDeco(readSavedDeco());
+    }
+
+    function applyDeco(st) {
+        liveDeco = st;
+        const root = document.documentElement;
+
+        root.style.setProperty("--fmdeco-size", String(st.size / 100));
+        root.classList.toggle("fmDecoCustomColors", !st.match);
+        root.classList.toggle("fmDecoOnMenu", st.menu);
+
+        if (!st.match) {
+            root.style.setProperty("--fmdeco-c-main", st.colors.main);
+            root.style.setProperty("--fmdeco-c-outline", st.colors.outline);
+            root.style.setProperty("--fmdeco-c-detail", st.colors.detail);
+            root.style.setProperty("--fmdeco-c-sparkle", st.colors.sparkle);
+        }
+
+        lastThemeDecoColors = "";
+        updateDecorations(true);
+    }
+
+    /* ---- building + placing ---- */
+
+    /* Positions are measured from the popup's OUTER frame (its border
+       plus FlockMod's resize bars), read per side into --fmdeco-ft /
+       -fr / -fb / -fl, so nothing sinks into the frame. */
+    function decoPieceHTML(piece) {
+        const pos = [];
+        let origin = "center";
+        const side = { top: "--fmdeco-ft", bottom: "--fmdeco-fb", left: "--fmdeco-fl", right: "--fmdeco-fr" };
+
+        if (piece.corner) {
+            const v = piece.corner[0] === "t" ? "top" : "bottom";
+            const h = piece.corner[1] === "l" ? "left" : "right";
+            pos.push(`${v}: calc(${piece.dy}px - var(${side[v]}, 0px))`, `${h}: calc(${piece.dx}px - var(${side[h]}, 0px))`);
+            origin = `${h === "left" ? "right" : "left"} ${v === "top" ? "bottom" : "top"}`;
+        } else if (piece.edge === "top") {
+            pos.push(`bottom: calc(100% + var(--fmdeco-ft, 0px) - ${piece.inset}px)`, `${piece.from}: ${piece.at}px`);
+            origin = "center bottom";
+        } else if (piece.edge === "bottom") {
+            pos.push(`top: calc(100% + var(--fmdeco-fb, 0px) - ${piece.inset}px)`, `left: calc(${piece.at} - ${piece.w / 2}px)`);
+            origin = "center top";
+        } else if (piece.edge === "right") {
+            pos.push(`left: calc(100% + var(--fmdeco-fr, 0px) - ${piece.inset}px)`, `top: ${piece.at}`);
+            origin = "left center";
+        } else if (piece.edge === "left") {
+            pos.push(`right: calc(100% + var(--fmdeco-fl, 0px) - ${piece.inset}px)`, `top: ${piece.at}`);
+            origin = "right center";
+        }
+
+        const tail = piece.edge === "right" || piece.edge === "bottom" ? " fmDecoTail" : "";
+
+        return `<div class="fmDecoPiece${tail}" style="${pos.join("; ")}; width: ${piece.w}px; height: ${piece.h}px; transform-origin: ${origin};">` +
+               `<svg viewBox="0 0 ${piece.w} ${piece.h}" width="${piece.w}" height="${piece.h}"${piece.mirror ? ' style="transform: scaleX(-1)"' : ""}>${piece.svg}</svg></div>`;
+    }
+
+    function buildDecoHTML(st) {
+        const style = DECO_STYLES[st.style] || DECO_STYLES.none;
+        return style.pieces(st.placement).map(decoPieceHTML).join("");
+    }
+
+    function decoSignature(st) {
+        return `${st.style}|${st.placement}`;
+    }
+
+    /* "Match my theme": read the colors your popups really show
+       (works on any FlockMod theme, with or without mod colors) */
+    let lastThemeDecoColors = "";
+
+    function refreshThemeDecoColors() {
+        const root = document.documentElement;
+        const popups = [...document.querySelectorAll('.dialog.dialogVisible:not([name="themeModMenu"]):not([name="themeModReference"])')];
+        const popup = popups[0] || document.querySelector('.dialog:not([name="themeModMenu"])');
+        const bar = (popup && (popup.querySelector(".dialogTitlebar:not(.inactive)") || popup.querySelector(".dialogTitlebar")));
+
+        const usable = (c) => c && c !== "transparent" && !/rgba\([^)]*,\s*0\)$/.test(c);
+
+        let main = bar ? getComputedStyle(bar).backgroundColor : "";
+        let outline = popup ? getComputedStyle(popup).borderTopColor : "";
+        let detail = "";
+
+        if (root.classList.contains("flockmodSidebarAccentActive")) {
+            detail = getComputedStyle(root).getPropertyValue("--flockmod-custom-sidebar-accent").trim();
+        } else {
+            const fill = document.querySelector("#sidebar .fmSlider .fmSelectedArea");
+            detail = fill ? getComputedStyle(fill).backgroundColor : "";
+        }
+
+        if (!usable(main)) main = "#4f4f55";
+        if (!usable(outline)) outline = "#707379";
+        if (!usable(detail)) detail = "#378de4";
+
+        const sig = `${main}|${outline}|${detail}`;
+
+        if (sig !== lastThemeDecoColors) {
+            lastThemeDecoColors = sig;
+            root.style.setProperty("--fmdeco-t-main", main);
+            root.style.setProperty("--fmdeco-t-outline", outline);
+            root.style.setProperty("--fmdeco-t-detail", detail);
+        }
+    }
+
+    /* Runs in the 500ms loop (and right after a change): gives every
+       popup its decoration box, rebuilding only when the style changed */
+    function updateDecorations(force) {
+        const st = liveDeco;
+
+        if (!st) {
+            return;
+        }
+
+        const on = st.style !== "none" && customizationsEnabled;
+        const sig = decoSignature(st);
+
+        /* FlockMod's popups can live anywhere on the page (not only
+           in #dialogContainer), so every ".dialog" is checked. The
+           little preview box in the mod menu isn't a .dialog. */
+        document.querySelectorAll(".dialog").forEach((dialog) => {
+            const isMenu = dialog.getAttribute("name") === "themeModMenu";
+            let box = dialog.querySelector(":scope > .fmDeco");
+
+            if (!on || (isMenu && !st.menu)) {
+                if (box) {
+                    box.remove();
+                    dialog.classList.remove("fmHasDeco");
+                }
+                return;
+            }
+
+            if (!box) {
+                box = document.createElement("div");
+                box.className = "fmDeco";
+                box.setAttribute("aria-hidden", "true");
+                dialog.appendChild(box);
+                dialog.classList.add("fmHasDeco");
+            }
+
+            if (force || box.dataset.sig !== sig) {
+                box.dataset.sig = sig;
+                box.innerHTML = buildDecoHTML(st);
+            }
+
+            measureDecoFrame(dialog, box);
+        });
+
+        if (on && st.match) {
+            refreshThemeDecoColors();
+        }
+    }
+
+
+    /* How far the popup's frame (border + FlockMod's resize bars)
+       reaches past its inside edge, per side. Cheap: 4 rectangles,
+       only written when something changed. */
+    function measureDecoFrame(dialog, box) {
+        const d = dialog.getBoundingClientRect();
+
+        if (!d.width || !d.height) {
+            return; /* hidden or minimized: keep the last values */
+        }
+
+        const inTop = d.top + dialog.clientTop;
+        const inLeft = d.left + dialog.clientLeft;
+        const inRight = inLeft + dialog.clientWidth;
+        const inBottom = inTop + dialog.clientHeight;
+
+        const bar = (cls) => {
+            const el = dialog.querySelector(`:scope > .dialogSize.${cls}`);
+            const r = el ? el.getBoundingClientRect() : null;
+            return r && r.width && r.height ? r : null;
+        };
+
+        const clamp = (n) => Math.round(Math.max(0, Math.min(40, n)));
+        const t = bar("sbTop");
+        const r = bar("sbRight");
+        const b = bar("sbBottom");
+        const l = bar("sbLeft");
+
+        const frame = {
+            ft: clamp(Math.max(inTop - d.top, t ? inTop - t.top : 0)),
+            fr: clamp(Math.max(d.right - inRight, r ? r.right - inRight : 0)),
+            fb: clamp(Math.max(d.bottom - inBottom, b ? b.bottom - inBottom : 0)),
+            fl: clamp(Math.max(inLeft - d.left, l ? inLeft - l.left : 0))
+        };
+
+        const sig = `${frame.ft}|${frame.fr}|${frame.fb}|${frame.fl}`;
+
+        if (box.dataset.frame !== sig) {
+            box.dataset.frame = sig;
+            Object.entries(frame).forEach(([k, v]) => box.style.setProperty(`--fmdeco-${k}`, `${v}px`));
+        }
+    }
+
+    /* ---- menu (Interface panel) ---- */
+
+    function buildDecoRowsHTML() {
+        const toggle = (id) => `
+            <label class="themeModToggle">
+                <input type="checkbox" id="${id}">
+                <span class="themeModToggleTrack">
+                    <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                    <span class="themeModToggleOption themeModToggleOn">ON</span>
+                    <span class="themeModToggleThumb"></span>
+                </span>
+            </label>`;
+
+        return `
+<div class="themeModSubsectionTitle themeModSpacingSubsection">
+    Popup Decorations
+</div>
+
+<div class="themeModSetting themeModNoDivider">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Style</div>
+        <div class="themeModSettingDescription">
+            Ears, tails, stars, flowers or a hat on every popup. They move and resize with it, hide while a popup is maximized, and never block clicks.
+        </div>
+    </div>
+    <select id="themeModDecoStyle" class="themeModSelect">
+        ${DECO_STYLE_CHOICES.map((k) => `<option value="${k}">${DECO_STYLES[k].label}</option>`).join("")}
+    </select>
+</div>
+
+<div class="themeModDecoPreviewWrap">
+    <div class="themeModDecoPreview">
+        <div class="themeModDecoPreviewBar">Chat</div>
+        <div class="themeModDecoPreviewBody"></div>
+        <div class="fmDeco" aria-hidden="true"></div>
+    </div>
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Placement</div>
+        <div class="themeModSettingDescription">Where the tail or decorations go.</div>
+    </div>
+    <select id="themeModDecoPlacement" class="themeModSelect"></select>
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Decoration Size</div>
+        <div class="themeModSettingDescription">Makes the decorations smaller or bigger.</div>
+    </div>
+    <div class="themeModRangeControl">
+        <input type="range" id="themeModDecoSize" class="themeModRange" min="70" max="150" step="5" value="100">
+        <span id="themeModDecoSizeValue" class="themeModRangeValue">100%</span>
+    </div>
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Also on the mod menu</div>
+        <div class="themeModSettingDescription">Decorate this menu too, not just FlockMod's popups.</div>
+    </div>
+    ${toggle("themeModDecoMenu")}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Match my theme</div>
+        <div class="themeModSettingDescription">Uses your popup's title bar, border and accent colors. Turn OFF to pick your own.</div>
+    </div>
+    ${toggle("themeModDecoMatch")}
+</div>
+
+<div class="themeModDecoColors">
+    ${Object.keys(DECO_COLOR_DEFAULTS).map((key) => `
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow" data-deco-color-row="${key}">
+        <div class="themeModSettingText">
+            <div class="themeModSettingName" data-deco-color-label="${key}"></div>
+        </div>
+        <input type="color" data-deco-color="${key}" value="${DECO_COLOR_DEFAULTS[key]}">
+    </div>`).join("")}
+</div>`;
+    }
+
+    function setupDecoControls(dialog) {
+        const styleSelect = dialog.querySelector("#themeModDecoStyle");
+        const placement = dialog.querySelector("#themeModDecoPlacement");
+        const size = dialog.querySelector("#themeModDecoSize");
+        const sizeValue = dialog.querySelector("#themeModDecoSizeValue");
+        const menuToggle = dialog.querySelector("#themeModDecoMenu");
+        const match = dialog.querySelector("#themeModDecoMatch");
+        const colorsBox = dialog.querySelector(".themeModDecoColors");
+        const previewDeco = dialog.querySelector(".themeModDecoPreview .fmDeco");
+        const pickers = {};
+
+        dialog.querySelectorAll("[data-deco-color]").forEach((input) => {
+            pickers[input.dataset.decoColor] = input;
+        });
+
+        if (!styleSelect) {
+            return { save() {}, reset() {} };
+        }
+
+        function fillPlacements(styleKey, wanted) {
+            const allowed = DECO_STYLES[styleKey].placements;
+            placement.innerHTML = allowed
+                .map((p) => `<option value="${p}">${DECO_PLACEMENT_LABELS[p]}</option>`)
+                .join("");
+            placement.value = allowed.includes(wanted) ? wanted : (allowed[0] || "");
+        }
+
+        function readInputs() {
+            const colors = {};
+            Object.keys(pickers).forEach((k) => { colors[k] = pickers[k].value; });
+
+            return normalizeDecoPlacement({
+                style: styleSelect.value,
+                placement: placement.value || "side",
+                size: Number(size.value),
+                match: match.checked,
+                menu: menuToggle.checked,
+                colors
+            });
+        }
+
+        function updateRows(st) {
+            const style = DECO_STYLES[st.style];
+            const on = st.style !== "none";
+
+            dialog.querySelectorAll(".themeModDecoOptionRow").forEach((row) => {
+                row.style.display = on ? "" : "none";
+            });
+
+            placement.closest(".themeModSetting").style.display = on && style.placements.length ? "" : "none";
+            colorsBox.style.display = on && !st.match ? "" : "none";
+
+            Object.keys(pickers).forEach((key) => {
+                const label = style.colors[key];
+                dialog.querySelector(`[data-deco-color-row="${key}"]`).style.display = label ? "" : "none";
+                dialog.querySelector(`[data-deco-color-label="${key}"]`).textContent = label || "";
+            });
+
+            previewDeco.innerHTML = on ? buildDecoHTML(st) : "";
+            previewDeco.parentElement.parentElement.style.display = on ? "" : "none";
+        }
+
+        function preview() {
+            sizeValue.textContent = `${size.value}%`;
+            const st = readInputs();
+            updateRows(st);
+            applyDeco(st);
+        }
+
+        function fill(st) {
+            styleSelect.value = st.style;
+            fillPlacements(st.style, st.placement);
+            size.value = String(st.size);
+            sizeValue.textContent = `${st.size}%`;
+            match.checked = st.match;
+            menuToggle.checked = st.menu;
+            Object.keys(pickers).forEach((k) => { pickers[k].value = st.colors[k]; });
+            updateRows(st);
+        }
+
+        /* Turning "Match my theme" off starts the pickers from the
+           colors you're currently seeing, instead of random defaults */
+        function seedPickersFromTheme() {
+            refreshThemeDecoColors();
+            const cs = getComputedStyle(document.documentElement);
+            const toHex = (c) => {
+                const m = String(c).match(/\d+(\.\d+)?/g);
+                if (/^#[0-9a-f]{6}$/i.test(c.trim())) return c.trim();
+                return m && m.length >= 3 ? rgbToHex(m.slice(0, 3).map(Number)) : null;
+            };
+            const main = toHex(cs.getPropertyValue("--fmdeco-t-main"));
+            const outline = toHex(cs.getPropertyValue("--fmdeco-t-outline"));
+            const detail = toHex(cs.getPropertyValue("--fmdeco-t-detail"));
+
+            if (main) pickers.main.value = main;
+            if (outline) pickers.outline.value = outline;
+            if (detail) {
+                pickers.detail.value = detail;
+                pickers.sparkle.value = mixHex(detail, "#ffffff", 0.45);
+            }
+        }
+
+        fill(readSavedDeco());
+
+        styleSelect.addEventListener("change", () => {
+            fillPlacements(styleSelect.value, placement.value);
+            preview();
+        });
+        placement.addEventListener("change", preview);
+        size.addEventListener("input", preview);
+        menuToggle.addEventListener("change", preview);
+        match.addEventListener("change", () => {
+            if (!match.checked) {
+                seedPickersFromTheme();
+            }
+            preview();
+        });
+        Object.values(pickers).forEach((input) => input.addEventListener("input", preview));
+
+        return {
+            save() {
+                const st = readInputs();
+                localStorage.setItem(DECO_LS.style, st.style);
+                localStorage.setItem(DECO_LS.placement, st.placement);
+                localStorage.setItem(DECO_LS.size, st.size);
+                localStorage.setItem(DECO_LS.match, st.match);
+                localStorage.setItem(DECO_LS.menu, st.menu);
+                Object.keys(DECO_COLOR_DEFAULTS).forEach((k) => localStorage.setItem(DECO_LS[k], st.colors[k]));
+            },
+            reset() {
+                const st = {
+                    style: "none", placement: "side", size: 100, match: true, menu: false,
+                    colors: { ...DECO_COLOR_DEFAULTS }
+                };
+                fill(st);
+                applyDeco(st);
+                this.save();
+            }
+        };
+    }
+
     function setupThumbShape(dialog) {
         const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
         const select = dialog.querySelector("#themeModThumbShape");
@@ -4632,6 +5325,12 @@ function buildSimpleColorRowsHTML() {
         add(THUMB_SHAPE_ENABLED_LS, "bool", false);
         add(THUMB_SHAPE_LS, "enum", "heart", { choices: THUMB_SHAPE_CHOICES });
         add(THUMB_SHAPE_SIZE_LS, "int", 100, { min: 100, max: 150 });
+        add(DECO_LS.style, "enum", "none", { choices: DECO_STYLE_CHOICES });
+        add(DECO_LS.placement, "enum", "side", { choices: DECO_PLACEMENT_CHOICES });
+        add(DECO_LS.size, "int", 100, { min: 70, max: 150 });
+        add(DECO_LS.match, "bool", true);
+        add(DECO_LS.menu, "bool", false);
+        Object.keys(DECO_COLOR_DEFAULTS).forEach((k) => add(DECO_LS[k], "color", DECO_COLOR_DEFAULTS[k]));
 
         themeFieldsCache = fields;
         return fields;
@@ -5564,6 +6263,8 @@ function buildSimpleColorRowsHTML() {
 
 </div>
 
+${buildDecoRowsHTML()}
+
         </div>
 
                         <div
@@ -6275,6 +6976,9 @@ const animationControls = setupAnimationsPanel(dialog);
 /* Sounds tab */
 const soundControls = setupSoundsPanel(dialog);
 
+/* Popup decorations (Interface panel) */
+const decoControls = setupDecoControls(dialog);
+
         fontSelect.addEventListener("change", () => {
             applyFontValue(fontSelect.value);
         });
@@ -6416,6 +7120,7 @@ const soundControls = setupSoundsPanel(dialog);
             gradientControls.save();
             animationControls.save();
             soundControls.save();
+            decoControls.save();
         });
 
         /* ---------- Copy to detailed ----------
@@ -6554,6 +7259,7 @@ const soundControls = setupSoundsPanel(dialog);
 
             animationControls.reset();
             soundControls.reset();
+            decoControls.reset();
 
             /* Reset only clears the colors of the mode you are in, so
                your detailed theme survives a reset in simple mode. */
@@ -7199,6 +7905,7 @@ const soundControls = setupSoundsPanel(dialog);
                 applySavedGradients();
                 applySavedAnimations();
                 applySavedSounds();
+                applySavedDeco();
                 rememberMenuRect(dialog);
 
                 dialog.remove();
@@ -7636,6 +8343,7 @@ const soundControls = setupSoundsPanel(dialog);
         applySavedGradients();
         applySavedAnimations();
         applySavedSounds();
+        applySavedDeco();
         applySavedBackgrounds();
         applySavedThumbShape();
 
@@ -7700,6 +8408,7 @@ const soundControls = setupSoundsPanel(dialog);
             checkSeeThroughTargets();
             makeThumbRoom();     /* for sliders in popups opened later */
             watchSoundTargets(); /* chat / Messenger boxes for sounds */
+            updateDecorations(); /* ears/tails on popups opened later */
         }, 500);
     }
 
