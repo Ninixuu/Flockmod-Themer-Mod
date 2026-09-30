@@ -2082,6 +2082,12 @@ function buildSimpleColorRowsHTML() {
             });
         }
 
+        const applyBtn = dialog.querySelector(".themeModApplyButton");
+
+        if (applyBtn) {
+            applyBtn.addEventListener("click", () => burstPetals(applyBtn));
+        }
+
         return {
             save() {
                 const st = readInputs();
@@ -2099,6 +2105,78 @@ function buildSimpleColorRowsHTML() {
                 this.save();
             }
         };
+    }
+
+
+    /* =========================================================
+       CELEBRATION EFFECTS (part of "Mod menu effects")
+       Petal burst + pink glow on Apply, pink shimmer when a
+       theme is loaded. The elements only exist for about a
+       second and are removed afterwards.
+       ========================================================= */
+
+    function menuEffectsOn() {
+        return document.documentElement.classList.contains("fmAnimMenu");
+    }
+
+    function animSpeedFactor() {
+        const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--fm-anim-speed"));
+        return Number.isFinite(v) && v > 0 ? v : 1;
+    }
+
+    function burstPetals(button) {
+        if (!menuEffectsOn() || !button) {
+            return;
+        }
+
+        /* Petals live inside the menu itself, so they share its
+           layer (FlockMod's popup layer can sit above anything added
+           straight to the page) and can't end up off screen */
+        const dialog = button.closest(MOD_DIALOG_SELECTOR);
+
+        if (!dialog) {
+            return;
+        }
+
+        const r = button.getBoundingClientRect();
+        const d = dialog.getBoundingClientRect();
+        const layer = document.createElement("div");
+        layer.className = "themeModPetalBurst";
+        layer.style.left = `${r.left - d.left - dialog.clientLeft + r.width / 2}px`;
+        layer.style.top = `${r.top - d.top - dialog.clientTop + r.height / 2}px`;
+
+        const count = 9;
+
+        for (let i = 0; i < count; i++) {
+            /* Fan upwards (Apply sits at the bottom of the menu) */
+            const angle = (-90 + (i - (count - 1) / 2) * 20 + (Math.random() * 12 - 6)) * Math.PI / 180;
+            const dist = 45 + Math.random() * 35;
+            const petal = document.createElement("div");
+
+            petal.className = "themeModPetal";
+            petal.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+            petal.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+            petal.style.setProperty("--rot", `${(Math.random() < 0.5 ? -1 : 1) * (120 + Math.random() * 200)}deg`);
+            petal.style.setProperty("--size", String(0.7 + Math.random() * 0.45));
+            petal.style.animationDelay = `${Math.round(Math.random() * 60 * animSpeedFactor())}ms`;
+            layer.appendChild(petal);
+        }
+
+        dialog.appendChild(layer);
+        setTimeout(() => layer.remove(), 1400 * animSpeedFactor());
+
+        playOnce(button, "fmApplyGlow");
+    }
+
+    function playThemeShimmer(dialog) {
+        if (!menuEffectsOn() || !dialog) {
+            return;
+        }
+
+        const shimmer = document.createElement("div");
+        shimmer.className = "themeModShimmer";
+        dialog.appendChild(shimmer);
+        setTimeout(() => shimmer.remove(), 1300 * animSpeedFactor());
     }
 
     /* Restarts a one-shot CSS animation class and cleans it up after
@@ -3168,6 +3246,7 @@ function buildSimpleColorRowsHTML() {
             writeThemeSettings(settings, full);
             loadSavedCustomizations();
             flash("themes", message);
+            playThemeShimmer(document.querySelector(MOD_DIALOG_SELECTOR));
         }
 
         undoRow.style.display = localStorage.getItem(THEME_UNDO_LS) ? "" : "none";
@@ -3231,6 +3310,7 @@ function buildSimpleColorRowsHTML() {
                 writeThemeSettings(result.settings, true);
                 loadSavedCustomizations();
                 flash("themes", "Went back to your theme from before the last load.");
+                playThemeShimmer(document.querySelector(MOD_DIALOG_SELECTOR));
             } catch (error) {
                 showStatus("Couldn't undo, the backup was damaged.", "error");
             }

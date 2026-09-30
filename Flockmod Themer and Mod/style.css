@@ -2529,3 +2529,95 @@ html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #alertContainer .
 html.fmAnimPopups:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage {
     animation: fmFadeScaleIn calc(.18s * var(--fm-anim-speed, 1)) ease-out;
 }
+
+/* =========================================================
+   CELEBRATION EFFECTS (Mod menu effects)
+   ========================================================= */
+
+/* Petal burst from the Apply button (lives inside the menu, above
+   its content; removed after about a second). !important guards
+   against FlockMod's own div/dialog styles. */
+.dialog[name="themeModMenu"] .themeModPetalBurst {
+    position: absolute !important;
+    display: block !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 60 !important;
+    pointer-events: none !important;
+    overflow: visible !important;
+}
+
+.dialog[name="themeModMenu"] .themeModPetal {
+    display: block !important;
+    box-sizing: content-box;
+    position: absolute;
+    left: -5px;
+    top: -6px;
+    width: 10px;
+    height: 12px;
+    border-radius: 60% 0 60% 60%;
+    background: radial-gradient(circle at 70% 30%, #ffe3ec 0 20%, #f9b4cb 55%, #ee86ab 100%);
+    scale: var(--size, 1);
+    opacity: 0;
+    animation: fmPetalFly calc(1s * var(--fm-anim-speed, 1)) cubic-bezier(.2, .7, .3, 1) forwards;
+}
+
+@keyframes fmPetalFly {
+    0%   { opacity: 0; translate: 0 0; rotate: 0deg; }
+    15%  { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; translate: var(--dx) calc(var(--dy) + 18px); rotate: var(--rot); }
+}
+
+/* Pink glow on Apply */
+@keyframes fmApplyGlowKf {
+    0%   { box-shadow: 0 0 0 0 rgba(244, 143, 177, 0); border-color: #4f5156; }
+    30%  { box-shadow: 0 0 12px 3px rgba(244, 143, 177, .8); border-color: #f48fb1; }
+    100% { box-shadow: 0 0 18px 8px rgba(244, 143, 177, 0); border-color: #4f5156; }
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModApplyButton.fmApplyGlow {
+    animation: fmApplyGlowKf calc(1.1s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* Theme load shimmer: a soft pink sweep across the menu plus a
+   pink edge that fades */
+.dialog[name="themeModMenu"] .themeModShimmer {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    overflow: hidden;
+    pointer-events: none;
+    border-radius: inherit;
+    animation: fmShimmerEdge calc(1.2s * var(--fm-anim-speed, 1)) ease-out forwards;
+}
+
+.dialog[name="themeModMenu"] .themeModShimmer::before {
+    content: "";
+    position: absolute;
+    top: -10%;
+    bottom: -10%;
+    left: 0;
+    width: 40%;
+    background: linear-gradient(100deg,
+        rgba(255, 182, 206, 0) 0%,
+        rgba(255, 182, 206, .22) 40%,
+        rgba(255, 228, 238, .38) 50%,
+        rgba(255, 182, 206, .22) 60%,
+        rgba(255, 182, 206, 0) 100%);
+    translate: -110% 0;
+    animation: fmShimmerSweep calc(.9s * var(--fm-anim-speed, 1)) ease-in-out forwards;
+}
+
+@keyframes fmShimmerSweep {
+    from { translate: -110% 0; }
+    to   { translate: 260% 0; }
+}
+
+@keyframes fmShimmerEdge {
+    0%   { box-shadow: inset 0 0 0 0 rgba(244, 143, 177, 0); }
+    25%  { box-shadow: inset 0 0 0 2px rgba(244, 143, 177, .9), inset 0 0 24px rgba(244, 143, 177, .35); }
+    100% { box-shadow: inset 0 0 0 0 rgba(244, 143, 177, 0); }
+}
