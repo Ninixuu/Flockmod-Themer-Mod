@@ -3333,6 +3333,9 @@ function buildSimpleColorRowsHTML() {
                         </div>
                         <div class="dialogTitleButtons">
                             <div style="text-align: right;">
+                                <a href="#" class="btn btn-md themeModRefHelp" title="How to use the reference window">
+                                    <i class="fas fa-info-circle titleButton"></i>
+                                </a>
                                 <a href="#" class="btn btn-md themeModRefMinimize" title="Minimize">
                                     <i class="fas fa-window-minimize titleButton"></i>
                                 </a>
@@ -3913,6 +3916,7 @@ function buildSimpleColorRowsHTML() {
 
         q(".themeModRefMinimize").addEventListener("click", (event) => {
             event.preventDefault();
+            win._closeTour?.();
 
             if (win.classList.contains("themeModRefMinimized")) {
                 win.classList.remove("themeModRefMinimized");
@@ -3926,6 +3930,7 @@ function buildSimpleColorRowsHTML() {
         });
 
         win._closeRef = () => {
+            win._closeTour?.();
             saveRect();
             saveRefView(view);
             resizeObserver.disconnect();
@@ -3944,7 +3949,85 @@ function buildSimpleColorRowsHTML() {
         });
 
         showCurrent().then(renderStrip);
+
+        /* Quick tour: asks the first time, the (i) button replays it */
+        setupTour(win, {
+            steps: getRefTourSteps(win),
+            seenKey: REF_TOUR_SEEN_LS,
+            title: "New here?",
+            text: "Want a quick look at how the reference window works? It's short.",
+            replayButton: ".themeModRefHelp",
+            welcomeButton: ".themeModRefHelpWelcome"
+        });
+
         return win;
+    }
+
+    const REF_TOUR_SEEN_LS = "flockmodRefTourSeen";
+
+    function getRefTourSteps(win) {
+        const el = (selector) => () => win.querySelector(selector);
+
+        /* Un-minimize first so every step has something to point at */
+        const open = () => {
+            if (win.classList.contains("themeModRefMinimized")) {
+                win.classList.remove("themeModRefMinimized");
+                win.style.height = `${win.dataset.fullHeight || 360}px`;
+                delete win.dataset.fullHeight;
+            }
+        };
+
+        return [
+            {
+                icon: "fa-plus",
+                title: "Add your references",
+                text: "Press + to pick images, or drop them in, or paste one with Ctrl+V. Up to 20, saved only in this browser.",
+                before: open,
+                target: el('[data-ref="add"]')
+            },
+            {
+                icon: "fa-hand-paper",
+                title: "Move and zoom",
+                text: "Drag to move the image. Scroll or pinch to zoom, and double-click to fit it back in the window.",
+                before: open,
+                target: el(".themeModRefStage")
+            },
+            {
+                icon: "fa-search-plus",
+                title: "Zoom buttons",
+                text: "\u2212 and + zoom too. The % button fits the image to the window.",
+                before: open,
+                target: el('[data-ref="fit"]')
+            },
+            {
+                icon: "fa-adjust",
+                title: "Check your drawing",
+                text: "Flip mirrors the image, and grayscale helps you compare light and dark values.",
+                before: open,
+                target: el('[data-ref="gray"]')
+            },
+            {
+                icon: "fa-eye",
+                title: "See-through window",
+                text: "This slider fades the whole window, so you can see the board behind it.",
+                before: open,
+                target: el(".themeModRefOpacity")
+            },
+            {
+                icon: "fa-th-large",
+                title: "All your images",
+                text: "Show every image here and pick one. The arrows (or \u2190 \u2192 keys) flip through them, and the trash removes the one you're on.",
+                before: open,
+                target: el('[data-ref="strip"]')
+            },
+            {
+                icon: "fa-info-circle",
+                title: "Need this again?",
+                text: "Press the \u24D8 button up here anytime to see this tour again. The minimize button next to it tucks the window away.",
+                before: open,
+                target: el(".themeModRefHelp")
+            }
+        ];
     }
 
     function addRefButton() {
@@ -9216,8 +9299,13 @@ const safetyControls = setupSafetyPanel(dialog);
         ];
     }
 
-    function setupTour(dialog) {
-        const steps = getTourSteps(dialog);
+    /* opts (all optional, defaults = the mod menu's tour):
+       steps, seenKey, title, text, replayButton, welcomeButton */
+    function setupTour(dialog, opts = {}) {
+        const steps = opts.steps || getTourSteps(dialog);
+        const seenKey = opts.seenKey || TOUR_SEEN_LS;
+        const promptTitle = opts.title || "Welcome to FlockMod Themer!";
+        const promptText = opts.text || "Would you like a quick tour? It takes about 30 seconds.";
         let card = null;
         let ring = null;
         let mode = null;        /* "prompt" | "step" | null */
@@ -9281,7 +9369,7 @@ const safetyControls = setupSafetyPanel(dialog);
         }
 
         function markSeen() {
-            localStorage.setItem(TOUR_SEEN_LS, "true");
+            localStorage.setItem(seenKey, "true");
         }
 
         /* ---- Welcome prompt ---- */
@@ -9293,8 +9381,8 @@ const safetyControls = setupSafetyPanel(dialog);
                 <div class="fmTour fmTourPrompt" role="dialog" aria-label="Mod tour">
                     ${TOUR_FLOWER_HTML}
                     <div class="fmTourBody">
-                        <div class="fmTourTitle">Welcome to FlockMod Themer!</div>
-                        <div class="fmTourText">Would you like a quick tour? It takes about 30 seconds.</div>
+                        <div class="fmTourTitle">${promptTitle}</div>
+                        <div class="fmTourText">${promptText}</div>
                     </div>
                     <div class="fmTourButtons">
                         <button type="button" class="fmTourBtn fmTourGhost" data-act="no">No thanks</button>
@@ -9423,6 +9511,7 @@ const safetyControls = setupSafetyPanel(dialog);
             if (mode === "prompt") {
                 const width = Math.min(560, Math.max(280, m.width - 40), vw - 16);
                 card.style.width = `${width}px`;
+                card.classList.toggle("fmTourPromptNarrow", width < 440);
 
                 const left = Math.min(Math.max(8, m.left + (m.width - width) / 2), vw - width - 8);
                 const aboveTop = m.top - card.offsetHeight - 12;
@@ -9490,11 +9579,20 @@ const safetyControls = setupSafetyPanel(dialog);
         }
 
         /* ---- Wiring ---- */
-        dialog.querySelector(".themeModTourButton")?.addEventListener("click", startTour);
-        dialog.querySelector(".themeModTourWelcomeButton")?.addEventListener("click", showPrompt);
+        dialog.querySelector(opts.replayButton || ".themeModTourButton")?.addEventListener("click", (event) => {
+            event.preventDefault();
+            startTour();
+        });
+        dialog.querySelector(opts.welcomeButton || ".themeModTourWelcomeButton")?.addEventListener("click", (event) => {
+            event.preventDefault();
+            showPrompt();
+        });
         dialog.querySelector(".closeButton")?.addEventListener("click", closeTour);
 
-        if (localStorage.getItem(TOUR_SEEN_LS) !== "true") {
+        /* Lets the window close the tour when it's closed another way */
+        dialog._closeTour = closeTour;
+
+        if (localStorage.getItem(seenKey) !== "true") {
             /* Let the menu finish opening first */
             setTimeout(() => {
                 if (dialog.isConnected && !card) {
