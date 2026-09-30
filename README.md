@@ -14,4 +14,5 @@ How to download:
   7. Click "Load Unpacked"
   8. Choose the "FlockMod Themer and Mod" File
   9. Make sure the extension is turned on
-  10. Enjoy!
+  10. Reload FM
+  11. Enjoy!
