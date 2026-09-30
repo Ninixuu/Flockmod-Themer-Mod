@@ -6822,6 +6822,91 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModUpdateStatus" style="display: none;"></div>
 
+                            <div class="themeModSetting themeModNoDivider">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Check for updates automatically
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        At most once a day, when you open this menu. A pink dot shows up on General if a new version is out. Only talks to GitHub.
+                                    </div>
+                                </div>
+
+                                <label class="themeModToggle">
+                                    <input type="checkbox" id="themeModAutoUpdate">
+                                    <span class="themeModToggleTrack">
+                                        <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                                        <span class="themeModToggleOption themeModToggleOn">ON</span>
+                                        <span class="themeModToggleThumb"></span>
+                                    </span>
+                                </label>
+
+                            </div>
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Backup
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Full backup file
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        Saves everything to one file: your theme, saved themes, settings, background images, sounds, fonts and reference images. Load it on a new browser or computer to get it all back.
+                                    </div>
+                                </div>
+
+                                <div class="themeModBackupButtons">
+                                    <button type="button" class="themeModButton themeModBackupSave">
+                                        <i class="fas fa-download"></i> Save backup
+                                    </button>
+                                    <button type="button" class="themeModButton themeModBackupLoad">
+                                        <i class="fas fa-upload"></i> Load backup
+                                    </button>
+                                    <input type="file" class="themeModBackupFile" accept=".json,application/json" style="display: none;">
+                                </div>
+
+                            </div>
+
+                            <div class="themeModBackupStatus" style="display: none;"></div>
+
+                            <div class="themeModLocalNote">
+                                <i class="fas fa-circle-info"></i>
+                                <span>The backup file stays on your computer. Nothing is uploaded. Loading one replaces everything the mod has saved in this browser.</span>
+                            </div>
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Help
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Links
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        Get the latest version, read the instructions, or let me, <span class="themeModCreatorName">nene2nd</span>, know about a bug.
+                                    </div>
+                                </div>
+
+                                <div class="themeModBackupButtons">
+                                    <a class="themeModButton themeModLinkButton" href="${UPDATE_REPO ? `https://github.com/${UPDATE_REPO}` : "#"}" target="_blank" rel="noopener noreferrer">
+                                        <i class="fab fa-github"></i> GitHub page
+                                    </a>
+                                    <a class="themeModButton themeModLinkButton" href="${UPDATE_REPO ? `https://github.com/${UPDATE_REPO}/issues` : "#"}" target="_blank" rel="noopener noreferrer">
+                                        <i class="fas fa-bug"></i> Report a bug
+                                    </a>
+                                </div>
+
+                            </div>
+
                         </div>
 
                         <div class="themeModSectionContent" data-theme-panel="interface">
@@ -8193,6 +8278,8 @@ const safetyControls = setupSafetyPanel(dialog);
 
         setupUpdateCheck(dialog);
 
+        setupBackup(dialog);
+
         return dialog;
     }
 
@@ -8391,16 +8478,64 @@ const safetyControls = setupSafetyPanel(dialog);
         return 0;
     }
 
+    const UPDATE_AUTO_LS = "flockmodAutoUpdateCheck";
+    const UPDATE_LAST_CHECK_LS = "flockmodLastUpdateCheck";
+    const UPDATE_LATEST_LS = "flockmodLatestKnownVersion";
+    const UPDATE_AUTO_EVERY_MS = 24 * 60 * 60 * 1000;
+
+    function getUpdateRepo() {
+        return UPDATE_REPO.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\/+$/, "");
+    }
+
+    /* Resolves to the newest version string on GitHub, or throws */
+    async function fetchLatestVersion() {
+        const repo = getUpdateRepo();
+
+        if (!repo) {
+            throw new Error("No repo set");
+        }
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+
+        try {
+            const path = UPDATE_MANIFEST_PATH.split("/").map(encodeURIComponent).join("/");
+            const response = await fetch(
+                `https://raw.githubusercontent.com/${repo}/${UPDATE_BRANCH}/${path}`,
+                { cache: "no-store", credentials: "omit", signal: controller.signal }
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const latest = String((await response.json()).version || "");
+
+            if (!/^\d+(\.\d+){0,3}$/.test(latest)) {
+                throw new Error("No version found");
+            }
+
+            localStorage.setItem(UPDATE_LATEST_LS, latest);
+            localStorage.setItem(UPDATE_LAST_CHECK_LS, String(Date.now()));
+            return latest;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
     function setupUpdateCheck(dialog) {
         const button = dialog.querySelector(".themeModUpdateButton");
         const status = dialog.querySelector(".themeModUpdateStatus");
+        const autoToggle = dialog.querySelector("#themeModAutoUpdate");
+        const generalTab = dialog.querySelector('.themeModSidebarItem[data-theme-section="general"]');
+        const titleTag = dialog.querySelector(".themeModTitleVersion");
 
         if (!button || !status) {
             return;
         }
 
         const current = getModVersion();
-        const repo = UPDATE_REPO.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\/+$/, "");
+        const repo = getUpdateRepo();
         const downloadUrl = UPDATE_DOWNLOAD_URL || (repo ? `https://github.com/${repo}` : "");
 
         const show = (kind, html) => {
@@ -8412,6 +8547,32 @@ const safetyControls = setupSafetyPanel(dialog);
         const link = (text) =>
             `<a href="${downloadUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 
+        /* Pink dot on General + the title tag while an update is known */
+        const markUpdate = (latest) => {
+            const has = Boolean(latest) && compareVersions(latest, current) > 0;
+            generalTab?.classList.toggle("themeModHasUpdate", has);
+            titleTag?.classList.toggle("themeModHasUpdate", has);
+
+            if (titleTag) {
+                titleTag.title = has ? `Version ${latest} is out` : "";
+            }
+
+            return has;
+        };
+
+        const showResult = (latest) => {
+            const result = compareVersions(latest, current);
+            markUpdate(latest);
+
+            if (result > 0) {
+                show("Available", `<i class="fas fa-seedling"></i><span>Version <b>v${latest}</b> is out (you have v${current}). ${link("Get the update")}</span>`);
+            } else if (result === 0) {
+                show("Current", `<i class="fas fa-check-circle"></i><span>You're up to date! (v${current})</span>`);
+            } else {
+                show("Current", `<i class="fas fa-check-circle"></i><span>You're ahead of the latest release (v${current}, newest is v${latest}).</span>`);
+            }
+        };
+
         button.addEventListener("click", async () => {
             if (!repo) {
                 show("Error", '<i class="fas fa-circle-info"></i><span>Update checking isn\'t set up in this copy of the mod yet.</span>');
@@ -8421,40 +8582,386 @@ const safetyControls = setupSafetyPanel(dialog);
             button.disabled = true;
             show("Checking", '<i class="fas fa-spinner fa-spin"></i><span>Checking for updates...</span>');
 
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 8000);
-
             try {
-                const response = await fetch(
-                    `https://raw.githubusercontent.com/${repo}/${UPDATE_BRANCH}/${UPDATE_MANIFEST_PATH.split("/").map(encodeURIComponent).join("/")}`,
-                    { cache: "no-store", credentials: "omit", signal: controller.signal }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const latest = String((await response.json()).version || "");
-
-                if (!/^\d+(\.\d+){0,3}$/.test(latest)) {
-                    throw new Error("No version found");
-                }
-
-                const result = compareVersions(latest, current);
-
-                if (result > 0) {
-                    show("Available", `<i class="fas fa-seedling"></i><span>Version <b>v${latest}</b> is out (you have v${current}). ${link("Get the update")}</span>`);
-                } else if (result === 0) {
-                    show("Current", `<i class="fas fa-check-circle"></i><span>You're up to date! (v${current})</span>`);
-                } else {
-                    show("Current", `<i class="fas fa-check-circle"></i><span>You're ahead of the latest release (v${current}, newest is v${latest}).</span>`);
-                }
+                showResult(await fetchLatestVersion());
             } catch (error) {
                 show("Error", `<i class="fas fa-exclamation-circle"></i><span>Couldn't check right now. You might be offline. ${downloadUrl ? link("Open the download page") : ""}</span>`);
             } finally {
-                clearTimeout(timer);
                 button.disabled = false;
             }
+        });
+
+        /* ---- Automatic check (OFF unless turned on; saves right away) ---- */
+        if (!autoToggle) {
+            return;
+        }
+
+        autoToggle.checked = localStorage.getItem(UPDATE_AUTO_LS) === "true";
+
+        const autoCheck = async () => {
+            if (!autoToggle.checked || !repo) {
+                return;
+            }
+
+            /* Show what we already know without going online */
+            const known = localStorage.getItem(UPDATE_LATEST_LS);
+
+            if (known && markUpdate(known)) {
+                showResult(known);
+            }
+
+            const last = Number(localStorage.getItem(UPDATE_LAST_CHECK_LS)) || 0;
+
+            if (Date.now() - last < UPDATE_AUTO_EVERY_MS) {
+                return;
+            }
+
+            try {
+                const latest = await fetchLatestVersion();
+
+                if (dialog.isConnected && markUpdate(latest)) {
+                    showResult(latest);
+                }
+            } catch (error) {
+                /* Quiet: try again next time the menu opens */
+            }
+        };
+
+        autoToggle.addEventListener("change", () => {
+            localStorage.setItem(UPDATE_AUTO_LS, autoToggle.checked);
+
+            if (autoToggle.checked) {
+                autoCheck();
+            } else {
+                markUpdate(null);
+            }
+        });
+
+        autoCheck();
+    }
+
+    /* =========================================================
+       FULL BACKUP FILE (General panel)
+       Everything the mod keeps: every localStorage key starting
+       with "flockmod" plus the four file databases (background
+       images, sounds, reference images, fonts). Files are stored
+       as base64 inside one .json file. Nothing goes online.
+       ========================================================= */
+
+    const BACKUP_FORMAT = 1;
+
+    function getBackupDatabases() {
+        return [
+            { name: BG_DB_NAME, store: BG_DB_STORE, open: openBgDB },
+            { name: SOUND_DB_NAME, store: SOUND_DB_STORE, open: openSoundDB },
+            { name: REF_DB_NAME, store: REF_DB_STORE, open: openRefDB },
+            { name: FONT_DB_NAME, store: FONT_DB_STORE, open: openFontDB }
+        ];
+    }
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function base64ToBytes(b64) {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+
+        return bytes;
+    }
+
+    /* Turns Blobs/Files/ArrayBuffers (anywhere in a value) into JSON-safe objects */
+    async function packValue(value) {
+        if (value instanceof Blob) {
+            const packed = { __fmBackup: "blob", type: value.type, data: await blobToBase64(value) };
+
+            if (value instanceof File) {
+                packed.__fmBackup = "file";
+                packed.name = value.name;
+                packed.lastModified = value.lastModified;
+            }
+
+            return packed;
+        }
+
+        if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
+            const bytes = value instanceof ArrayBuffer
+                ? new Uint8Array(value)
+                : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+            return { __fmBackup: "buffer", data: await blobToBase64(new Blob([bytes])) };
+        }
+
+        if (Array.isArray(value)) {
+            return Promise.all(value.map(packValue));
+        }
+
+        if (value && typeof value === "object") {
+            const out = {};
+
+            for (const [k, v] of Object.entries(value)) {
+                out[k] = await packValue(v);
+            }
+
+            return out;
+        }
+
+        return value;
+    }
+
+    function unpackValue(value) {
+        if (Array.isArray(value)) {
+            return value.map(unpackValue);
+        }
+
+        if (value && typeof value === "object") {
+            if (value.__fmBackup === "blob" || value.__fmBackup === "file") {
+                const bytes = base64ToBytes(value.data || "");
+
+                return value.__fmBackup === "file"
+                    ? new File([bytes], value.name || "file", { type: value.type || "", lastModified: value.lastModified || Date.now() })
+                    : new Blob([bytes], { type: value.type || "" });
+            }
+
+            if (value.__fmBackup === "buffer") {
+                return base64ToBytes(value.data || "").buffer;
+            }
+
+            const out = {};
+
+            for (const [k, v] of Object.entries(value)) {
+                out[k] = unpackValue(v);
+            }
+
+            return out;
+        }
+
+        return value;
+    }
+
+    function readAllEntries(db, storeName) {
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, "readonly");
+            const store = tx.objectStore(storeName);
+            const keysReq = store.getAllKeys();
+            const valuesReq = store.getAll();
+
+            tx.oncomplete = () => resolve(keysReq.result.map((key, i) => [key, valuesReq.result[i]]));
+            tx.onerror = () => reject(tx.error);
+        });
+    }
+
+    function replaceAllEntries(db, storeName, entries) {
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(storeName, "readwrite");
+            const store = tx.objectStore(storeName);
+
+            store.clear();
+            entries.forEach(([key, value]) => store.put(value, key));
+
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+        });
+    }
+
+    async function buildBackup() {
+        const storage = {};
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+
+            if (key && key.startsWith("flockmod")) {
+                storage[key] = localStorage.getItem(key);
+            }
+        }
+
+        const databases = {};
+
+        for (const d of getBackupDatabases()) {
+            const db = await d.open();
+
+            try {
+                const entries = await readAllEntries(db, d.store);
+                databases[d.name] = await Promise.all(
+                    entries.map(async ([key, value]) => [key, await packValue(value)])
+                );
+            } finally {
+                db.close();
+            }
+        }
+
+        return {
+            app: "FlockMod Themer",
+            kind: "backup",
+            format: BACKUP_FORMAT,
+            modVersion: getModVersion(),
+            created: new Date().toISOString(),
+            localStorage: storage,
+            databases
+        };
+    }
+
+    async function restoreBackup(backup) {
+        /* Settings: drop the mod's current keys, then write the backup's */
+        const oldKeys = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+
+            if (key && key.startsWith("flockmod")) {
+                oldKeys.push(key);
+            }
+        }
+
+        oldKeys.forEach((key) => localStorage.removeItem(key));
+
+        Object.entries(backup.localStorage || {}).forEach(([key, value]) => {
+            if (key.startsWith("flockmod") && typeof value === "string") {
+                localStorage.setItem(key, value);
+            }
+        });
+
+        /* Files */
+        for (const d of getBackupDatabases()) {
+            const entries = Array.isArray(backup.databases?.[d.name]) ? backup.databases[d.name] : [];
+            const db = await d.open();
+
+            try {
+                await replaceAllEntries(db, d.store, entries.map(([key, value]) => [key, unpackValue(value)]));
+            } finally {
+                db.close();
+            }
+        }
+    }
+
+    function setupBackup(dialog) {
+        const saveButton = dialog.querySelector(".themeModBackupSave");
+        const loadButton = dialog.querySelector(".themeModBackupLoad");
+        const fileInput = dialog.querySelector(".themeModBackupFile");
+        const status = dialog.querySelector(".themeModBackupStatus");
+
+        if (!saveButton || !loadButton || !fileInput || !status) {
+            return;
+        }
+
+        const show = (kind, html) => {
+            status.className = `themeModBackupStatus themeModUpdateStatus themeModUpdate${kind}`;
+            status.innerHTML = html;
+            status.style.display = "flex";
+        };
+
+        const busy = (on) => {
+            saveButton.disabled = on;
+            loadButton.disabled = on;
+        };
+
+        saveButton.addEventListener("click", async () => {
+            busy(true);
+            show("Checking", '<i class="fas fa-spinner fa-spin"></i><span>Packing up your backup...</span>');
+
+            try {
+                const backup = await buildBackup();
+                const blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                const date = new Date().toISOString().slice(0, 10);
+
+                a.href = url;
+                a.download = `FlockMod-Themer-backup-${date}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+                const mb = (blob.size / (1024 * 1024)).toFixed(blob.size > 1024 * 1024 ? 1 : 2);
+                show("Current", `<i class="fas fa-check-circle"></i><span>Backup saved (${mb} MB). Keep the file somewhere safe.</span>`);
+            } catch (error) {
+                show("Error", '<i class="fas fa-exclamation-circle"></i><span>Couldn\'t make the backup. Try again, or free up some space if your disk is full.</span>');
+            } finally {
+                busy(false);
+            }
+        });
+
+        loadButton.addEventListener("click", () => {
+            fileInput.value = "";
+            fileInput.click();
+        });
+
+        fileInput.addEventListener("change", async () => {
+            const file = fileInput.files && fileInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            let backup;
+
+            try {
+                backup = JSON.parse(await file.text());
+            } catch (error) {
+                backup = null;
+            }
+
+            if (!backup || backup.app !== "FlockMod Themer" || backup.kind !== "backup" || typeof backup.localStorage !== "object") {
+                show("Error", '<i class="fas fa-exclamation-circle"></i><span>That file isn\'t a FlockMod Themer backup.</span>');
+                return;
+            }
+
+            const when = backup.created ? new Date(backup.created).toLocaleDateString() : "an unknown date";
+
+            /* Ask before replacing everything (no browser popups) */
+            show("Available", `
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Load the backup from ${when} (v${backup.modVersion || "?"})? It replaces all your current mod settings, themes, images, sounds and fonts.</span>
+                <span class="themeModBackupConfirm">
+                    <button type="button" class="themeModButton" data-act="cancel">Cancel</button>
+                    <button type="button" class="themeModButton themeModBackupReplace" data-act="replace">Replace everything</button>
+                </span>`);
+
+            status.querySelector('[data-act="cancel"]').addEventListener("click", () => {
+                status.style.display = "none";
+            });
+
+            status.querySelector('[data-act="replace"]').addEventListener("click", async () => {
+                busy(true);
+                show("Checking", '<i class="fas fa-spinner fa-spin"></i><span>Loading your backup...</span>');
+
+                try {
+                    await restoreBackup(backup);
+
+                    /* The open menu still holds the old values, so don't
+                       let Apply write them back over the backup */
+                    const apply = dialog.querySelector(".themeModApplyButton");
+
+                    if (apply) {
+                        apply.disabled = true;
+                        apply.title = "Refresh FlockMod to finish loading your backup";
+                    }
+
+                    show("Current", `
+                        <i class="fas fa-check-circle"></i>
+                        <span>Backup loaded! Refresh FlockMod to see everything.</span>
+                        <span class="themeModBackupConfirm">
+                            <button type="button" class="themeModButton themeModBackupReplace" data-act="refresh">Refresh now</button>
+                        </span>`);
+
+                    status.querySelector('[data-act="refresh"]').addEventListener("click", () => {
+                        location.reload();
+                    });
+                } catch (error) {
+                    show("Error", '<i class="fas fa-exclamation-circle"></i><span>Something went wrong while loading the backup. Refresh FlockMod and try again.</span>');
+                    busy(false);
+                }
+            });
         });
     }
 

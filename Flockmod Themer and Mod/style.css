@@ -3602,3 +3602,86 @@ html.fmAnimMenu .fmTourRing.fmTourPulse { animation: fmTourPulse calc(1.1s * var
     border-color: #8a6a3a;
     color: #e8c58f;
 }
+
+/* =========================================================
+   GENERAL: auto update dot, backup, links
+   ========================================================= */
+
+/* Small pink dot on General when an update is out */
+.dialog[name="themeModMenu"] .themeModSidebarItem.themeModHasUpdate {
+    position: relative;
+}
+
+.dialog[name="themeModMenu"] .themeModSidebarItem.themeModHasUpdate::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    translate: 0 -50%;
+    border-radius: 50%;
+    background: #f48fb1;
+    box-shadow: 0 0 6px rgba(244, 143, 177, .9);
+}
+
+.dialog[name="themeModMenu"] .themeModTitleVersion.themeModHasUpdate {
+    color: #fff;
+    background-color: rgba(244, 143, 177, .45);
+    border-color: #f48fb1;
+    box-shadow: 0 0 6px rgba(244, 143, 177, .6);
+}
+
+.dialog[name="themeModMenu"] .themeModBackupButtons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.dialog[name="themeModMenu"] .themeModBackupButtons .themeModButton:disabled {
+    opacity: .6;
+    cursor: default;
+}
+
+.dialog[name="themeModMenu"] a.themeModLinkButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    line-height: 26px;
+}
+
+.dialog[name="themeModMenu"] .themeModBackupStatus {
+    flex-wrap: wrap;
+}
+
+.dialog[name="themeModMenu"] .themeModBackupConfirm {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.dialog[name="themeModMenu"] .themeModBackupReplace {
+    border-color: #f48fb1;
+    color: #ffd1e0;
+}
+
+.dialog[name="themeModMenu"] .themeModApplyButton:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* Creator name in General > Help: pink glow on hover */
+.dialog[name="themeModMenu"] .themeModCreatorName {
+    font-weight: 600;
+    color: #f7a1c0;
+    cursor: default;
+    transition: color .25s ease, text-shadow .25s ease;
+}
+
+.dialog[name="themeModMenu"] .themeModCreatorName:hover {
+    color: #ffe3ec;
+    text-shadow: 0 0 4px #f48fb1, 0 0 10px rgba(244, 143, 177, .85), 0 0 18px rgba(236, 127, 167, .6);
+}
