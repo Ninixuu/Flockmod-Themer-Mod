@@ -9,6 +9,18 @@
        ========================================================= */
     const CHANGELOG = [
         {
+            version: "1.3",
+            notes: [
+                "13 new popup decoration styles: Glitch, Moth, Leaves, Strawberry, Dragon, Gothic lace, Night sky, Terminal, Ink, Spiderweb, Thorned rose, Deep sea and Minimal.",
+                "Every decoration style has a Use style colors button and a Color popups to match switch, with your own title bar, background and text colors (and an optional border color).",
+                "Chat Bubbles (Interface): 27 styles for your own messages, including cat, dog, bear, fox, stars, sakura and witch hat to match the popups.",
+                "Bubble options: your messages on the right, bubbles for everyone else, decorations on or off, and your own bubble colors.",
+                "Decorations and bubbles play a small animation once when they appear.",
+                "Mention sounds only match whole words now (so a short name no longer rings on longer words).",
+                "Clicking a Messenger conversation no longer plays the message sound."
+            ]
+        },
+        {
             version: "1.2",
             notes: [
                 "Every tab has its own quick tour. Press \u24D8 next to search.",
@@ -2307,7 +2319,7 @@ function buildSimpleColorRowsHTML() {
         {
             key: "Messenger",
             name: "Messenger message",
-            description: "A new message in the Messenger. Works while the Messenger is open. (FlockMod's own: \"Messenger message tone\")",
+            description: "A new message in the Messenger, open or closed (when its unread badge goes up). (FlockMod's own: \"Messenger message tone\")",
             def: { enabled: true, sound: "builtin:bell", volume: 70 }
         },
         {
@@ -2631,6 +2643,13 @@ function buildSimpleColorRowsHTML() {
                     lastSentAt = Date.now();
                 }
             }
+
+            /* Clicking a conversation (or anything) in the Messenger
+               loads its old messages. Those aren't new, so the
+               conversation watcher ignores the next 2 seconds. */
+            if (event.type === "click" && target instanceof Element && target.closest('.dialog[name="messenger"]')) {
+                soundWatches.messenger.armedAt = Math.max(soundWatches.messenger.armedAt, Date.now() + 2000);
+            }
         };
 
         window.addEventListener("keydown", markSent, true);
@@ -2682,7 +2701,12 @@ function buildSimpleColorRowsHTML() {
             .filter((w) => w.length >= 2);
         const lower = text.toLowerCase();
 
-        return words.some((w) => lower.includes(w));
+        /* Whole words only, so "maz" doesn't match "amazing".
+           Letters/numbers/_ right before or after = part of a word. */
+        return words.some((w) => {
+            const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            return new RegExp(`(^|[^\\p{L}\\p{N}_])${safe}($|[^\\p{L}\\p{N}_])`, "u").test(lower);
+        });
     }
 
     /* Only small additions count as "new". Loading history, joining
@@ -2766,11 +2790,44 @@ function buildSimpleColorRowsHTML() {
                     own = msg ? msg.classList.contains("offlineOwn") : null;
                 }
 
-                if (own === false) {
+                if (own === false && Date.now() - lastSentAt >= 2000) {
                     fireSoundEvent("Messenger");
                 }
             });
         });
+    }
+
+    /* The Messenger's unread badge in the bottom bar. When its number
+       goes up, a new Messenger message arrived, even with the
+       Messenger closed. Checked in the 500ms loop (one small read). */
+    let lastMessengerBadge = null;
+
+    function findMessengerBadge() {
+        const known = document.querySelector("#bottombar > nav > div > ul:nth-child(3) > li:nth-child(7) > a > span.badge, " +
+                                             "#bottombar > nav > div > ul:nth-child(3) > li:nth-child(7) > a > span");
+
+        if (known) {
+            return known;
+        }
+
+        /* Fallback: a badge on a bottom bar button with an envelope/chat icon */
+        return [...document.querySelectorAll("#bottombar .nav-link .badge")].find((badge) => {
+            const link = badge.closest(".nav-link");
+            return link && !link.matches(".themeModMenuButton, .themeModRefButton") &&
+                link.querySelector(".fa-envelope, .fa-comment, .fa-comments, .fa-comment-dots, .fa-inbox");
+        }) || null;
+    }
+
+    function checkMessengerBadge() {
+        const badge = findMessengerBadge();
+        const hidden = !badge || badge.offsetParent === null;
+        const count = hidden ? 0 : (parseInt(badge.textContent.replace(/\D/g, ""), 10) || 0);
+
+        if (lastMessengerBadge !== null && count > lastMessengerBadge && Date.now() - lastSentAt >= 2000) {
+            fireSoundEvent("Messenger");
+        }
+
+        lastMessengerBadge = count;
     }
 
     const soundWatches = {
@@ -2928,7 +2985,7 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-circle-info"></i>
-                                <span>Sounds only play on your computer, and nothing is sent to FlockMod. Uploaded sounds are saved only in this browser, so nobody else hears them. Sound settings aren't included in share codes, and clearing your browser's data for FlockMod removes your uploads. The Messenger sound works while the Messenger is open.</span>
+                                <span>Sounds only play on your computer, and nothing is sent to FlockMod. Uploaded sounds are saved only in this browser, so nobody else hears them. Sound settings aren't included in share codes, and clearing your browser's data for FlockMod removes your uploads. The Messenger sound plays when its unread badge goes up, even with the Messenger closed.</span>
                             </div>
 
                         </div>`;
@@ -4093,8 +4150,28 @@ function buildSimpleColorRowsHTML() {
         main: "flockmodDecoMainColor",
         outline: "flockmodDecoOutlineColor",
         detail: "flockmodDecoDetailColor",
-        sparkle: "flockmodDecoSparkleColor"
+        sparkle: "flockmodDecoSparkleColor",
+        frame: "flockmodDecoFrame",
+        /* v1.3: your own popup colors for "Color popups to match".
+           frameCustom OFF = use the style's colors (so old theme
+           codes without these keys look exactly like before). */
+        frameCustom: "flockmodDecoFrameCustom",
+        frameBorder: "flockmodDecoFrameBorder",
+        frameTitle: "flockmodDecoFrameTitle",
+        frameTitleText: "flockmodDecoFrameTitleText",
+        frameBg: "flockmodDecoFrameBg",
+        frameText: "flockmodDecoFrameText",
+        frameBorderColor: "flockmodDecoFrameBorderColor"
     };
+
+    /* The popup color pickers, in menu order: [key in frame, LS key, label] */
+    const DECO_FRAME_PICKERS = [
+        ["title", "frameTitle", "Title bar"],
+        ["titleText", "frameTitleText", "Title text"],
+        ["bg", "frameBg", "Background"],
+        ["text", "frameText", "Text"]
+    ];
+    const DECO_FRAME_FALLBACK = { bg: "#1d1e21", content: "#1d1e21", title: "#2a2c30", titleText: "#e6e7ea", text: "#c5c7cc", border: "#3a3d43" };
 
     const DECO_COLOR_DEFAULTS = {
         main: "#d7b9c4",
@@ -4205,12 +4282,16 @@ function buildSimpleColorRowsHTML() {
 
         cat: {
             label: "Cat",
+            palette: { main: "#e8d5c4", outline: "#8a6a58", detail: "#f4a7b9", sparkle: "#fff3e0" },
+            frame: { bg: "#2a2320", content: "#2a2320", title: "#4a3a32", titleText: "#f6e6da", text: "#eadbd0", border: "#6e5646" },
             placements: ["side", "bottom", "none"],
             colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: null },
             pieces: (p) => [...earPair(EAR_CAT, 22), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.cat, p)])]
         },
         dog: {
             label: "Dog",
+            palette: { main: "#c89b6d", outline: "#5e4331", detail: "#e9c9a4", sparkle: "#fff4e6" },
+            frame: { bg: "#26211d", content: "#26211d", title: "#4a3b2e", titleText: "#f3e4d2", text: "#e6d8c8", border: "#6b5441" },
             placements: ["bottom", "side", "none"],
             colors: { main: "Fur", outline: "Outline", detail: null, sparkle: null },
             /* Floppy ears hang OUTSIDE the corners, so titles stay readable */
@@ -4222,24 +4303,32 @@ function buildSimpleColorRowsHTML() {
         },
         bunny: {
             label: "Bunny",
+            palette: { main: "#f5eef0", outline: "#b78b98", detail: "#f6b8c8", sparkle: "#ffffff" },
+            frame: { bg: "#2a2226", content: "#2a2226", title: "#5a4450", titleText: "#fde8ef", text: "#eedde3", border: "#7a5c68" },
             placements: ["side", "bottom", "none"],
             colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: "Pom-pom tail" },
             pieces: (p) => [...earPair(EAR_BUNNY, 26), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.bunny, p)])]
         },
         bear: {
             label: "Bear",
+            palette: { main: "#9a6b4b", outline: "#4a3020", detail: "#d9b08c", sparkle: "#f3dcc4" },
+            frame: { bg: "#241d19", content: "#241d19", title: "#4b3627", titleText: "#f0dcc8", text: "#e3d2c2", border: "#6a4d38" },
             placements: ["bottom", "side", "none"],
             colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: null },
             pieces: (p) => [...earPair(EAR_BEAR, 20), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.bear, p)])]
         },
         fox: {
             label: "Fox",
+            palette: { main: "#e07a3c", outline: "#5a2e14", detail: "#ffe1cc", sparkle: "#ffffff" },
+            frame: { bg: "#261c17", content: "#261c17", title: "#5a2e18", titleText: "#ffe2cc", text: "#eed9ca", border: "#7a4326" },
             placements: ["side", "bottom", "none"],
             colors: { main: "Fur", outline: "Outline", detail: "Inner ears", sparkle: "Tail tip" },
             pieces: (p) => [...earPair(EAR_FOX, 20), ...(p === "none" ? [] : [tailPiece(DECO_TAILS.fox, p)])]
         },
         stars: {
             label: "Stars",
+            palette: { main: "#232a4d", outline: "#c9a95a", detail: "#ffe08a", sparkle: "#fff3b8" },
+            frame: { bg: "#161a2e", content: "#161a2e", title: "#232a4d", titleText: "#ffe9a8", text: "#dfe3f3", border: "#3a4273" },
             placements: ["left", "right"],
             colors: { main: null, outline: "Outline", detail: "Small stars", sparkle: "Big stars" },
             pieces: (p) => decoCornerPieces(p,
@@ -4251,6 +4340,8 @@ function buildSimpleColorRowsHTML() {
         },
         sakura: {
             label: "Sakura",
+            palette: { main: "#ffffff", outline: "#d97a9b", detail: "#ffc2d6", sparkle: "#ffe08a" },
+            frame: { bg: "#2a1f25", content: "#2a1f25", title: "#5c3446", titleText: "#ffe3ee", text: "#f1dde5", border: "#8a4f68" },
             placements: ["left", "right"],
             colors: { main: null, outline: "Outline", detail: "Petals", sparkle: "Flower centers" },
             pieces: (p) => decoCornerPieces(p,
@@ -4262,6 +4353,8 @@ function buildSimpleColorRowsHTML() {
         },
         witch: {
             label: "Witch hat",
+            palette: { main: "#3a2a55", outline: "#1a1026", detail: "#9b6ad6", sparkle: "#ffd86b" },
+            frame: { bg: "#1c1726", content: "#1c1726", title: "#2e2340", titleText: "#e8dcff", text: "#ddd4ee", border: "#4a3a66" },
             placements: ["left", "right"],
             colors: { main: "Hat", outline: "Outline", detail: "Band", sparkle: "Stars" },
             pieces: (p) => {
@@ -4283,6 +4376,331 @@ function buildSimpleColorRowsHTML() {
             }
         }
     };
+
+
+    /* ---------------------------------------------------------
+       THEME PACK DECORATIONS (v1.3)
+       Darker / neutral styles. Same 4 color roles as the others;
+       each also has its own "palette" that the "Use this style's
+       colors" button copies into the pickers.
+       Extra piece kinds used here (see decoPieceHTML):
+         fill: "frame" | "title" | "titleline" | "topline" | "under"
+               overlays that follow the popup (no size scaling)
+         edge "top" + from "center"
+         flip: "x" | "y" | "xy"
+       --------------------------------------------------------- */
+
+    function decoLeaf(x, y, len, rot, cls) {
+        const a = (len * 0.25).toFixed(1), b = (len * 0.75).toFixed(1), c = (len * 0.32).toFixed(1);
+        return `<g transform="translate(${x} ${y}) rotate(${rot})">` +
+               `<path d="M0 0 C${a} -${c} ${b} -${c} ${len} 0 C${b} ${c} ${a} ${c} 0 0Z" class="${cls} fmdO" stroke-width="1"/>` +
+               `<path d="M1.5 0 L${(len - 2).toFixed(1)} 0" class="fmdOs" stroke-width=".8"/></g>`;
+    }
+
+    function decoButterfly() {
+        const wing = '<path d="M20 15 C14 3 3 1 2 8 C1 15 11 17 20 16Z" class="fmdM fmdO" stroke-width=".8"/>' +
+                     '<path d="M20 17 C13 18 6 23 8 28 C11 32 18 25 20 17Z" class="fmdD fmdO" stroke-width=".8"/>' +
+                     '<circle cx="8" cy="8" r="2.2" class="fmdS"/><circle cx="12" cy="25" r="1.3" class="fmdS"/>';
+        return `<g class="fmdWing">${wing}</g>` +
+               `<g transform="translate(40 0) scale(-1 1)"><g class="fmdWing">${wing}</g></g>` +
+               '<rect x="18.9" y="9" width="2.2" height="15" rx="1.1" class="fmdOf"/>' +
+               '<path d="M19.6 10 C18 5 16 4 14 3 M20.4 10 C22 5 24 4 26 3" class="fmdOs" stroke-width="1" stroke-linecap="round"/>';
+    }
+
+    const DECO_HORN = { w: 24, h: 30, inset: 2,
+        svg: '<path d="M3 30 C2 17 9 6 22 1 C15 9 12 18 15 30Z" class="fmdM fmdO" stroke-width="1.5" stroke-linejoin="round"/>' +
+             '<path d="M22 1 C18 5 16 8 14.5 12 C16.5 10 18.5 9 19.5 9 C20.5 6 21.5 3.5 22 1Z" class="fmdS"/>' +
+             '<path d="M5.5 24 L11 23 M6 18 L12 17 M8 12 L13.5 12" class="fmdOs" stroke-width="1" opacity=".6"/>' };
+
+    /* Thick at the popup, thin at the spade tip. The base tucks
+       under the border so it grows out of the popup. */
+    const DECO_DRAGON_TAIL = { w: 66, h: 46, side: "58%", bottom: "76%", inset: 5,
+        svg: '<path d="M14 9 L19 1 L22 12Z M28 15 L34 8 L35 19Z" class="fmdD fmdO" stroke-width="1" stroke-linejoin="round"/>' +
+             '<path d="M0 6 C18 6 30 16 44 29 L46 34 C30 26 16 22 0 22Z" class="fmdM fmdO" stroke-width="1.6" stroke-linejoin="round"/>' +
+             '<path d="M42 29 L58 20 L55 33 L65 43 L44 38Z" class="fmdD fmdO" stroke-width="1.5" stroke-linejoin="round"/>' };
+
+    /* Sits 3px outside the corner, running along both borders */
+    const decoGothCorner =
+        '<path d="M3 34 L3 3 L34 3" class="fmdOs" stroke-width="1.6" stroke-linecap="square"/>' +
+        '<path d="M3 3 L-3 -3" class="fmdOs" stroke-width="1.2" stroke-linecap="round"/>' +
+        '<path d="M34 0 L37 3 L34 6 L31 3Z M0 34 L3 31 L6 34 L3 37Z" class="fmdOf"/>' +
+        '<path d="M3 -1 L7 3 L3 7 L-1 3Z" class="fmdD fmdO" stroke-width=".8"/>';
+
+    const decoBat =
+        '<path d="M30 10 C24 2 12 2 2 8 C8 9 10 12 10 16 C14 13 18 14 20 18 C22 14 26 13 30 16 C34 13 38 14 40 18 C42 14 46 13 50 16 C50 12 52 9 58 8 C48 2 36 2 30 10Z" class="fmdM fmdBatWings"/>' +
+        '<path d="M26.5 9 L27 4 L29 8 L31 8 L33 4 L33.5 9 Q30 15 26.5 9Z" class="fmdM"/>' +
+        '<circle cx="28.6" cy="9.3" r=".9" class="fmdS"/><circle cx="31.4" cy="9.3" r=".9" class="fmdS"/>' +
+        '<path d="M28.6 13 L28 18 M31.4 13 L32 18" class="fmdMs" stroke-width="1.3" stroke-linecap="round"/>';
+
+    function decoWeb() {
+        /* corner point at (34, 34); strands reach up and to the left */
+        const P = (t, x, y) => `${(34 - t * x).toFixed(1)} ${(34 - t * y).toFixed(1)}`;
+        const dirs = [[34, 6], [30, 22], [20, 30], [6, 34]];
+        let d = dirs.map(([x, y]) => `M34 34 L${P(1, x, y)}`).join(" ");
+        [0.3, 0.6, 0.9].forEach((t) => {
+            d += " M" + P(t, ...dirs[0]);
+            for (let i = 1; i < dirs.length; i++) {
+                const m = (t * 0.8);
+                const cx = 34 - m * (dirs[i - 1][0] + dirs[i][0]) / 2;
+                const cy = 34 - m * (dirs[i - 1][1] + dirs[i][1]) / 2;
+                d += ` Q${cx.toFixed(1)} ${cy.toFixed(1)} ${P(t, ...dirs[i])}`;
+            }
+        });
+        return `<path d="${d}" class="fmdOs" stroke-width=".8" opacity=".85"/>`;
+    }
+
+    const decoSpider =
+        '<line x1="10" y1="0" x2="10" y2="30" class="fmdOs" stroke-width=".8"/>' +
+        '<g class="fmdOs" stroke-width="1.1" stroke-linecap="round"><path d="M7 33 L2 29 M7 35 L1 35 M7 37 L2 41 M8 38 L5 43 M13 33 L18 29 M13 35 L19 35 M13 37 L18 41 M12 38 L15 43"/></g>' +
+        '<ellipse cx="10" cy="35" rx="4" ry="4.6" class="fmdM fmdO" stroke-width=".9"/>' +
+        '<circle cx="8.6" cy="34" r=".9" class="fmdD"/><circle cx="11.4" cy="34" r=".9" class="fmdD"/>';
+
+    const decoRose =
+        '<path d="M5 24 C2 19 7 17 11 20Z" class="fmdD"/><path d="M27 24 C30 19 25 17 21 20Z" class="fmdD"/>' +
+        '<g class="fmdBloom"><circle cx="16" cy="15" r="10" class="fmdM"/>' +
+        '<path d="M16 15 m-2.5 0 a2.5 2.5 0 1 1 5 0 a5 5 0 1 1 -10 0 a7.5 7.5 0 1 1 15 0" class="fmdOs" stroke-width="1.4"/></g>';
+
+    const decoStem =
+        '<path d="M8 0 C6 30 10 60 7 90 C6 105 8 118 8 130" class="fmdDs" stroke-width="2.4" stroke-linecap="round"/>' +
+        '<g class="fmdS"><path d="M7 22 L1 19 L6 26Z"/><path d="M9 48 L15 44 L10 52Z"/><path d="M7 74 L1 71 L6 78Z"/><path d="M8 102 L14 99 L9 106Z"/></g>' +
+        '<path d="M8 60 C14 54 16 60 14 64 C12 66 9 64 8 60Z" class="fmdD"/>';
+
+    const decoJelly =
+        '<g class="fmdBob"><path d="M4 18 Q4 3 18 3 Q32 3 32 18 Q28 16 25 18 Q22 16 18 18 Q14 16 11 18 Q8 16 4 18Z" class="fmdM fmdJellyBell"/>' +
+        '<g class="fmdOs" stroke-width="1.3" stroke-linecap="round" opacity=".85"><path d="M9 18 Q7 26 10 32 Q12 38 9 45"/><path d="M15 19 Q17 27 14 34 Q12 40 15 48"/><path d="M21 19 Q19 27 22 34 Q24 40 21 47"/><path d="M27 18 Q29 25 26 31 Q24 37 27 43"/></g></g>';
+
+    /* Kelp growing up the side from the bottom corner */
+    const decoKelp =
+        '<g class="fmdSway"><path d="M6 96 C2 80 11 66 6 50 C2 36 10 24 7 8" class="fmdOs" stroke-width="2.2" stroke-linecap="round"/>' +
+        '<path d="M16 96 C19 84 12 74 16 62 C19 52 14 44 16 36" class="fmdOs" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>' +
+        '<path d="M6 70 C0 66 -2 60 1 56 C4 60 6 64 6 70Z M7 40 C13 36 15 30 12 26 C9 30 7 34 7 40Z M16 80 C22 76 23 70 20 67 C17 70 16 74 16 80Z" class="fmdOf" opacity=".85"/></g>';
+
+    const decoAirBubbles =
+        '<g class="fmdRise fmdSs" stroke-width="1.2"><circle cx="8" cy="34" r="4"/><circle cx="4" cy="20" r="2.5"/><circle cx="10" cy="8" r="3"/></g>';
+
+    const decoBerry =
+        '<path d="M13 8 C22 6 26 12 24 18 C22 25 16 29 13 29 C10 29 4 25 2 18 C0 12 4 6 13 8Z" class="fmdM fmdO" stroke-width="1.2"/>' +
+        '<g class="fmdS"><ellipse cx="8" cy="14" rx=".8" ry="1.3"/><ellipse cx="14" cy="13" rx=".8" ry="1.3"/><ellipse cx="19" cy="15" rx=".8" ry="1.3"/><ellipse cx="10" cy="20" rx=".8" ry="1.3"/><ellipse cx="16" cy="21" rx=".8" ry="1.3"/><ellipse cx="13" cy="26" rx=".8" ry="1.3"/></g>' +
+        '<path d="M13 9 L8 5 L10 10 L4 9 L9 12 L13 10 L17 12 L22 9 L16 10 L18 5Z" class="fmdD"/>';
+
+    const decoCap =
+        '<g class="fmdBounce"><path d="M22 8 L15 2 L17 9 L6 7 L13 12 L3 16 L16 14 L22 21 L28 14 L41 16 L31 12 L38 7 L27 9 L29 2Z" class="fmdD fmdO" stroke-width="1" stroke-linejoin="round"/>' +
+        '<rect x="20.8" y="0" width="2.6" height="9" rx="1.3" class="fmdOf"/></g>';
+
+    const decoInkLeaf = (x, y, rot, len = 1) =>
+        `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${len})" d="M0 0 C5 -2.8 14 -2.6 22 0 C14 2.2 5 2 0 0Z" class="fmdM"/>`;
+
+    /* Drawn for the LEFT side of a popup: the stalk stands on the
+       bottom corner and leans on the border, leaves point outward */
+    const decoBamboo =
+        '<path d="M24 118 L24 88 M24 84 L23 54 M23 50 L21 22" class="fmdMs" stroke-width="3.8" stroke-linecap="round"/>' +
+        '<path d="M21.5 86 L26.5 86 M20.5 52 L25.5 52" class="fmdMs" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>' +
+        decoInkLeaf(22, 52, -160) + decoInkLeaf(22, 51, -128, 0.9) + decoInkLeaf(23, 86, 172, 0.85) +
+        decoInkLeaf(21, 22, -104, 0.8) + decoInkLeaf(21, 23, -148, 0.7);
+
+    Object.assign(DECO_STYLES, {
+        glitch: {
+            label: "Glitch",
+            frame: { bg: "#0c0c12", content: "#0c0c12", title: "#11111a", titleText: "#d8d8e6", text: "#d8d8e6", border: "#2a2a3a" },
+            placements: [],
+            palette: { main: "#11111a", outline: "#2a2a3a", detail: "#00e5ff", sparkle: "#ff2bd6" },
+            colors: { main: null, outline: null, detail: "Cyan side", sparkle: "Pink side" },
+            pieces: () => [
+                { fill: "frame", html: '<i class="fmdGlitchFrame"></i><i class="fmdSlice fmdSliceA"></i><i class="fmdSlice fmdSliceB"></i>' },
+                { fill: "title", html: '<i class="fmdScan"></i>' },
+                { w: 22, h: 22, corner: "tr", dx: -10, dy: -10,
+                  svg: '<rect x="8" y="0" width="6" height="6" class="fmdS"/><rect x="14" y="6" width="6" height="6" class="fmdD"/><rect x="2" y="10" width="4" height="4" fill="#fff" opacity=".55"/>' },
+                { w: 16, h: 16, corner: "bl", dx: -8, dy: -8,
+                  svg: '<rect x="0" y="6" width="5" height="5" class="fmdD"/><rect x="6" y="11" width="4" height="4" class="fmdS"/>' }
+            ]
+        },
+        moth: {
+            label: "Moth / butterfly",
+            frame: { bg: "#211e24", content: "#211e24", title: "#2a2530", titleText: "#e4dcea", text: "#e4dcea", border: "#40384a" },
+            placements: ["right", "left"],
+            palette: { main: "#b9a2cf", outline: "#2d2533", detail: "#8d7aa3", sparkle: "#5b4a6e" },
+            colors: { main: "Upper wings", outline: "Body", detail: "Lower wings", sparkle: "Wing spots" },
+            pieces: (p) => {
+                const right = p !== "left";
+                const legs = '<path d="M19.3 22 L16 31.5 M20.7 22 L24 31.5 M19.5 19 L13.5 28 M20.5 19 L26.5 28" class="fmdOs" stroke-width="1.1" stroke-linecap="round"/>';
+                return [
+                    { w: 40, h: 32, edge: "top", from: right ? "right" : "left", at: 64, inset: 1, svg: decoButterfly() + legs },
+                    { w: 26, h: 21, edge: "top", from: right ? "right" : "left", at: 110, inset: 1, flip: right ? "x" : "",
+                      svg: `<svg width="26" height="21" viewBox="0 0 40 32" overflow="visible"><g transform="rotate(-8 20 32)">${decoButterfly()}${legs}</g></svg>` }
+                ];
+            }
+        },
+        leaves: {
+            label: "Leaves",
+            frame: { bg: "#1b231e", content: "#1b231e", title: "#223029", titleText: "#dbe8de", text: "#dbe8de", border: "#33463a" },
+            placements: ["left", "right"],
+            palette: { main: "#4f8a5e", outline: "#2e5a3a", detail: "#7fb58c", sparkle: "#a8d5a0" },
+            colors: { main: "Leaves", outline: "Vine & veins", detail: "Light leaves", sparkle: null },
+            pieces: (p) => {
+                const right = p === "right";
+                return [
+                    { w: 130, h: 24, edge: "top", from: right ? "right" : "left", at: 16, inset: 3, flip: right ? "x" : "",
+                      svg: '<path d="M0 21 C22 17 40 23 62 20 C84 17 104 22 130 20" class="fmdOs" stroke-width="1.8" stroke-linecap="round"/>' +
+                           decoLeaf(20, 19, 15, -70, "fmdD") + decoLeaf(44, 21, 13, -118, "fmdM") + decoLeaf(66, 20, 14, -62, "fmdD") +
+                           decoLeaf(92, 19, 12, -115, "fmdM") + decoLeaf(114, 21, 11, -70, "fmdD") },
+                    { w: 48, h: 44, corner: right ? "tr" : "tl", dx: -24, dy: -22, flip: right ? "x" : "",
+                      svg: decoLeaf(24, 22, 24, -150, "fmdM") + decoLeaf(25, 21, 20, -100, "fmdD") + decoLeaf(23, 23, 19, 165, "fmdD") + decoLeaf(26, 20, 15, -60, "fmdM") },
+                    { w: 34, h: 30, corner: right ? "bl" : "br", dx: -16, dy: -14, flip: right ? "x" : "",
+                      svg: decoLeaf(16, 14, 17, 20, "fmdM") + decoLeaf(16, 14, 15, 70, "fmdD") + decoLeaf(16, 14, 12, -20, "fmdD") }
+                ];
+            }
+        },
+        strawberry: {
+            label: "Strawberry",
+            frame: { bg: "#2a1d20", content: "#2a1d20", title: "#c73a4c", titleText: "#ffffff", text: "#f3e3e5", border: "#5a2e36" },
+            placements: [],
+            palette: { main: "#d8465a", outline: "#2f6e30", detail: "#4f9e4a", sparkle: "#ffe39a" },
+            colors: { main: "Berry", outline: "Outline", detail: "Leaves", sparkle: "Seeds" },
+            pieces: () => [
+                { fill: "title", html: '<i class="fmdSeeds"></i>' },
+                { w: 44, h: 22, edge: "top", from: "center", inset: 7, svg: decoCap },
+                { w: 38, h: 40, edge: "bottom", at: "80%", inset: 1, cls: "fmdDangle",
+                  svg: '<path d="M19 0 C19 6 13 9 11 15 M19 0 C20 7 25 11 27 17" class="fmdOs" stroke-width="1.6" stroke-linecap="round"/>' +
+                       `<g transform="translate(2 12) scale(.66)">${decoBerry}</g><g transform="translate(18 15) scale(.6)">${decoBerry}</g>` }
+            ]
+        },
+        dragon: {
+            label: "Dragon",
+            frame: { bg: "#161515", content: "#161515", title: "#3a1410", titleText: "#f3c9a8", text: "#e7dcd6", border: "#5c2419" },
+            placements: ["side", "bottom", "none"],
+            palette: { main: "#7a2b1c", outline: "#2a0e09", detail: "#d9532c", sparkle: "#e2a57c" },
+            colors: { main: "Scales", outline: "Outline", detail: "Tail tip", sparkle: "Horn tips" },
+            pieces: (p) => [
+                { fill: "title", html: '<i class="fmdScales"></i>' },
+                { ...DECO_HORN, edge: "top", from: "left", at: 14 },
+                { ...DECO_HORN, edge: "top", from: "right", at: 14, mirror: true },
+                ...(p === "none" ? [] : [{ ...tailPiece(DECO_DRAGON_TAIL, p), cls: "fmdTailSwish" }])
+            ]
+        },
+        gothic: {
+            label: "Gothic lace",
+            frame: { bg: "#141114", content: "#141114", title: "#1f171c", titleText: "#e6d9df", text: "#d8cdd2", border: "#4a3a42" },
+            placements: [],
+            palette: { main: "#9a8290", outline: "#b9a7b1", detail: "#9b1b35", sparkle: "#e05a78" },
+            colors: { main: "Bat", outline: "Filigree & lace", detail: "Gems", sparkle: "Bat eyes" },
+            pieces: () => [
+                { w: 38, h: 38, corner: "tl", dx: -6, dy: -6, svg: decoGothCorner },
+                { w: 38, h: 38, corner: "tr", dx: -6, dy: -6, flip: "x", svg: decoGothCorner },
+                { w: 38, h: 38, corner: "bl", dx: -6, dy: -6, flip: "y", svg: decoGothCorner },
+                { w: 38, h: 38, corner: "br", dx: -6, dy: -6, flip: "xy", svg: decoGothCorner },
+                { w: 60, h: 20, edge: "top", from: "center", inset: 2, svg: decoBat },
+                { fill: "under", html: '<i class="fmdLace"></i>' }
+            ]
+        },
+        nightsky: {
+            label: "Night sky",
+            frame: { bg: "#111a31", content: "#111a31", title: "#18244a", titleText: "#f1ddb0", text: "#d9def0", border: "#2d3b6b" },
+            placements: ["right", "left"],
+            palette: { main: "#e8c97a", outline: "#c9a95a", detail: "#e8c97a", sparkle: "#fff6d8" },
+            colors: { main: "Moon", outline: "Lines", detail: "Big stars", sparkle: "Small stars" },
+            pieces: (p) => {
+                const right = p !== "left";
+                return [
+                    /* crescent resting on the corner, dipping just past the edge */
+                    { w: 34, h: 32, corner: right ? "tr" : "tl", dx: -17, dy: -24, flip: right ? "" : "x",
+                      svg: '<path d="M19 3 A13 13 0 1 0 30 22 A10.5 10.5 0 1 1 19 3Z" class="fmdM"/><circle cx="11" cy="18" r="1.6" class="fmdOf" opacity=".5"/><circle cx="9" cy="11" r="1" class="fmdOf" opacity=".45"/>' },
+                    /* a little star mobile hanging from the bottom edge */
+                    { w: 60, h: 42, edge: "bottom", at: right ? "26%" : "74%", inset: 0, cls: "fmdDangle",
+                      svg: '<path d="M10 0 L10 17 M30 0 L30 28 M50 0 L50 10" class="fmdOs" stroke-width=".9" opacity=".85"/>' +
+                           `<g class="fmdTwinkle">${decoStar(30, 34, 7, "fmdD", 0)}</g>${decoStar(10, 22, 5, "fmdS", 0)}${decoStar(50, 15, 5, "fmdS", 0)}` }
+                ];
+            }
+        },
+        terminal: {
+            label: "Terminal",
+            frame: { bg: "#070b07", content: "#070b07", title: "#0d140d", titleText: "#39ff7a", text: "#8fe8a8", border: "#1f4d2b" },
+            placements: [],
+            palette: { main: "#0d140d", outline: "#1f4d2b", detail: "#39ff7a", sparkle: "#b6ffcc" },
+            colors: { main: "Tag background", outline: null, detail: "Glow & text", sparkle: null },
+            pieces: () => [
+                { fill: "frame", html: '<i class="fmdTermGlow"></i>' },
+                { fill: "title", html: '<i class="fmdScan fmdScanSoft"></i>' },
+                { w: 46, h: 19, edge: "top", from: "right", at: 72, inset: 2,
+                  svg: '<path d="M.75 19 L.75 3.5 Q.75 .75 3.5 .75 L42.5 .75 Q45.25 .75 45.25 3.5 L45.25 19" class="fmdM fmdTermStroke" stroke-width="1.5"/>' +
+                       '<path d="M9 5.5 L14 9.5 L9 13.5" class="fmdDs" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+                       '<rect x="18" y="12.5" width="9" height="2.2" class="fmdD fmdCursor"/>' }
+            ]
+        },
+        ink: {
+            label: "Ink (sumi-e)",
+            frame: { bg: "#1a1917", content: "#1a1917", title: "#1a1917", titleText: "#efe8da", text: "#d9d2c4", border: "#3b3833" },
+            placements: ["left", "right"],
+            palette: { main: "#efe8da", outline: "#1a1917", detail: "#c23b2e", sparkle: "#f6efe2" },
+            colors: { main: "Brush strokes", outline: null, detail: "Seal", sparkle: "Seal mark" },
+            pieces: (p) => {
+                const right = p === "right";
+                return [
+                    { fill: "titleline", html: '<svg viewBox="0 0 200 8" preserveAspectRatio="none"><path d="M0 5 Q30 1 70 4 T140 3 Q175 2 200 4 L198 6 Q160 8 120 6 T40 7 Q15 8 0 7Z" class="fmdM" opacity=".8"/></svg>' },
+                    /* A bamboo sprig painted in a few strokes, the classic sumi-e subject */
+                    { w: 30, h: 120, edge: right ? "right" : "left", at: "calc(100% - 112px)", inset: 5, flip: right ? "x" : "", cls: "fmdSway", svg: decoBamboo },
+                    /* Ink splatter + the artist's red seal (a stamped signature) */
+                    { w: 30, h: 30, corner: right ? "bl" : "br", dx: -9, dy: -9, cls: "fmdStamp",
+                      svg: '<circle cx="2" cy="6" r="1.6" class="fmdM" opacity=".8"/><circle cx="5.5" cy="2" r=".9" class="fmdM" opacity=".7"/>' +
+                           '<g transform="rotate(-6 17 17)"><rect x="6" y="6" width="22" height="22" rx="2.5" class="fmdD"/><rect x="8.5" y="8.5" width="17" height="17" rx="1.2" fill="none" class="fmdSs" stroke-width="1"/>' +
+                           '<text x="17" y="21.6" text-anchor="middle" font-size="13" font-family="Yu Mincho, MS Mincho, Noto Serif CJK JP, serif" class="fmdS">印</text></g>' }
+                ];
+            }
+        },
+        spiderweb: {
+            label: "Spiderweb",
+            frame: { bg: "#18181b", content: "#18181b", title: "#202024", titleText: "#e2e2e6", text: "#cfcfd4", border: "#3a3a42" },
+            placements: ["left", "right"],
+            palette: { main: "#2b2b31", outline: "#9a9aa6", detail: "#e8e8ee", sparkle: "#e8e8ee" },
+            colors: { main: "Spider", outline: "Web & legs", detail: "Eyes", sparkle: null },
+            pieces: (p) => {
+                const right = p === "right";
+                return [
+                    { w: 48, h: 48, corner: right ? "br" : "bl", dx: 0, dy: 0, flip: right ? "" : "x", svg: `<g opacity=".7" transform="scale(1.4)">${decoWeb()}</g>` },
+                    { w: 20, h: 44, edge: "bottom", at: right ? "70%" : "30%", inset: 0, cls: "fmdDangle", svg: decoSpider }
+                ];
+            }
+        },
+        rose: {
+            label: "Thorned rose",
+            frame: { bg: "#1a1214", content: "#1a1214", title: "#24161a", titleText: "#f0d6dc", text: "#dccbcf", border: "#4a2a31" },
+            placements: ["left", "right"],
+            palette: { main: "#a8213b", outline: "#5e0f20", detail: "#3d6b3f", sparkle: "#5b8a52" },
+            colors: { main: "Rose", outline: "Petal lines", detail: "Stem & leaves", sparkle: "Thorns" },
+            pieces: (p) => {
+                const right = p === "right";
+                return [
+                    { w: 16, h: 130, edge: right ? "right" : "left", at: "4px", inset: 4, flip: right ? "" : "x", svg: decoStem },
+                    { w: 32, h: 30, corner: right ? "tr" : "tl", dx: -24, dy: -22, flip: right ? "x" : "", svg: decoRose }
+                ];
+            }
+        },
+        deepsea: {
+            label: "Deep sea",
+            frame: { bg: "#07131d", content: "#07131d", title: "#0b1f2e", titleText: "#9ff3ea", text: "#c3e3e6", border: "#16384a" },
+            placements: ["left", "right"],
+            palette: { main: "#3fe0d0", outline: "#2a8f93", detail: "#3fe0d0", sparkle: "#9ff3ea" },
+            colors: { main: "Jellyfish", outline: "Tentacles", detail: "Glow", sparkle: "Air bubbles" },
+            pieces: (p) => {
+                const right = p === "right";
+                return [
+                    { fill: "frame", html: '<i class="fmdSeaGlow"></i>' },
+                    { w: 22, h: 96, edge: right ? "right" : "left", at: "calc(100% - 90px)", inset: 4, flip: right ? "" : "x", svg: decoKelp },
+                    { w: 16, h: 40, edge: right ? "right" : "left", at: "calc(100% - 132px)", inset: 1, svg: decoAirBubbles },
+                    { w: 36, h: 50, edge: right ? "right" : "left", at: "6px", inset: 5, svg: decoJelly }
+                ];
+            }
+        },
+        minimal: {
+            label: "Minimal",
+            frame: { bg: "#1d1e21", content: "#1d1e21", title: "#1d1e21", titleText: "#e6e7ea", text: "#c5c7cc", border: "#2f3136" },
+            placements: [],
+            palette: { main: "#1d1e21", outline: "#2f3136", detail: "#8fa3bf", sparkle: "#c8d3e2" },
+            colors: { main: null, outline: null, detail: "Accent line", sparkle: null },
+            pieces: () => [
+                { fill: "topline", html: '<i class="fmdTopLine"></i>' }
+            ]
+        }
+    });
 
     const DECO_STYLE_CHOICES = Object.keys(DECO_STYLES);
     const DECO_PLACEMENT_CHOICES = ["side", "bottom", "none", "left", "right"];
@@ -4325,8 +4743,19 @@ function buildSimpleColorRowsHTML() {
             size: Number.isInteger(size) && size >= 70 && size <= 150 ? size : 100,
             match: localStorage.getItem(DECO_LS.match) !== "false",   /* default ON */
             menu: localStorage.getItem(DECO_LS.menu) === "true",
+            frame: localStorage.getItem(DECO_LS.frame) === "true",
+            frameCustom: localStorage.getItem(DECO_LS.frameCustom) === "true",
+            frameBorder: localStorage.getItem(DECO_LS.frameBorder) === "true",   /* default OFF: keeps your theme's border */
+            frameColors: {},
             colors
         };
+
+        const hex = (v) => /^#[0-9a-f]{6}$/i.test(v || "") ? v : null;
+        const styleFrame = (DECO_STYLES[st.style] && DECO_STYLES[st.style].frame) || DECO_FRAME_FALLBACK;
+        DECO_FRAME_PICKERS.forEach(([k, ls]) => {
+            st.frameColors[k] = hex(localStorage.getItem(DECO_LS[ls])) || styleFrame[k];
+        });
+        st.frameColors.border = hex(localStorage.getItem(DECO_LS.frameBorderColor)) || styleFrame.border;
 
         return normalizeDecoPlacement(st);
     }
@@ -4342,6 +4771,30 @@ function buildSimpleColorRowsHTML() {
     }
 
     let liveDeco = null;
+
+    /* The popup colors actually used: the style's own, or your
+       picked ones when you've changed them */
+    function resolveDecoFrame(st) {
+        const base = DECO_STYLES[st.style] && DECO_STYLES[st.style].frame;
+
+        if (!base) {
+            return null;
+        }
+
+        if (!st.frameCustom || !st.frameColors) {
+            return base;
+        }
+
+        const c = st.frameColors;
+        return {
+            bg: c.bg || base.bg,
+            content: c.bg || base.content,
+            title: c.title || base.title,
+            titleText: c.titleText || base.titleText,
+            text: c.text || base.text,
+            border: c.border || base.border
+        };
+    }
 
     function applySavedDeco() {
         applyDeco(readSavedDeco());
@@ -4362,6 +4815,22 @@ function buildSimpleColorRowsHTML() {
             root.style.setProperty("--fmdeco-c-sparkle", st.colors.sparkle);
         }
 
+        /* "Color popups to match": the style's own popup colors
+           (title bar, background, text, border) beat the theme's */
+        const frame = resolveDecoFrame(st);
+        const frameOn = Boolean(st.frame && frame);
+        root.classList.toggle("fmDecoFrameOn", frameOn);
+        root.classList.toggle("fmDecoFrameBorderOn", frameOn && Boolean(st.frameBorder));
+
+        if (frameOn) {
+            root.style.setProperty("--fmframe-bg", frame.bg);
+            root.style.setProperty("--fmframe-content", frame.content);
+            root.style.setProperty("--fmframe-title", frame.title);
+            root.style.setProperty("--fmframe-titletext", frame.titleText);
+            root.style.setProperty("--fmframe-text", frame.text);
+            root.style.setProperty("--fmframe-border", frame.border);
+        }
+
         lastThemeDecoColors = "";
         updateDecorations(true);
     }
@@ -4372,6 +4841,11 @@ function buildSimpleColorRowsHTML() {
        plus FlockMod's resize bars), read per side into --fmdeco-ft /
        -fr / -fb / -fl, so nothing sinks into the frame. */
     function decoPieceHTML(piece) {
+        /* Overlays that follow the popup's own box (never scaled) */
+        if (piece.fill) {
+            return `<div class="fmDecoPiece fmDecoFill fmDecoFill-${piece.fill}">${piece.html || ""}</div>`;
+        }
+
         const pos = [];
         let origin = "center";
         const side = { top: "--fmdeco-ft", bottom: "--fmdeco-fb", left: "--fmdeco-fl", right: "--fmdeco-fr" };
@@ -4382,7 +4856,8 @@ function buildSimpleColorRowsHTML() {
             pos.push(`${v}: calc(${piece.dy}px - var(${side[v]}, 0px))`, `${h}: calc(${piece.dx}px - var(${side[h]}, 0px))`);
             origin = `${h === "left" ? "right" : "left"} ${v === "top" ? "bottom" : "top"}`;
         } else if (piece.edge === "top") {
-            pos.push(`bottom: calc(100% + var(--fmdeco-ft, 0px) - ${piece.inset}px)`, `${piece.from}: ${piece.at}px`);
+            pos.push(`bottom: calc(100% + var(--fmdeco-ft, 0px) - ${piece.inset}px)`,
+                piece.from === "center" ? `left: calc(50% - ${piece.w / 2}px)` : `${piece.from}: ${piece.at}px`);
             origin = "center bottom";
         } else if (piece.edge === "bottom") {
             pos.push(`top: calc(100% + var(--fmdeco-fb, 0px) - ${piece.inset}px)`, `left: calc(${piece.at} - ${piece.w / 2}px)`);
@@ -4395,10 +4870,14 @@ function buildSimpleColorRowsHTML() {
             origin = "right center";
         }
 
-        const tail = piece.edge === "right" || piece.edge === "bottom" ? " fmDecoTail" : "";
+        /* Tails wag on open, unless the piece brings its own animation */
+        const tail = (piece.edge === "right" || piece.edge === "bottom") && !piece.cls ? " fmDecoTail" : "";
+        const extra = piece.cls ? ` ${piece.cls}` : "";
+        const flip = piece.flip || (piece.mirror ? "x" : "");
+        const flipCss = { x: "scaleX(-1)", y: "scaleY(-1)", xy: "scale(-1, -1)" }[flip];
 
-        return `<div class="fmDecoPiece${tail} fmDecoEdge-${piece.edge}" style="${pos.join("; ")}; width: ${piece.w}px; height: ${piece.h}px; transform-origin: ${origin};">` +
-               `<svg viewBox="0 0 ${piece.w} ${piece.h}" width="${piece.w}" height="${piece.h}"${piece.mirror ? ' style="transform: scaleX(-1)"' : ""}>${piece.svg}</svg></div>`;
+        return `<div class="fmDecoPiece${tail}${extra} fmDecoEdge-${piece.edge || "corner"}" style="${pos.join("; ")}; width: ${piece.w}px; height: ${piece.h}px; transform-origin: ${origin};">` +
+               `<svg viewBox="0 0 ${piece.w} ${piece.h}" width="${piece.w}" height="${piece.h}"${flipCss ? ` style="transform: ${flipCss}"` : ""}>${piece.svg}</svg></div>`;
     }
 
     function buildDecoHTML(st) {
@@ -4530,7 +5009,13 @@ function buildSimpleColorRowsHTML() {
             fl: clamp(Math.max(inLeft - d.left, l ? inLeft - l.left : 0))
         };
 
-        const sig = `${frame.ft}|${frame.fr}|${frame.fb}|${frame.fl}`;
+        /* Title bar height + border width, for the overlay pieces */
+        const titlebar = dialog.querySelector(".dialogTitlebar");
+        const tr = titlebar ? titlebar.getBoundingClientRect() : null;
+        frame.tb = tr && tr.height ? Math.round(Math.max(0, Math.min(80, tr.bottom - inTop))) : 30;
+        frame.bw = Math.round(Math.max(0, Math.min(10, dialog.clientTop)));
+
+        const sig = `${frame.ft}|${frame.fr}|${frame.fb}|${frame.fl}|${frame.tb}|${frame.bw}`;
 
         if (box.dataset.frame !== sig) {
             box.dataset.frame = sig;
@@ -4560,7 +5045,7 @@ function buildSimpleColorRowsHTML() {
     <div class="themeModSettingText">
         <div class="themeModSettingName">Style</div>
         <div class="themeModSettingDescription">
-            Ears, tails, stars, flowers or a hat on every popup. They move and resize with it, hide while a popup is maximized, and never block clicks.
+            Ears, tails, flowers, moths, dragons, glitches and more on every popup. They move and resize with it, hide while a popup is maximized, and never block clicks.
         </div>
     </div>
     <select id="themeModDecoStyle" class="themeModSelect">
@@ -4611,6 +5096,41 @@ function buildSimpleColorRowsHTML() {
     ${toggle("themeModDecoMatch")}
 </div>
 
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow themeModDecoPaletteRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Style colors</div>
+        <div class="themeModSettingDescription">Use the colors this style was designed with, for the decorations and the popup colors. Turns Match my theme off so you can tweak them.</div>
+    </div>
+    <button type="button" class="themeModButton themeModDecoUsePalette"><i class="fas fa-palette"></i> Use style colors</button>
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow themeModDecoFrameRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Color popups to match</div>
+        <div class="themeModSettingDescription">Gives every popup this style's own title bar, background and text colors, on top of your theme. Change them below if you like. OFF keeps your theme's popup colors.</div>
+    </div>
+    ${toggle("themeModDecoFrame")}
+</div>
+
+<div class="themeModDecoFrameColors">
+    ${DECO_FRAME_PICKERS.map(([k, , label]) => `
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow">
+        <div class="themeModSettingText"><div class="themeModSettingName">${label}</div></div>
+        <input type="color" data-deco-frame-color="${k}" value="${DECO_FRAME_FALLBACK[k]}">
+    </div>`).join("")}
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow">
+        <div class="themeModSettingText">
+            <div class="themeModSettingName">Popup border</div>
+            <div class="themeModSettingDescription">ON also colors the popup's border and resize edges. OFF keeps your theme's border.</div>
+        </div>
+        ${toggle("themeModDecoFrameBorder")}
+    </div>
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow themeModDecoFrameBorderRow">
+        <div class="themeModSettingText"><div class="themeModSettingName">Border color</div></div>
+        <input type="color" data-deco-frame-color="border" value="${DECO_FRAME_FALLBACK.border}">
+    </div>
+</div>
+
 <div class="themeModDecoColors">
     ${Object.keys(DECO_COLOR_DEFAULTS).map((key) => `
     <div class="themeModSetting themeModNoDivider themeModDecoColorRow" data-deco-color-row="${key}">
@@ -4631,11 +5151,30 @@ function buildSimpleColorRowsHTML() {
         const match = dialog.querySelector("#themeModDecoMatch");
         const colorsBox = dialog.querySelector(".themeModDecoColors");
         const previewDeco = dialog.querySelector(".themeModDecoPreview .fmDeco");
+        const paletteRow = dialog.querySelector(".themeModDecoPaletteRow");
+        const paletteButton = dialog.querySelector(".themeModDecoUsePalette");
+        const frameToggle = dialog.querySelector("#themeModDecoFrame");
+        const frameBox = dialog.querySelector(".themeModDecoFrameColors");
+        const frameBorderToggle = dialog.querySelector("#themeModDecoFrameBorder");
+        const frameBorderRow = dialog.querySelector(".themeModDecoFrameBorderRow");
         const pickers = {};
+        const framePickers = {};
+        /* true once you change a popup color yourself */
+        let frameCustom = false;
 
         dialog.querySelectorAll("[data-deco-color]").forEach((input) => {
             pickers[input.dataset.decoColor] = input;
         });
+        dialog.querySelectorAll("[data-deco-frame-color]").forEach((input) => {
+            framePickers[input.dataset.decoFrameColor] = input;
+        });
+
+        /* Puts a style's own popup colors into the popup pickers */
+        function framePickersFromStyle(styleKey) {
+            const f = (DECO_STYLES[styleKey] && DECO_STYLES[styleKey].frame) || DECO_FRAME_FALLBACK;
+            frameCustom = false;
+            Object.keys(framePickers).forEach((k) => { framePickers[k].value = f[k]; });
+        }
 
         if (!styleSelect) {
             return { save() {}, reset() {}, resetPreview() {} };
@@ -4659,6 +5198,10 @@ function buildSimpleColorRowsHTML() {
                 size: Number(size.value),
                 match: match.checked,
                 menu: menuToggle.checked,
+                frame: frameToggle ? frameToggle.checked : false,
+                frameCustom,
+                frameBorder: frameBorderToggle ? frameBorderToggle.checked : false,
+                frameColors: Object.fromEntries(Object.keys(framePickers).map((k) => [k, framePickers[k].value])),
                 colors
             });
         }
@@ -4672,6 +5215,16 @@ function buildSimpleColorRowsHTML() {
             });
 
             placement.closest(".themeModSetting").style.display = on && style.placements.length ? "" : "none";
+            if (paletteRow) {
+                paletteRow.style.display = on && style.palette ? "" : "none";
+            }
+            if (frameToggle) {
+                frameToggle.closest(".themeModSetting").style.display = on && style.frame ? "" : "none";
+            }
+            if (frameBox) {
+                frameBox.style.display = on && style.frame && st.frame ? "" : "none";
+                frameBorderRow.style.display = st.frameBorder ? "" : "none";
+            }
             colorsBox.style.display = on && !st.match ? "" : "none";
 
             Object.keys(pickers).forEach((key) => {
@@ -4698,6 +5251,15 @@ function buildSimpleColorRowsHTML() {
             sizeValue.textContent = `${st.size}%`;
             match.checked = st.match;
             menuToggle.checked = st.menu;
+            if (frameToggle) frameToggle.checked = st.frame;
+            if (frameBorderToggle) frameBorderToggle.checked = Boolean(st.frameBorder);
+            framePickersFromStyle(st.style);
+            if (st.frameCustom && st.frameColors) {
+                frameCustom = true;
+                Object.keys(framePickers).forEach((k) => {
+                    if (st.frameColors[k]) framePickers[k].value = st.frameColors[k];
+                });
+            }
             Object.keys(pickers).forEach((k) => { pickers[k].value = st.colors[k]; });
             updateRows(st);
         }
@@ -4728,11 +5290,18 @@ function buildSimpleColorRowsHTML() {
 
         styleSelect.addEventListener("change", () => {
             fillPlacements(styleSelect.value, placement.value);
+            framePickersFromStyle(styleSelect.value);   /* each style starts with its own popup colors */
             preview();
         });
         placement.addEventListener("change", preview);
         size.addEventListener("input", preview);
         menuToggle.addEventListener("change", preview);
+        if (frameToggle) frameToggle.addEventListener("change", preview);
+        if (frameBorderToggle) frameBorderToggle.addEventListener("change", preview);
+        Object.values(framePickers).forEach((input) => input.addEventListener("input", () => {
+            frameCustom = true;
+            preview();
+        }));
         match.addEventListener("change", () => {
             if (!match.checked) {
                 seedPickersFromTheme();
@@ -4740,6 +5309,26 @@ function buildSimpleColorRowsHTML() {
             preview();
         });
         Object.values(pickers).forEach((input) => input.addEventListener("input", preview));
+
+        /* Copies the style's own palette into the 4 pickers */
+        if (paletteButton) {
+            paletteButton.addEventListener("click", () => {
+                const palette = DECO_STYLES[styleSelect.value] && DECO_STYLES[styleSelect.value].palette;
+
+                if (!palette) {
+                    return;
+                }
+
+                match.checked = false;
+                Object.keys(pickers).forEach((k) => {
+                    if (palette[k]) {
+                        pickers[k].value = palette[k];
+                    }
+                });
+                framePickersFromStyle(styleSelect.value);
+                preview();
+            });
+        }
 
         return {
             save() {
@@ -4749,11 +5338,17 @@ function buildSimpleColorRowsHTML() {
                 localStorage.setItem(DECO_LS.size, st.size);
                 localStorage.setItem(DECO_LS.match, st.match);
                 localStorage.setItem(DECO_LS.menu, st.menu);
+                localStorage.setItem(DECO_LS.frame, st.frame);
+                localStorage.setItem(DECO_LS.frameCustom, st.frameCustom);
+                localStorage.setItem(DECO_LS.frameBorder, st.frameBorder);
+                DECO_FRAME_PICKERS.forEach(([k, ls]) => localStorage.setItem(DECO_LS[ls], st.frameColors[k]));
+                localStorage.setItem(DECO_LS.frameBorderColor, st.frameColors.border);
                 Object.keys(DECO_COLOR_DEFAULTS).forEach((k) => localStorage.setItem(DECO_LS[k], st.colors[k]));
             },
             reset() {
                 const st = {
-                    style: "none", placement: "side", size: 100, match: true, menu: false,
+                    style: "none", placement: "side", size: 100, match: true, menu: false, frame: false,
+                    frameCustom: false, frameBorder: false, frameColors: {},
                     colors: { ...DECO_COLOR_DEFAULTS }
                 };
                 fill(st);
@@ -4764,11 +5359,530 @@ function buildSimpleColorRowsHTML() {
                Popup Decorations subsection's own reset button */
             resetPreview() {
                 const st = {
-                    style: "none", placement: "side", size: 100, match: true, menu: false,
+                    style: "none", placement: "side", size: 100, match: true, menu: false, frame: false,
+                    frameCustom: false, frameBorder: false, frameColors: {},
                     colors: { ...DECO_COLOR_DEFAULTS }
                 };
                 fill(st);
                 applyDeco(st);
+            }
+        };
+    }
+
+
+    /* =========================================================
+       CHAT BUBBLES (Interface > Chat Bubbles)
+       Restyles the public / staff chat (#chatMessages) on YOUR
+       screen only. FlockMod marks your own messages with
+       data-type="MYMSG", so no name guessing is needed.
+       Looks are pure CSS (style.css). The only JS work is adding
+       a small decoration (moth, horns, hearts...) to the first
+       message of each of your message groups, done by a watcher
+       that only looks at newly added messages.
+       ========================================================= */
+
+    const BUB_LS = {
+        style: "flockmodBubbleStyle",
+        right: "flockmodBubbleRight",
+        others: "flockmodBubbleOthers",
+        deco: "flockmodBubbleDeco",
+        custom: "flockmodBubbleCustom",
+        bg: "flockmodBubbleColor",
+        text: "flockmodBubbleTextColor",
+        border: "flockmodBubbleBorderColor"
+    };
+
+    const BUB_CUSTOM_DEFAULTS = { bg: "#f48fb1", text: "#3a1020", border: "#e0709a" };
+
+    const bubButterfly = (w) => {
+        const wing = '<path d="M20 15 C14 3 3 1 2 8 C1 15 11 17 20 16Z" class="fmbA"/>' +
+                     '<path d="M20 17 C13 18 6 23 8 28 C11 32 18 25 20 17Z" class="fmbB"/>' +
+                     '<circle cx="8" cy="8" r="2.2" class="fmbC"/><circle cx="12" cy="25" r="1.3" class="fmbC"/>';
+        return `<svg viewBox="0 0 40 32" width="${w}"><g class="fmbWing">${wing}</g>` +
+               `<g transform="translate(40 0) scale(-1 1)"><g class="fmbWing">${wing}</g></g>` +
+               '<rect x="18.9" y="9" width="2.2" height="15" rx="1.1" class="fmbD"/>' +
+               '<path d="M19.6 10 C18 5 16 4 14 3 M20.4 10 C22 5 24 4 26 3" class="fmbDs" stroke-width="1" fill="none" stroke-linecap="round"/></svg>';
+    };
+    const bubLeaf = (w, cls, rot) =>
+        `<svg viewBox="0 0 24 14" width="${w}" style="transform: rotate(${rot}deg)"><path d="M1 7 C6 0 17 0 23 7 C17 14 6 14 1 7Z" class="${cls}"/><path d="M3 7 L20 7" stroke="#00000040" stroke-width=".9"/></svg>`;
+    const bubHorn = (flip) =>
+        `<svg viewBox="0 0 24 30" width="11"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M3 30 C2 17 9 6 22 1 C15 9 12 18 15 30Z" class="fmbA"/><path d="M22 1 C18 5 16 8 14.5 12 C16.5 10 18.5 9 19.5 9 C20.5 6 21.5 3.5 22 1Z" class="fmbC"/></svg>`;
+    const bubHeart = (w, cls) =>
+        `<svg viewBox="0 0 20 18" width="${w}"><path d="M10 17 C4 12 1 9 1 6 C1 3 3 1 6 1 C8 1 9 2 10 4 C11 2 12 1 14 1 C17 1 19 3 19 6 C19 9 16 12 10 17Z" class="${cls}"/></svg>`;
+    const bubAt = (css, html) => `<span class="fmBubPart" style="${css}">${html}</span>`;
+    const bubStar = (w, cls, extra = "") => {
+        let d = "";
+        for (let i = 0; i < 10; i++) {
+            const ang = -Math.PI / 2 + i * Math.PI / 5;
+            const r = i % 2 ? 4.3 : 9.5;
+            d += `${i ? "L" : "M"}${(10 + r * Math.cos(ang)).toFixed(1)} ${(10.5 + r * Math.sin(ang)).toFixed(1)}`;
+        }
+        return `<svg viewBox="0 0 20 20" width="${w}"><path d="${d}Z" class="${cls}" stroke-linejoin="round"${extra}/></svg>`;
+    };
+    const bubFlower = (w) => {
+        let petals = "";
+        for (let i = 0; i < 5; i++) {
+            petals += `<path d="M0 0 C-5 -3 -5 -8.5 0 -9 C5 -8.5 5 -3 0 0Z" transform="rotate(${i * 72})" class="fmbA fmbBs" stroke-width=".9"/>`;
+        }
+        return `<svg viewBox="-10 -10 20 20" width="${w}"><g transform="rotate(12)">${petals}</g><circle r="2" class="fmbC"/></svg>`;
+    };
+    /* Classic set (matches the older popup decorations) */
+    const bubCatEar = (flip) => `<svg viewBox="0 0 14 12" width="14"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M1 12 L6 2 Q7 0 8 2 L13 12Z" class="fmbA fmbBs" stroke-width="1.3" stroke-linejoin="round"/><path d="M4.2 11.4 L7 5.5 L9.8 11.4Z" class="fmbC"/></svg>`;
+    const bubFoxEar = (flip) => `<svg viewBox="0 0 14 14" width="14"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M1 14 L6 1.5 Q7 0 8 1.5 L13 14Z" class="fmbA fmbBs" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.1 5.5 L6.3 2.3 Q7 1.3 7.7 2.3 L8.9 5.5Z" class="fmbB"/><path d="M4.6 13.4 L7 7.4 L9.4 13.4Z" class="fmbC"/></svg>`;
+    const bubBearEar = '<svg viewBox="0 0 12 11" width="13"><circle cx="6" cy="6" r="5.2" class="fmbA fmbBs" stroke-width="1.2"/><circle cx="6" cy="6.6" r="2.5" class="fmbC"/></svg>';
+    const bubPaw = '<svg viewBox="0 0 12 8" width="13"><ellipse cx="6" cy="4" rx="5.4" ry="3.6" class="fmbA fmbBs" stroke-width="1.1"/><circle cx="3.7" cy="3.4" r=".95" class="fmbC"/><circle cx="6" cy="2.7" r=".95" class="fmbC"/><circle cx="8.3" cy="3.4" r=".95" class="fmbC"/></svg>';
+    const bubDogEar = (flip) => `<svg viewBox="0 0 10 20" width="10"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M8 1 C3 0 0 5 1 12 C2 18 5 20 7 19 C9 18 9 12 9 7 C9 4 10 2 8 1Z" class="fmbA fmbBs" stroke-width="1"/></svg>`;
+
+    /* Each style: colors (bg, text, border + a/b/c/d for the little
+       decoration) and the decoration itself. Special looks (fonts,
+       seeds, glow...) live in style.css under [data-fm-bub="key"]. */
+    const BUB_STYLES = {
+        none: { label: "Off (FlockMod's normal chat)", group: "" },
+        simple: { label: "Simple", group: "Basic",
+            c: { bg: "#f48fb1", text: "#3a1020", border: "#f48fb1" } },
+
+        glitch: { label: "Glitch", group: "Dark & neutral",
+            c: { bg: "#12121a", text: "#e6e6f0", border: "#2a2a3a", a: "#00e5ff", b: "#ff2bd6" },
+            deco: bubAt("top: -9px; right: -9px", '<svg viewBox="0 0 22 22" width="15"><rect x="8" y="0" width="6" height="6" class="fmbB"/><rect x="14" y="6" width="6" height="6" class="fmbA"/><rect x="2" y="10" width="4" height="4" fill="#fff" opacity=".55"/></svg>') },
+        moth: { label: "Moth / butterfly", group: "Dark & neutral",
+            c: { bg: "#352d3d", text: "#efe6f5", border: "#56495f", a: "#b9a2cf", b: "#8d7aa3", c: "#5b4a6e", d: "#2d2533" },
+            deco: bubAt("top: -15px; right: -12px", bubButterfly(28)) },
+        leaves: { label: "Leaves", group: "Dark & neutral",
+            c: { bg: "#2c4534", text: "#e3f1e6", border: "#4b6e55", a: "#7fb58c", b: "#4f8a5e" },
+            deco: bubAt("bottom: -8px; left: -12px", bubLeaf(22, "fmbA", -150)) + bubAt("top: -11px; right: 12px", bubLeaf(16, "fmbB", -60)) },
+        strawberry: { label: "Strawberry", group: "Dark & neutral",
+            c: { bg: "#d8465a", text: "#ffffff", border: "#b33447", a: "#4f9e4a", b: "#2f6e30", c: "#ffe39a" },
+            deco: bubAt("top: -11px; right: 12px", '<svg viewBox="0 0 44 22" width="30"><path d="M22 8 L15 2 L17 9 L6 7 L13 12 L3 16 L16 14 L22 21 L28 14 L41 16 L31 12 L38 7 L27 9 L29 2Z" class="fmbA fmbBs" stroke-width="1" stroke-linejoin="round"/><rect x="20.8" y="0" width="2.6" height="9" rx="1.3" class="fmbB"/></svg>') },
+        dragon: { label: "Dragon", group: "Dark & neutral",
+            c: { bg: "#2e1210", text: "#f5dccb", border: "#7a2b1c", a: "#8a3a26", b: "#d9532c", c: "#e2a57c" },
+            deco: bubAt("top: -13px; left: 10px", bubHorn(false)) + bubAt("top: -13px; right: 10px", bubHorn(true)) +
+                  bubAt("bottom: -14px; left: -24px", '<svg viewBox="0 0 64 40" width="34"><path d="M62 2 C44 4 34 28 14 29" class="fmbAs" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M15 29 L3 20 L7 31 L0 39 L16 34Z" class="fmbB"/></svg>') },
+        gothic: { label: "Gothic lace", group: "Dark & neutral",
+            c: { bg: "#2a1119", text: "#f1dfe5", border: "#6b1e33", a: "#9a8290", c: "#e05a78" },
+            deco: bubAt("top: -12px; right: -6px", '<svg viewBox="0 0 60 26" width="30"><path d="M30 10 C24 2 12 2 2 8 C8 9 10 12 10 16 C14 13 18 14 20 18 C22 14 26 13 30 16 C34 13 38 14 40 18 C42 14 46 13 50 16 C50 12 52 9 58 8 C48 2 36 2 30 10Z" class="fmbA"/><path d="M26.5 9 L27 4 L29 8 L31 8 L33 4 L33.5 9 Q30 15 26.5 9Z" class="fmbA"/><circle cx="28.6" cy="9.3" r=".8" class="fmbC"/><circle cx="31.4" cy="9.3" r=".8" class="fmbC"/></svg>') },
+        nightsky: { label: "Night sky", group: "Dark & neutral",
+            c: { bg: "#1c2a55", text: "#eef1fb", border: "#8a7a55", a: "#e8c97a" },
+            deco: bubAt("top: -9px; right: -8px", '<svg viewBox="0 0 20 20" width="18"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8Z" class="fmbA fmbTwinkle"/></svg>') },
+        terminal: { label: "Terminal", group: "Dark & neutral",
+            c: { bg: "#0b120b", text: "#6dff9a", border: "#2f7a45" } },
+        ink: { label: "Ink (sumi-e)", group: "Dark & neutral",
+            c: { bg: "#ece4d3", text: "#1a1917", border: "#1a1917", a: "#c23b2e", b: "#1a1917", c: "#f6efe2" },
+            /* an ink blot on the corner + the red seal stamp */
+            deco: bubAt("top: -9px; right: -9px", '<svg viewBox="0 0 24 22" width="22"><g class="fmbB">' +
+                      '<path d="M11 3 C15 2 19 5 19 9 C20 13 17 17 12 17 C8 18 4 15 4 11 C3 7 7 3 11 3Z"/>' +
+                      '<circle cx="21.5" cy="3.5" r="1.6"/><circle cx="22.5" cy="14" r="1"/><circle cx="3" cy="18.5" r="1.1"/></g></svg>') +
+                  bubAt("bottom: -9px; left: -12px", '<svg viewBox="0 0 22 22" width="22"><circle cx="-1" cy="4" r="1.2" class="fmbB"/><circle cx="2" cy="1" r=".8" class="fmbB"/>' +
+                      '<g transform="rotate(-6 8 13)"><rect x="0" y="5" width="16" height="16" rx="2" class="fmbA"/>' +
+                      '<text x="8" y="17" text-anchor="middle" font-size="10.5" font-family="Yu Mincho, MS Mincho, Noto Serif CJK JP, serif" class="fmbC">印</text></g></svg>') },
+        spiderweb: { label: "Spiderweb", group: "Dark & neutral",
+            c: { bg: "#2c2c32", text: "#ececf0", border: "#4a4a54", a: "#9a9aa6" },
+            deco: bubAt("top: -3px; left: -3px", '<svg viewBox="0 0 50 50" width="22" opacity=".85"><g class="fmbAs" stroke-width=".9" fill="none"><path d="M0 0 L50 10 M0 0 L40 30 M0 0 L25 45 M0 0 L8 50"/><path d="M15 3 Q12 5 12 9 Q9 10 7.5 13.5 Q4 13 2.4 15"/><path d="M30 6 Q23 10 24 18 Q17 20 15 27 Q8 27 4.8 30"/></g></svg>') },
+        rose: { label: "Thorned rose", group: "Dark & neutral",
+            c: { bg: "#321820", text: "#f6e1e6", border: "#7a2a3b", a: "#a8213b", b: "#3d6b3f", c: "#5e0f20" },
+            deco: bubAt("top: -10px; left: -10px", '<svg viewBox="0 0 30 30" width="20"><path d="M4 22 C2 18 6 16 10 19Z" class="fmbB"/><path d="M26 22 C28 18 24 16 20 19Z" class="fmbB"/><circle cx="15" cy="14" r="10" class="fmbA"/><path d="M15 14 m-2.5 0 a2.5 2.5 0 1 1 5 0 a5 5 0 1 1 -10 0 a7.5 7.5 0 1 1 15 0" class="fmbCs" stroke-width="1.4" fill="none"/></svg>') },
+        deepsea: { label: "Deep sea", group: "Dark & neutral",
+            c: { bg: "#0d2533", text: "#dff9f6", border: "#2a8f93", a: "#3fe0d0" },
+            deco: bubAt("top: -18px; left: -10px", '<svg viewBox="0 0 16 40" width="9"><g class="fmbAs" fill="none" opacity=".75"><circle cx="8" cy="34" r="4"/><circle cx="4" cy="20" r="2.5"/><circle cx="10" cy="8" r="3"/></g></svg>') },
+        minimal: { label: "Minimal", group: "Dark & neutral",
+            c: { bg: "#2a2c30", text: "#e8e9ec", border: "#3a3d43", a: "#8fa3bf" } },
+
+        hearts: { label: "Hearts", group: "Cute",
+            c: { bg: "#ffd6e0", text: "#6a2a3a", border: "#f48fb1", a: "#f48fb1", b: "#ff6f9a", c: "#ffb3c7" },
+            deco: bubAt("top: -14px; right: -8px", `<span class="fmbFloat" style="display: flex; gap: 2px; align-items: flex-end">${bubHeart(10, "fmbA")}${bubHeart(15, "fmbB")}${bubHeart(8, "fmbC")}</span>`) },
+        butterfly: { label: "Butterfly (pastel)", group: "Cute",
+            c: { bg: "#efe3ff", text: "#4a3566", border: "#c7a8f0", a: "#ffb3d1", b: "#c7a8f0", c: "#ffffff", d: "#6b4f8a" },
+            deco: bubAt("top: -15px; right: -12px", bubButterfly(28)) },
+        ghost: { label: "Ghost", group: "Cute",
+            c: { bg: "#f2f2f7", text: "#34343c", border: "#f2f2f7", a: "#ffffff", b: "#c9c9d4", c: "#34343c" },
+            deco: bubAt("top: -9px; left: -8px", '<svg viewBox="0 0 20 22" width="18"><path d="M2 20 L2 10 A8 8 0 0 1 18 10 L18 20 L15 17 L12 20 L9 17 L6 20 L4 18Z" class="fmbA fmbBs" stroke-width="1"/><circle cx="7.5" cy="10" r="1.4" class="fmbC"/><circle cx="12.5" cy="10" r="1.4" class="fmbC"/></svg>') },
+        bunny: { label: "Bunny", group: "Cute",
+            c: { bg: "#fff0f3", text: "#6b3b48", border: "#f3c1cc", a: "#fff0f3", b: "#f3c1cc", c: "#ffc2d1" },
+            deco: bubAt("top: -30px; left: 18px", '<svg viewBox="0 0 30 26" width="40"><g transform="rotate(-12 9 24)"><ellipse cx="9" cy="13" rx="4.5" ry="12" class="fmbA fmbBs" stroke-width="1.3"/><ellipse cx="9" cy="14" rx="2" ry="8" class="fmbC"/></g><g transform="rotate(12 21 24)"><ellipse cx="21" cy="13" rx="4.5" ry="12" class="fmbA fmbBs" stroke-width="1.3"/><ellipse cx="21" cy="14" rx="2" ry="8" class="fmbC"/></g></svg>') },
+        cat: { label: "Cat", group: "Cute",
+            c: { bg: "#f1e2d3", text: "#4a3326", border: "#c9a58c", a: "#f1e2d3", b: "#b98f74", c: "#f4a7b9" },
+            deco: bubAt("top: -10px; left: 12px", bubCatEar(false)) + bubAt("top: -10px; left: 30px", bubCatEar(true)) +
+                  bubAt("bottom: 2px; right: -12px", '<svg viewBox="0 0 14 22" width="13"><path d="M1 20 C10 20 12 13 8 9 C4 5 7 1 12 2" class="fmbBs" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg>') },
+        dog: { label: "Dog", group: "Cute",
+            c: { bg: "#f3e3cf", text: "#4a3322", border: "#c89b6d", a: "#a8764c", b: "#6e4b30" },
+            deco: bubAt("top: -2px; left: -5px", bubDogEar(false)) + bubAt("top: -2px; right: -5px", bubDogEar(true)) },
+        bear: { label: "Bear", group: "Cute",
+            c: { bg: "#ead2b8", text: "#4a3020", border: "#9a6b4b", a: "#9a6b4b", b: "#6e4a32", c: "#f3dcc4" },
+            deco: bubAt("top: -7px; left: 10px", bubBearEar) + bubAt("top: -7px; left: 28px", bubBearEar) +
+                  bubAt("bottom: -6px; left: 12px", bubPaw) + bubAt("bottom: -6px; left: 30px", bubPaw) },
+        fox: { label: "Fox", group: "Cute",
+            c: { bg: "#e8894d", text: "#fffaf5", border: "#c2622b", a: "#e07a3c", b: "#5a2e14", c: "#fff1e6" },
+            deco: bubAt("top: -12px; left: 11px", bubFoxEar(false)) + bubAt("top: -12px; left: 29px", bubFoxEar(true)) +
+                  bubAt("bottom: 1px; right: -16px", '<svg viewBox="0 0 18 16" width="18"><path d="M0 12 C6 14 14 12 17 4 C13 6 9 6 6 5 C3 6 1 9 0 12Z" class="fmbA fmbBs" stroke-width="1"/><path d="M17 4 C14.5 5.5 13 6 11.5 6.3 C13 8 15 7 17 4Z" class="fmbC"/></svg>') },
+        stars: { label: "Stars", group: "Cute",
+            c: { bg: "#232a4d", text: "#fff3d0", border: "#c9a95a", a: "#ffe08a", b: "#fff3b8" },
+            deco: bubAt("top: -10px; right: -9px", `<span class="fmbTwinkle" style="display: block">${bubStar(19, "fmbA")}</span>`) +
+                  bubAt("top: -6px; right: 14px", bubStar(9, "fmbB")) + bubAt("bottom: -5px; left: -6px", bubStar(10, "fmbB")) },
+        sakura: { label: "Sakura", group: "Cute",
+            c: { bg: "#ffe3ee", text: "#6a2a45", border: "#f4a7c0", a: "#ffb7cf", b: "#e87fa3", c: "#ffe08a" },
+            deco: bubAt("top: -11px; right: -10px", bubFlower(22)) +
+                  bubAt("bottom: -7px; left: -6px", '<svg viewBox="-6 -12 12 13" width="9" style="transform: rotate(-30deg)"><path d="M0 0 C-5 -3 -5 -10 0 -12 C1 -10 -0.5 -9.5 0 -10 C0.5 -9.5 -1 -10 0 -12 C5 -10 5 -3 0 0Z" class="fmbA fmbBs" stroke-width=".9"/></svg>') },
+        witch: { label: "Witch hat", group: "Cute",
+            c: { bg: "#3a2a55", text: "#efe6ff", border: "#6b4f99", a: "#2a1d3f", b: "#9b6ad6", c: "#ffd86b" },
+            deco: bubAt("top: -17px; left: 4px", '<svg viewBox="0 0 28 20" width="30"><g transform="rotate(-14 14 18)"><path d="M13 1 C17 3 19 8 21 15 L7 15 C9 10 10 5 13 1Z" class="fmbA fmbBs" stroke-width="1"/><path d="M13 1 C11 0 8 1 7 3" class="fmbBs" stroke-width="1.6" fill="none" stroke-linecap="round"/><rect x="8" y="12" width="12" height="2.6" rx=".8" class="fmbB"/><ellipse cx="14" cy="15.5" rx="11" ry="2.4" class="fmbA fmbBs" stroke-width="1"/></g></svg>') +
+                  bubAt("top: -7px; right: -6px", `<span class="fmbTwinkle" style="display: block">${bubStar(12, "fmbC")}</span>`) },
+        pixel: { label: "Pixel / 8-bit", group: "Cute",
+            c: { bg: "#7c5cff", text: "#ffffff", border: "#7c5cff", a: "#5a3fd6" } },
+        sticky: { label: "Sticky note", group: "Cute",
+            c: { bg: "#fff3a8", text: "#3a3520", border: "#fff3a8" } }
+    };
+
+    const BUB_STYLE_CHOICES = Object.keys(BUB_STYLES);
+    const BUB_ROLE_KEYS = ["bg", "text", "border", "a", "b", "c", "d"];
+
+    function readSavedBubbles() {
+        const style = localStorage.getItem(BUB_LS.style);
+        const colors = {};
+
+        Object.keys(BUB_CUSTOM_DEFAULTS).forEach((k) => {
+            const v = localStorage.getItem(BUB_LS[k]);
+            colors[k] = /^#[0-9a-f]{6}$/i.test(v || "") ? v : BUB_CUSTOM_DEFAULTS[k];
+        });
+
+        return {
+            style: BUB_STYLES[style] ? style : "none",
+            right: localStorage.getItem(BUB_LS.right) !== "false",    /* default ON */
+            others: localStorage.getItem(BUB_LS.others) !== "false",  /* default ON */
+            deco: localStorage.getItem(BUB_LS.deco) !== "false",      /* default ON */
+            custom: localStorage.getItem(BUB_LS.custom) === "true",
+            colors
+        };
+    }
+
+    let liveBubbles = null;
+
+    function applySavedBubbles() {
+        applyBubbles(readSavedBubbles());
+    }
+
+    function applyBubbles(st) {
+        liveBubbles = st;
+        const root = document.documentElement;
+        const style = BUB_STYLES[st.style] || BUB_STYLES.none;
+        const on = st.style !== "none";
+
+        root.classList.toggle("fmBubOn", on);
+        root.classList.toggle("fmBubRight", on && st.right);
+        root.classList.toggle("fmBubOthers", on && st.others);
+
+        if (on) {
+            root.dataset.fmBub = st.style;
+            const c = { ...style.c };
+
+            if (st.custom) {
+                c.bg = st.colors.bg;
+                c.text = st.colors.text;
+                c.border = st.colors.border;
+            }
+
+            BUB_ROLE_KEYS.forEach((k) => {
+                root.style.setProperty(`--fmbub-${k}`, c[k] || c.border || c.bg);
+            });
+        } else {
+            delete root.dataset.fmBub;
+        }
+
+        redecorateAllBubbles();
+    }
+
+    /* ---- decorations on your messages ---- */
+
+    function bubbleDecoSig() {
+        const st = liveBubbles;
+        return st && st.style !== "none" && st.deco && customizationsEnabled && BUB_STYLES[st.style].deco
+            ? st.style
+            : "";
+    }
+
+    function decorateBubbleBlock(block, sig) {
+        const text = block.querySelector(".msgLine .msgText");
+
+        if (!text) {
+            return;
+        }
+
+        const old = text.querySelector(":scope > .fmBubDeco");
+
+        if (old && old.dataset.sig === sig) {
+            return;
+        }
+
+        if (old) {
+            old.remove();
+        }
+
+        text.classList.toggle("fmBubHasDeco", Boolean(sig));
+
+        if (!sig) {
+            return;
+        }
+
+        const deco = document.createElement("span");
+        deco.className = "fmBubDeco";
+        deco.dataset.sig = sig;
+        deco.setAttribute("aria-hidden", "true");
+        deco.innerHTML = BUB_STYLES[sig].deco;
+        text.appendChild(deco);
+    }
+
+    const MY_BLOCKS = '.chatBlock.messageBlock[data-type="MYMSG"]';
+
+    function redecorateAllBubbles() {
+        const sig = bubbleDecoSig();
+
+        document.querySelectorAll(`#chatMessages ${MY_BLOCKS}, .themeModBubblePreview ${MY_BLOCKS}`)
+            .forEach((block) => decorateBubbleBlock(block, sig));
+
+        /* Leftovers (e.g. after turning decorations off) */
+        if (!sig) {
+            document.querySelectorAll(".fmBubDeco").forEach((el) => el.remove());
+            document.querySelectorAll(".fmBubHasDeco").forEach((el) => el.classList.remove("fmBubHasDeco"));
+        }
+    }
+
+    /* Watches the chat box for new messages. Re-attached from the
+       500ms loop when FlockMod creates or replaces #chatMessages. */
+    const bubbleWatch = { el: null, observer: null };
+
+    function watchBubbleChat() {
+        const el = document.getElementById("chatMessages");
+
+        if (el === bubbleWatch.el) {
+            return;
+        }
+
+        if (bubbleWatch.observer) {
+            bubbleWatch.observer.disconnect();
+        }
+
+        bubbleWatch.el = el;
+        bubbleWatch.observer = null;
+
+        if (!el) {
+            return;
+        }
+
+        bubbleWatch.observer = new MutationObserver((records) => {
+            const sig = bubbleDecoSig();
+
+            if (!sig) {
+                return;
+            }
+
+            records.forEach((record) => record.addedNodes.forEach((node) => {
+                if (node.nodeType !== 1 || node.classList.contains("fmBubDeco") || node.closest(".fmBubDeco")) {
+                    return;
+                }
+
+                const block = node.closest(MY_BLOCKS);
+
+                if (block) {
+                    decorateBubbleBlock(block, sig);
+                } else {
+                    node.querySelectorAll(MY_BLOCKS).forEach((b) => decorateBubbleBlock(b, sig));
+                }
+            }));
+        });
+
+        bubbleWatch.observer.observe(el, { childList: true, subtree: true });
+        redecorateAllBubbles();
+    }
+
+    /* ---- menu (Interface panel) ---- */
+
+    function buildBubbleRowsHTML() {
+        const toggle = (id, def) => `
+            <label class="themeModToggle">
+                <input type="checkbox" id="${id}" data-default="${def}"${def ? " checked" : ""}>
+                <span class="themeModToggleTrack">
+                    <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                    <span class="themeModToggleOption themeModToggleOn">ON</span>
+                    <span class="themeModToggleThumb"></span>
+                </span>
+            </label>`;
+
+        const groups = {};
+        BUB_STYLE_CHOICES.forEach((k) => {
+            const g = BUB_STYLES[k].group;
+            (groups[g] = groups[g] || []).push(k);
+        });
+
+        const options = Object.entries(groups).map(([g, keys]) => {
+            const opts = keys.map((k) => `<option value="${k}"${k === "none" ? " selected" : ""}>${BUB_STYLES[k].label}</option>`).join("");
+            return g ? `<optgroup label="${g}">${opts}</optgroup>` : opts;
+        }).join("");
+
+        const msg = (mine, name, lines) =>
+            `<div class="chatBlock messageBlock" data-type="${mine ? "MYMSG" : "MSG"}">` +
+            `<div class="msgTime">13:27</div><div class="msgUsername">${name}</div><div class="msgContent">` +
+            lines.map((t) => `<div class="msgLine"><div class="msgTime"></div><div class="msgText">${t}</div></div>`).join("") +
+            "</div></div>";
+
+        return `
+<div class="themeModSubsectionTitle themeModSpacingSubsection">
+    Chat Bubbles
+</div>
+
+<div class="themeModSetting themeModNoDivider">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Bubble style</div>
+        <div class="themeModSettingDescription">
+            Puts chat messages in bubbles, with your own in a special style. Only you see this.
+        </div>
+    </div>
+    <select id="themeModBubbleStyle" class="themeModSelect" data-default="none">${options}</select>
+</div>
+
+<div class="themeModBubblePreviewWrap themeModBubbleOptionRow">
+    <div class="themeModBubblePreview">
+        ${msg(false, "mochi", ["anyone want to collab?"])}
+        ${msg(true, "you", ["me!! what should we draw?"])}
+        ${msg(false, "mochi", ["cats in a garden?"])}
+        ${msg(true, "you", ["yesss", "i'll start the sketch"])}
+    </div>
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">My messages on the right</div>
+        <div class="themeModSettingDescription">Like a phone chat: yours on the right, everyone else on the left.</div>
+    </div>
+    ${toggle("themeModBubbleRight", true)}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Bubble everyone else</div>
+        <div class="themeModSettingDescription">Simple bubbles for other people's messages. Their text keeps your chat colors, and names keep their role colors.</div>
+    </div>
+    ${toggle("themeModBubbleOthers", true)}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Bubble decorations</div>
+        <div class="themeModSettingDescription">The little extras (moth, horns, hearts...) on the first message of each of your message groups.</div>
+    </div>
+    ${toggle("themeModBubbleDeco", true)}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Custom bubble colors</div>
+        <div class="themeModSettingDescription">OFF uses the style's own colors. ON lets you pick your bubble, text and border colors.</div>
+    </div>
+    ${toggle("themeModBubbleCustom", false)}
+</div>
+
+<div class="themeModBubbleColors">
+    ${[["bg", "Bubble"], ["text", "Text"], ["border", "Border"]].map(([k, label]) => `
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow">
+        <div class="themeModSettingText"><div class="themeModSettingName">${label}</div></div>
+        <input type="color" data-bubble-color="${k}" value="${BUB_CUSTOM_DEFAULTS[k]}" data-default="${BUB_CUSTOM_DEFAULTS[k]}">
+    </div>`).join("")}
+</div>`;
+    }
+
+    function setupBubbleControls(dialog) {
+        const styleSelect = dialog.querySelector("#themeModBubbleStyle");
+
+        if (!styleSelect) {
+            return { save() {}, reset() {} };
+        }
+
+        const right = dialog.querySelector("#themeModBubbleRight");
+        const others = dialog.querySelector("#themeModBubbleOthers");
+        const deco = dialog.querySelector("#themeModBubbleDeco");
+        const custom = dialog.querySelector("#themeModBubbleCustom");
+        const colorsBox = dialog.querySelector(".themeModBubbleColors");
+        const pickers = {};
+
+        dialog.querySelectorAll("[data-bubble-color]").forEach((input) => {
+            pickers[input.dataset.bubbleColor] = input;
+        });
+
+        function readInputs() {
+            const colors = {};
+            Object.keys(pickers).forEach((k) => { colors[k] = pickers[k].value; });
+
+            return {
+                style: styleSelect.value,
+                right: right.checked,
+                others: others.checked,
+                deco: deco.checked,
+                custom: custom.checked,
+                colors
+            };
+        }
+
+        function updateRows(st) {
+            const on = st.style !== "none";
+
+            dialog.querySelectorAll(".themeModBubbleOptionRow").forEach((row) => {
+                row.style.display = on ? "" : "none";
+            });
+            colorsBox.style.display = on && st.custom ? "" : "none";
+            deco.closest(".themeModSetting").style.display = on && BUB_STYLES[st.style].deco ? "" : "none";
+        }
+
+        function preview() {
+            const st = readInputs();
+            updateRows(st);
+            applyBubbles(st);
+        }
+
+        function fill(st) {
+            styleSelect.value = st.style;
+            right.checked = st.right;
+            others.checked = st.others;
+            deco.checked = st.deco;
+            custom.checked = st.custom;
+            Object.keys(pickers).forEach((k) => { pickers[k].value = st.colors[k]; });
+            updateRows(st);
+        }
+
+        fill(readSavedBubbles());
+
+        styleSelect.addEventListener("change", preview);
+        [right, others, deco].forEach((el) => el.addEventListener("change", preview));
+        Object.values(pickers).forEach((input) => input.addEventListener("input", preview));
+
+        /* Turning custom colors on starts from the style's own colors */
+        custom.addEventListener("change", () => {
+            const style = BUB_STYLES[styleSelect.value];
+
+            if (custom.checked && style && style.c) {
+                Object.keys(pickers).forEach((k) => {
+                    if (style.c[k]) {
+                        pickers[k].value = style.c[k];
+                    }
+                });
+            }
+            preview();
+        });
+
+        return {
+            save() {
+                const st = readInputs();
+                localStorage.setItem(BUB_LS.style, st.style);
+                localStorage.setItem(BUB_LS.right, st.right);
+                localStorage.setItem(BUB_LS.others, st.others);
+                localStorage.setItem(BUB_LS.deco, st.deco);
+                localStorage.setItem(BUB_LS.custom, st.custom);
+                Object.keys(BUB_CUSTOM_DEFAULTS).forEach((k) => localStorage.setItem(BUB_LS[k], st.colors[k]));
+            },
+            reset() {
+                const st = {
+                    style: "none", right: true, others: true, deco: true, custom: false,
+                    colors: { ...BUB_CUSTOM_DEFAULTS }
+                };
+                fill(st);
+                applyBubbles(st);
+                this.save();
             }
         };
     }
@@ -6192,6 +7306,17 @@ function buildSimpleColorRowsHTML() {
         add(DECO_LS.size, "int", 100, { min: 70, max: 150 });
         add(DECO_LS.match, "bool", true);
         add(DECO_LS.menu, "bool", false);
+        add(DECO_LS.frame, "bool", false);
+        add(DECO_LS.frameCustom, "bool", false);
+        add(DECO_LS.frameBorder, "bool", false);
+        DECO_FRAME_PICKERS.forEach(([k, ls]) => add(DECO_LS[ls], "color", DECO_FRAME_FALLBACK[k]));
+        add(DECO_LS.frameBorderColor, "color", DECO_FRAME_FALLBACK.border);
+        add(BUB_LS.style, "enum", "none", { choices: BUB_STYLE_CHOICES });
+        add(BUB_LS.right, "bool", true);
+        add(BUB_LS.others, "bool", true);
+        add(BUB_LS.deco, "bool", true);
+        add(BUB_LS.custom, "bool", false);
+        Object.keys(BUB_CUSTOM_DEFAULTS).forEach((k) => add(BUB_LS[k], "color", BUB_CUSTOM_DEFAULTS[k]));
         Object.keys(DECO_COLOR_DEFAULTS).forEach((k) => add(DECO_LS[k], "color", DECO_COLOR_DEFAULTS[k]));
 
         themeFieldsCache = fields;
@@ -7287,6 +8412,8 @@ function buildSimpleColorRowsHTML() {
 
 ${buildDecoRowsHTML()}
 
+${buildBubbleRowsHTML()}
+
         </div>
 
                         <div
@@ -8003,6 +9130,9 @@ const soundControls = setupSoundsPanel(dialog);
 /* Popup decorations (Interface panel) */
 const decoControls = setupDecoControls(dialog);
 
+/* Chat bubbles (Interface panel) */
+const bubbleControls = setupBubbleControls(dialog);
+
 /* Safety tab */
 const safetyControls = setupSafetyPanel(dialog);
 
@@ -8148,6 +9278,7 @@ const safetyControls = setupSafetyPanel(dialog);
             animationControls.save();
             soundControls.save();
             decoControls.save();
+            bubbleControls.save();
             safetyControls.save();
         });
 
@@ -8288,6 +9419,7 @@ const safetyControls = setupSafetyPanel(dialog);
             animationControls.reset();
             soundControls.reset();
             decoControls.reset();
+            bubbleControls.reset();
             safetyControls.reset();
 
             /* Reset only clears the colors of the mode you are in, so
@@ -9408,7 +10540,7 @@ const safetyControls = setupSafetyPanel(dialog);
                 step("fa-font", "Font", "Change the font, its size and weight. You can add any Google Font by name, or upload your own.", title("Font")),
                 step("fa-arrows-alt-v", "Spacing and corners", "Make FlockMod roomier or more compact, and round the corners of buttons and boxes.", title("Spacing")),
                 step("fa-heart", "Slider thumbs", "Turn slider and switch thumbs into shapes like hearts, stars or cats.", title("Slider Thumbs")),
-                step("fa-cat", "Popup decorations", "Add ears, tails, flowers or a hat to every popup. The preview shows how it looks.", title("Popup Decorations")),
+                step("fa-cat", "Popup decorations", "Add ears, tails, flowers, dragons, moths and more to every popup. The preview shows how it looks.", title("Popup Decorations")),
                 step("fa-undo-alt", "Reset one part", "\u21BA next to a section title resets just that section.", el(".themeModSubsectionReset"))
             ],
             colors: simple ? [
@@ -10309,6 +11441,7 @@ const safetyControls = setupSafetyPanel(dialog);
                 applySavedAnimations();
                 applySavedSounds();
                 applySavedDeco();
+                applySavedBubbles();
                 applySavedTroll();
                 rememberMenuRect(dialog);
 
@@ -10749,6 +11882,7 @@ const safetyControls = setupSafetyPanel(dialog);
         applySavedAnimations();
         applySavedSounds();
         applySavedDeco();
+        applySavedBubbles();
         applySavedTroll();
         applySavedBackgrounds();
         applySavedThumbShape();
@@ -10814,7 +11948,9 @@ const safetyControls = setupSafetyPanel(dialog);
             checkSeeThroughTargets();
             makeThumbRoom();     /* for sliders in popups opened later */
             watchSoundTargets(); /* chat / Messenger boxes for sounds */
+            checkMessengerBadge(); /* Messenger unread badge, for sounds */
             updateDecorations(); /* ears/tails on popups opened later */
+            watchBubbleChat();   /* chat bubble decorations */
         }, 500);
 
         /* Troll detection checks 4x a second (does nothing while off) */

@@ -3155,6 +3155,175 @@ html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmDeco
         fmDecoWag calc(.6s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1));
 }
 
+/* ---- Theme pack decorations (v1.3) ---- */
+
+.fmDeco .fmdOf { fill: var(--fmdeco-outline); }
+.fmDeco .fmdDs { fill: none; stroke: var(--fmdeco-detail); }
+.fmDeco .fmdSs { fill: none; stroke: var(--fmdeco-sparkle); }
+.fmDeco .fmdTermStroke { stroke: var(--fmdeco-detail); }
+.fmDeco .fmdJellyBell { opacity: .85; filter: drop-shadow(0 0 4px var(--fmdeco-detail)); }
+
+.fmDeco,
+.fmDecoFill { border-radius: inherit; }
+
+/* Overlays: follow the popup's box, never scaled by Decoration Size */
+.fmDecoPiece.fmDecoFill { scale: none; }
+.fmDecoFill i { position: absolute; display: block; pointer-events: none; }
+.fmDecoFill-frame { inset: calc(-1 * var(--fmdeco-bw, 1px)); }
+.fmDecoFill-frame > i { inset: 0; border-radius: inherit; }
+.fmDecoFill-title {
+    top: 0; left: 0; right: 0;
+    height: var(--fmdeco-tb, 30px);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    overflow: hidden;
+}
+.fmDecoFill-title > i { inset: 0; }
+.fmDecoFill-titleline { left: 10px; right: 10px; top: calc(var(--fmdeco-tb, 30px) - 3px); height: 6px; }
+.fmDecoFill-titleline svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fmDecoFill-topline {
+    top: calc(-1 * var(--fmdeco-bw, 1px)); left: calc(-1 * var(--fmdeco-bw, 1px)); right: calc(-1 * var(--fmdeco-bw, 1px));
+    height: 3px;
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    overflow: hidden;
+}
+.fmDecoFill-topline > i { inset: 0; background: var(--fmdeco-detail); }
+.fmDecoFill-under { left: 8px; right: 8px; top: calc(100% + var(--fmdeco-bw, 1px)); height: 7px; }
+.fmDecoFill-under > i { inset: 0; }
+
+/* Glitch */
+.fmdGlitchFrame {
+    box-shadow:
+        -3px 0 0 color-mix(in srgb, var(--fmdeco-detail) 70%, transparent),
+         3px 0 0 color-mix(in srgb, var(--fmdeco-sparkle) 70%, transparent);
+}
+.fmdScan { background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 3px); }
+.fmdScanSoft { opacity: .6; }
+.fmdSlice { left: -6px; right: -6px; height: 6px; opacity: 0; }
+.fmdSliceA { top: 30%; background: var(--fmdeco-detail); }
+.fmdSliceB { top: 64%; height: 4px; background: var(--fmdeco-sparkle); }
+
+/* Strawberry seeds / dragon scales on the title bar */
+.fmdSeeds {
+    background-image:
+        radial-gradient(1.1px 1.8px at 4px 5px, color-mix(in srgb, var(--fmdeco-sparkle) 45%, transparent) 99%, transparent),
+        radial-gradient(1.1px 1.8px at 16px 17px, color-mix(in srgb, var(--fmdeco-sparkle) 45%, transparent) 99%, transparent);
+    background-size: 24px 24px;
+}
+.fmdScales {
+    background-image: radial-gradient(circle at 50% 100%, transparent 5px,
+        color-mix(in srgb, var(--fmdeco-detail) 22%, transparent) 5.5px,
+        color-mix(in srgb, var(--fmdeco-detail) 22%, transparent) 6.6px, transparent 7px);
+    background-size: 12px 7px;
+}
+
+/* Gothic lace edge */
+.fmdLace {
+    background: radial-gradient(circle at 5px 0, var(--fmdeco-outline) 4.4px, transparent 5px) repeat-x;
+    background-size: 10px 7px;
+    opacity: .75;
+}
+
+/* Glows */
+.fmdTermGlow { box-shadow: 0 0 14px color-mix(in srgb, var(--fmdeco-detail) 22%, transparent); }
+.fmdSeaGlow { box-shadow: 0 0 22px color-mix(in srgb, var(--fmdeco-detail) 20%, transparent); }
+
+/* Moving parts rotate/scale around their own middle */
+.fmDeco .fmdWing { transform-origin: 20px 16px; }
+.fmDeco .fmdBloom,
+.fmDeco .fmdTwinkle,
+.fmDeco .fmdBounce,
+.fmDeco .fmdBatWings { transform-box: fill-box; transform-origin: center; }
+.fmDeco .fmdSway { transform-origin: 50% 100%; transform-box: fill-box; }
+.fmDeco .fmdDangle { transform-origin: 50% 0; }
+
+/* One-time open animations (Animations > Popups). Each plays a
+   few times at most and then stops. */
+@keyframes fmdFlap    { 50% { transform: scaleX(.2); } }
+@keyframes fmdSwayKf  { 25% { rotate: 6deg; } 75% { rotate: -5deg; } }
+@keyframes fmdBounceKf { 40% { transform: translateY(-4px); } 70% { transform: translateY(1px); } }
+@keyframes fmdFlutter { 50% { transform: scaleY(.7); } }
+@keyframes fmdTwinkleKf { 50% { transform: scale(.5) rotate(45deg); opacity: .5; } }
+@keyframes fmdBlink   { 50% { opacity: 0; } }
+@keyframes fmdStampKf { 0% { opacity: 0; scale: 1.8; } 100% { opacity: 1; scale: var(--fmdeco-size, 1); } }
+@keyframes fmdDangleKf { 40% { translate: 0 8px; } 70% { translate: 0 -2px; } }
+@keyframes fmdBloomKf { 0% { transform: scale(.4) rotate(-90deg); } 100% { transform: none; } }
+@keyframes fmdBobKf   { 50% { transform: translateY(-5px); } }
+@keyframes fmdRiseKf  { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes fmdSwishKf { 0%, 100% { rotate: 0deg; } 35% { rotate: -9deg; } 70% { rotate: 5deg; } }
+@keyframes fmdFadeKf  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fmdSliceKf {
+    0%   { opacity: .85; translate: -6px 0; }
+    25%  { opacity: 0; }
+    50%  { opacity: .7; translate: 5px 0; }
+    75%, 100% { opacity: 0; translate: 0 0; }
+}
+@keyframes fmdJoltKf {
+    0%   { translate: -3px 1px; }
+    30%  { translate: 3px -1px; }
+    60%  { translate: -1px 0; }
+    100% { translate: 0 0; }
+}
+
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmDecoFill {
+    animation: fmdFadeKf calc(.25s * var(--fm-anim-speed, 1)) ease-out backwards;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdGlitchFrame {
+    animation: fmdJoltKf calc(.35s * var(--fm-anim-speed, 1)) steps(3) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdSlice {
+    animation: fmdSliceKf calc(.45s * var(--fm-anim-speed, 1)) steps(1) calc(.05s * var(--fm-anim-speed, 1)) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdWing {
+    animation: fmdFlap calc(.32s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 4;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdSway {
+    animation:
+        fmDecoPop calc(.35s * var(--fm-anim-speed, 1)) ease-out backwards,
+        fmdSwayKf calc(1.4s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdBounce {
+    animation: fmdBounceKf calc(.5s * var(--fm-anim-speed, 1)) ease-out calc(.3s * var(--fm-anim-speed, 1)) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdBatWings {
+    animation: fmdFlutter calc(.25s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 4;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdTwinkle {
+    animation: fmdTwinkleKf calc(.5s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 3;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdCursor {
+    animation: fmdBlink calc(1s * var(--fm-anim-speed, 1)) steps(1) 4;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdStamp {
+    animation: fmdStampKf calc(.35s * var(--fm-anim-speed, 1)) ease-out calc(.25s * var(--fm-anim-speed, 1)) backwards;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdDangle {
+    animation:
+        fmDecoPop calc(.35s * var(--fm-anim-speed, 1)) ease-out backwards,
+        fmdDangleKf calc(1s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdBloom {
+    animation: fmdBloomKf calc(.6s * var(--fm-anim-speed, 1)) ease-out 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdBob {
+    animation: fmdBobKf calc(1.2s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdRise {
+    animation: fmdRiseKf calc(1.2s * var(--fm-anim-speed, 1)) ease-out 1;
+}
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdTailSwish {
+    animation:
+        fmDecoPop calc(.35s * var(--fm-anim-speed, 1)) ease-out backwards,
+        fmdSwishKf calc(.7s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1)) 2;
+}
+
+/* Menu preview box: its own title bar is 24px */
+.dialog[name="themeModMenu"] .themeModDecoPreview .fmDeco {
+    --fmdeco-tb: 24px;
+    --fmdeco-bw: 2px;
+    border-radius: 4px;
+}
+
 /* ---- menu rows + live preview ---- */
 
 .dialog[name="themeModMenu"] .themeModDecoPreviewWrap {
@@ -3192,6 +3361,180 @@ html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmDeco
     padding-bottom: 6px;
     padding-left: 14px;
 }
+
+
+/* =========================================================
+   CHAT BUBBLES (Interface > Chat Bubbles) - your screen only
+   html.fmBubOn:not(.flockmodCustomizationsDisabled)   = html.fmBubOn   (+ data-fm-bub="style")
+   Your messages: .messageBlock[data-type="MYMSG"]
+   Colors: --fmbub-bg / -text / -border, decoration -a -b -c -d
+   ========================================================= */
+
+/* Layout: time + name on one row, the messages under it */
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock > .msgContent {
+    flex: 0 0 100%;
+    display: block !important;
+    min-width: 0;
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgLine {
+    display: flex !important;
+    align-items: flex-end;
+    gap: 4px;
+    margin: 4px 0;
+    padding: 0 12px 0 4px;
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgLine > .msgTime:empty { display: none; }
+
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgText {
+    position: relative;
+    display: inline-block !important;
+    max-width: 85%;
+    padding: 5px 11px;
+    border-radius: 14px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+/* Everyone else: plain, see-through bubbles (keeps chat colors) */
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubOthers :is(#chatMessages, .themeModBubblePreview) .messageBlock:not([data-type="MYMSG"]) .msgText {
+    background: rgba(128, 128, 128, .2);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled):not(.fmBubOthers) :is(#chatMessages, .themeModBubblePreview) .messageBlock:not([data-type="MYMSG"]) .msgText {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+/* Yours on the right */
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] { justify-content: flex-end; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgLine { justify-content: flex-end; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] > .msgUsername { order: -1; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] > .msgTime { order: 0; margin-right: 12px; }
+
+/* Your bubble */
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    background-color: var(--fmbub-bg) !important;
+    color: var(--fmbub-text) !important;
+    border: 1.5px solid var(--fmbub-border);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText a { color: inherit !important; text-decoration: underline; }
+
+/* Room above for decorations that stick out of the top */
+html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 12px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="bunny"] :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 26px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="witch"] :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 17px; }
+/* Paws / petals / stars that hang below the bubble need a little room */
+html.fmBubOn:not(.flockmodCustomizationsDisabled):is([data-fm-bub="bear"], [data-fm-bub="stars"], [data-fm-bub="sakura"]) :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-bottom: 6px; }
+/* Tails sticking out on the right need room when bubbles are on the right */
+html.fmBubOn.fmBubRight:not(.flockmodCustomizationsDisabled):is([data-fm-bub="cat"], [data-fm-bub="fox"]) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText.fmBubHasDeco { margin-right: 8px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="stars"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 8px color-mix(in srgb, var(--fmbub-a) 25%, transparent); }
+
+.fmBubDeco { display: none; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled) .fmBubDeco {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    user-select: none;
+}
+.fmBubPart { position: absolute; line-height: 0; }
+.fmBubPart svg { display: block; overflow: visible; }
+
+.fmbA { fill: var(--fmbub-a); }  .fmbAs { stroke: var(--fmbub-a); }
+.fmbB { fill: var(--fmbub-b); }  .fmbBs { stroke: var(--fmbub-b); }
+.fmbC { fill: var(--fmbub-c); }  .fmbCs { stroke: var(--fmbub-c); }
+.fmbD { fill: var(--fmbub-d); }  .fmbDs { stroke: var(--fmbub-d); }
+.fmbBgs { stroke: var(--fmbub-bg); }
+.fmBubDeco .fmbWing { transform-origin: 20px 16px; }
+.fmBubDeco .fmbTwinkle { transform-box: fill-box; transform-origin: center; }
+
+/* ---- per-style looks ---- */
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="simple"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-color: transparent; }
+
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="glitch"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    border-radius: 2px;
+    font-family: ui-monospace, Consolas, monospace;
+    box-shadow: -2px 0 0 var(--fmbub-a), 2px 0 0 var(--fmbub-b);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="strawberry"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    background-image:
+        radial-gradient(1.1px 1.8px at 4px 5px, color-mix(in srgb, var(--fmbub-c) 60%, transparent) 99%, transparent),
+        radial-gradient(1.1px 1.8px at 13px 13px, color-mix(in srgb, var(--fmbub-c) 60%, transparent) 99%, transparent);
+    background-size: 18px 16px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="dragon"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    background-image: radial-gradient(circle at 50% 100%, transparent 5px,
+        color-mix(in srgb, var(--fmbub-b) 18%, transparent) 5.5px,
+        color-mix(in srgb, var(--fmbub-b) 18%, transparent) 6.6px, transparent 7px);
+    background-size: 12px 7px;
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="gothic"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { font-family: Georgia, "Times New Roman", serif; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    border-radius: 2px;
+    font-family: ui-monospace, Consolas, monospace;
+    text-shadow: 0 0 6px color-mix(in srgb, var(--fmbub-text) 45%, transparent);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::before { content: "> "; opacity: .6; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ink"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 14px 5px 13px 6px; border-width: 1.5px 2.5px 3px 1.5px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .5); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="deepsea"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 10px color-mix(in srgb, var(--fmbub-a) 35%, transparent); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="minimal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 8px 3px 3px 8px; border-right: 3px solid var(--fmbub-a); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 16px 16px 3px 3px; margin-bottom: 6px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -6px;
+    height: 6px;
+    background: radial-gradient(circle at 6px 0, var(--fmbub-bg) 6px, transparent 6.5px) repeat-x;
+    background-size: 12px 6px;
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="pixel"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+    border-radius: 0;
+    border-color: transparent;
+    font-family: ui-monospace, Consolas, monospace;
+    clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px),
+        calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+    box-shadow: inset -3px -3px 0 var(--fmbub-a);
+}
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 2px; border-color: transparent; rotate: -1.5deg; box-shadow: 2px 3px 0 rgba(0, 0, 0, .25); margin-top: 6px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::before {
+    content: "";
+    position: absolute;
+    top: -7px; left: 50%;
+    width: 34px; height: 12px;
+    margin-left: -17px;
+    background: rgba(255, 255, 255, .45);
+    rotate: 3deg;
+}
+
+/* ---- one-time decoration animations (Animations > Popups) ---- */
+@keyframes fmbFlap { 50% { transform: scaleX(.2); } }
+@keyframes fmbTwinkleKf { 50% { transform: scale(.5) rotate(45deg); opacity: .5; } }
+@keyframes fmbFloatKf { 0% { transform: translateY(6px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+html.fmAnimPopups.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .fmBubDeco .fmbWing { animation: fmbFlap calc(.32s * var(--fm-anim-speed, 1)) ease-in-out 3; }
+html.fmAnimPopups.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .fmBubDeco .fmbTwinkle { animation: fmbTwinkleKf calc(.5s * var(--fm-anim-speed, 1)) ease-in-out 2; }
+html.fmAnimPopups.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .fmBubDeco .fmbFloat { animation: fmbFloatKf calc(.8s * var(--fm-anim-speed, 1)) ease-out 1; }
+
+/* ---- menu preview ---- */
+.dialog[name="themeModMenu"] .themeModBubblePreviewWrap { padding: 8px 14px 14px; }
+.dialog[name="themeModMenu"] .themeModBubblePreview {
+    background: rgba(0, 0, 0, .18);
+    border-radius: 8px;
+    padding: 8px 6px;
+    font-size: .85rem;
+    color: #e8e8ea;
+}
+.dialog[name="themeModMenu"] .themeModBubblePreview .msgTime { opacity: .55; font-size: .75em; }
+.dialog[name="themeModMenu"] .themeModBubblePreview .msgUsername { color: #8ab4f8; font-size: .8em; }
+.dialog[name="themeModMenu"] .themeModBubblePreview [data-type="MYMSG"] .msgUsername { color: #f48fb1; }
+.dialog[name="themeModMenu"] .themeModBubbleColors .themeModDecoColorRow { padding-left: 14px; }
 
 /* =========================================================
    SAFETY: TROLL DETECTION (your screen only)
@@ -3920,4 +4263,60 @@ html.fmAnimMenu .dialog[name="themeModMenu"] .fmWhatsNew {
 
 .dialog[name="themeModMenu"].themeModSearching .themeModPanelHelp {
     display: none;
+}
+
+/* =========================================================
+   POPUP DECORATIONS: "Color popups to match" (fmDecoFrameOn)
+   The style's own popup colors, stronger than the theme's and
+   the Colors panel's popup colors. Only on decorated popups,
+   never on the mod menu.
+   ========================================================= */
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) {
+    background: var(--fmframe-bg) !important;
+    color: var(--fmframe-text) !important;
+}
+/* Border + resize edges only with "Popup border" ON */
+html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) {
+    border-color: var(--fmframe-border) !important;
+}
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dynamicDialogArea,
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogArea,
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .submodal .subcontent {
+    background: var(--fmframe-content) !important;
+    color: var(--fmframe-text) !important;
+}
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitlebar,
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitlebar.inactive {
+    background: var(--fmframe-title) !important;
+    color: var(--fmframe-titletext) !important;
+}
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitlebar a,
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitle,
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitle a {
+    color: var(--fmframe-titletext) !important;
+}
+html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsBar,
+html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsCorner {
+    background-color: var(--fmframe-border) !important;
+    border-color: var(--fmframe-border) !important;
+}
+html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .scrollNotBottom:not(.scrollNoOverflow)::after {
+    background: linear-gradient(to bottom, transparent 0, var(--fmframe-content) 100%) !important;
+}
+
+/* The menu's little preview box shows the popup colors too */
+html.fmDecoFrameOn .dialog[name="themeModMenu"] .themeModDecoPreview {
+    background: var(--fmframe-bg);
+    color: var(--fmframe-text);
+}
+html.fmDecoFrameOn.fmDecoFrameBorderOn .dialog[name="themeModMenu"] .themeModDecoPreview {
+    border-color: var(--fmframe-border);
+}
+
+/* The popup color pickers sit indented under their toggle */
+.dialog[name="themeModMenu"] .themeModDecoFrameColors .themeModDecoColorRow { padding-left: 14px; }
+html.fmDecoFrameOn .dialog[name="themeModMenu"] .themeModDecoPreviewBar {
+    background: var(--fmframe-title);
+    color: var(--fmframe-titletext);
+    text-shadow: none;
 }
