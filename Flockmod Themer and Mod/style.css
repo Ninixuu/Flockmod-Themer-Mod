@@ -3357,7 +3357,7 @@ html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmCheckbo
    ========================================================= */
 .fmTour {
     position: fixed;
-    z-index: 100001;
+    z-index: 2147483000; /* FlockMod's popup layer sits at 999998 */
     box-sizing: border-box;
     font-family: Rubik, sans-serif;
     letter-spacing: .02rem;
@@ -3502,7 +3502,7 @@ html.fmAnimMenu .fmTourFlower {
 /* ---- Pink glow ring around what the step is about ---- */
 .fmTourRing {
     position: fixed;
-    z-index: 100000;
+    z-index: 2147482999;
     pointer-events: none;
     border: 2px solid #f48fb1;
     border-radius: 8px;
