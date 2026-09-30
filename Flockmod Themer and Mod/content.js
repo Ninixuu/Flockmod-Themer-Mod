@@ -6907,6 +6907,24 @@ function buildSimpleColorRowsHTML() {
 
                             </div>
 
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Thank You
+                            </div>
+
+                            <div class="themeModThanks">
+                                <span class="themeModThanksFlower" aria-hidden="true"></span>
+                                <span class="themeModThanksPetal themeModThanksPetal1" aria-hidden="true"></span>
+                                <span class="themeModThanksPetal themeModThanksPetal2" aria-hidden="true"></span>
+                                <span class="themeModThanksPetal themeModThanksPetal3" aria-hidden="true"></span>
+                                <p>
+                                    I have full respect for the original creators of FlockMod, which is
+                                    <span class="themeModCreatorName">FDT</span> and
+                                    <span class="themeModCreatorName">auto</span>.
+                                    Thank you to everyone who gave me valuable ideas and advice, I hope you enjoy this mod!
+                                </p>
+                                <p class="themeModThanksSign">&ndash; <span class="themeModCreatorName">nene2nd</span></p>
+                            </div>
+
                         </div>
 
                         <div class="themeModSectionContent" data-theme-panel="interface">

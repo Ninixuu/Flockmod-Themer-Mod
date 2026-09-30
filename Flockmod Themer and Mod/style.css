@@ -3685,3 +3685,84 @@ html.fmAnimMenu .fmTourRing.fmTourPulse { animation: fmTourPulse calc(1.1s * var
     color: #ffe3ec;
     text-shadow: 0 0 4px #f48fb1, 0 0 10px rgba(244, 143, 177, .85), 0 0 18px rgba(236, 127, 167, .6);
 }
+
+/* =========================================================
+   GENERAL > THANK YOU (sakura card)
+   A soft pink card with a sakura flower and a few resting
+   petals. Hovering the card lets the petals drift a little
+   (only while menu animations are on). Names glow on hover
+   like the creator name in Help.
+   ========================================================= */
+
+.dialog[name="themeModMenu"] .themeModThanks {
+    position: relative;
+    overflow: hidden;
+    margin: 6px 0 14px;
+    padding: 14px 16px 12px 58px;
+    border: 1px solid rgba(244, 143, 177, .45);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(244, 143, 177, .14) 0%, rgba(244, 143, 177, .05) 55%, rgba(255, 209, 224, .10) 100%);
+    box-shadow: inset 0 0 18px rgba(244, 143, 177, .08);
+}
+
+.dialog[name="themeModMenu"] .themeModThanks p {
+    position: relative;
+    margin: 0;
+    font-size: .78rem;
+    line-height: 1.55;
+    color: #e6d3da;
+}
+
+.dialog[name="themeModMenu"] .themeModThanks .themeModThanksSign {
+    margin-top: 6px;
+    text-align: right;
+}
+
+.dialog[name="themeModMenu"] .themeModThanksFlower {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    width: 28px;
+    height: 28px;
+    background: radial-gradient(circle, #ffe7a3 0 14%, #ffd1e0 24%, #f7a1c0 60%, #ec7fa7 100%);
+    -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg transform='translate(50 50)'%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(72)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(144)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(216)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(288)'/%3E%3Ccircle r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg transform='translate(50 50)'%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(72)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(144)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(216)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(288)'/%3E%3Ccircle r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+    transition: rotate .8s ease;
+}
+
+.dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksFlower {
+    rotate: 72deg;
+}
+
+.dialog[name="themeModMenu"] .themeModThanksPetal {
+    position: absolute;
+    width: 9px;
+    height: 12px;
+    background: linear-gradient(160deg, #ffd1e0, #f48fb1);
+    -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 28'%3E%3Cpath d='M10 28C3 22 0 15 2 8 3 3 7 0 10 4 13 0 17 3 18 8 20 15 17 22 10 28Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 28'%3E%3Cpath d='M10 28C3 22 0 15 2 8 3 3 7 0 10 4 13 0 17 3 18 8 20 15 17 22 10 28Z'/%3E%3C/svg%3E") center / contain no-repeat;
+    opacity: .55;
+    pointer-events: none;
+}
+
+.dialog[name="themeModMenu"] .themeModThanksPetal1 { right: 18px; top: 8px;     rotate: 25deg; }
+.dialog[name="themeModMenu"] .themeModThanksPetal2 { right: 44px; bottom: 10px; rotate: -40deg; width: 7px; height: 10px; }
+.dialog[name="themeModMenu"] .themeModThanksPetal3 { left: 22px;  bottom: 12px; rotate: 70deg;  width: 8px; height: 11px; }
+
+/* Petals drift a little while the card is hovered (animations on only) */
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksPetal {
+    animation: fmThanksDrift calc(2.4s * var(--fm-anim-speed, 1)) ease-in-out infinite alternate;
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksPetal2 { animation-delay: -.8s; }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksPetal3 { animation-delay: -1.6s; }
+
+@keyframes fmThanksDrift {
+    from { translate: 0 0;    }
+    to   { translate: -6px 5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialog[name="themeModMenu"] .themeModThanksFlower { transition: none; }
+    html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksPetal { animation: none; }
+}
