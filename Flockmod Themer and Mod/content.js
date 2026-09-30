@@ -17,7 +17,8 @@
                 "Bubble options: your messages on the right, bubbles for everyone else, decorations on or off, and your own bubble colors.",
                 "Decorations and bubbles play a small animation once when they appear.",
                 "Mention sounds only match whole words now (so a short name no longer rings on longer words).",
-                "Clicking a Messenger conversation no longer plays the message sound."
+                "Clicking a Messenger conversation no longer plays the message sound.",
+                "The Apply Changes button is now pink, so it's easier to spot."
             ]
         },
         {

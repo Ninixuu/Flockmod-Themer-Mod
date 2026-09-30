@@ -559,13 +559,45 @@ html.flockmodFontActive:not(.flockmodCustomizationsDisabled) .optiontitle {
     background-color: #28292d;
 }
 
+/* Apply is sakura pink so it's easy to spot (people kept
+   forgetting to press it) */
 .themeModApplyButton {
-    background-color: #4f5156;
-    color: #fff;
+    background-color: #f48fb1;
+    border-color: #f48fb1;
+    color: #3a1020;
+    font-weight: 600;
 }
 
 .themeModApplyButton:hover {
-    background-color: #5c5e64;
+    background-color: #f7a1c0;
+    border-color: #f7a1c0;
+    color: #3a1020;
+    box-shadow: 0 0 8px rgba(244, 143, 177, .45);
+}
+
+.themeModApplyButton:active {
+    background-color: #e0709a;
+    border-color: #e0709a;
+}
+
+/* Same pink, but strong enough that no theme or popup color
+   rule (the mod's or FlockMod's) can turn Apply grey again */
+.dialog[name="themeModMenu"] .themeModApplyButton,
+.themeModActions .themeModApplyButton {
+    background: #f48fb1 !important;
+    border-color: #f48fb1 !important;
+    color: #3a1020 !important;
+    font-weight: 600 !important;
+}
+.dialog[name="themeModMenu"] .themeModApplyButton:hover,
+.themeModActions .themeModApplyButton:hover {
+    background: #f7a1c0 !important;
+    border-color: #f7a1c0 !important;
+}
+.dialog[name="themeModMenu"] .themeModApplyButton:active,
+.themeModActions .themeModApplyButton:active {
+    background: #e0709a !important;
+    border-color: #e0709a !important;
 }
 
 
@@ -2639,9 +2671,9 @@ html.fmAnimPopups:not(.flockmodCustomizationsDisabled) #alertContainer .alertMes
 
 /* Pink glow on Apply */
 @keyframes fmApplyGlowKf {
-    0%   { box-shadow: 0 0 0 0 rgba(244, 143, 177, 0); border-color: #4f5156; }
-    30%  { box-shadow: 0 0 12px 3px rgba(244, 143, 177, .8); border-color: #f48fb1; }
-    100% { box-shadow: 0 0 18px 8px rgba(244, 143, 177, 0); border-color: #4f5156; }
+    0%   { box-shadow: 0 0 0 0 rgba(244, 143, 177, 0); border-color: #f48fb1; }
+    30%  { box-shadow: 0 0 12px 3px rgba(244, 143, 177, .8); border-color: #ffd1e0; }
+    100% { box-shadow: 0 0 18px 8px rgba(244, 143, 177, 0); border-color: #f48fb1; }
 }
 
 html.fmAnimMenu .dialog[name="themeModMenu"] .themeModApplyButton.fmApplyGlow {
