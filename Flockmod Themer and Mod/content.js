@@ -5589,22 +5589,61 @@ function buildSimpleColorRowsHTML() {
 
         if (on) {
             root.dataset.fmBub = st.style;
-            const c = { ...style.c };
-
-            if (st.custom) {
-                c.bg = st.colors.bg;
-                c.text = st.colors.text;
-                c.border = st.colors.border;
-            }
+            const c = bubbleColors(st);
 
             BUB_ROLE_KEYS.forEach((k) => {
-                root.style.setProperty(`--fmbub-${k}`, c[k] || c.border || c.bg);
+                root.style.setProperty(`--fmbub-${k}`, c[k]);
             });
         } else {
             delete root.dataset.fmBub;
         }
 
         redecorateAllBubbles();
+    }
+
+    /* The style's colors (or your custom bubble colors), every role filled */
+    function bubbleColors(st) {
+        const style = BUB_STYLES[st.style] || BUB_STYLES.none;
+        const c = { ...(style.c || {}) };
+
+        if (st.custom) {
+            c.bg = st.colors.bg;
+            c.text = st.colors.text;
+            c.border = st.colors.border;
+        }
+
+        const out = {};
+        BUB_ROLE_KEYS.forEach((k) => { out[k] = c[k] || c.border || c.bg; });
+        return out;
+    }
+
+    /* The little preview in the menu styles itself (its own classes,
+       colors and decorations), so it always shows the style you
+       picked, even while bubbles aren't on in the real chat */
+    function paintBubblePreview(dialog, st) {
+        const box = dialog.querySelector(".themeModBubblePreview");
+
+        if (!box) {
+            return;
+        }
+
+        const style = BUB_STYLES[st.style] || BUB_STYLES.none;
+        const on = st.style !== "none";
+
+        box.classList.toggle("fmPrevOn", on);
+        box.classList.toggle("fmBubRight", on && st.right);
+        box.classList.toggle("fmBubOthers", on && st.others);
+
+        if (on) {
+            box.dataset.fmBub = st.style;
+            const c = bubbleColors(st);
+            BUB_ROLE_KEYS.forEach((k) => box.style.setProperty(`--fmbub-${k}`, c[k]));
+        } else {
+            delete box.dataset.fmBub;
+        }
+
+        const sig = on && st.deco && style.deco ? st.style : "";
+        box.querySelectorAll(MY_BLOCKS).forEach((block) => decorateBubbleBlock(block, sig));
     }
 
     /* ---- decorations on your messages ---- */
@@ -5652,13 +5691,14 @@ function buildSimpleColorRowsHTML() {
     function redecorateAllBubbles() {
         const sig = bubbleDecoSig();
 
-        document.querySelectorAll(`#chatMessages ${MY_BLOCKS}, .themeModBubblePreview ${MY_BLOCKS}`)
+        document.querySelectorAll(`#chatMessages ${MY_BLOCKS}`)
             .forEach((block) => decorateBubbleBlock(block, sig));
 
-        /* Leftovers (e.g. after turning decorations off) */
+        /* Leftovers (e.g. after turning decorations off). The menu
+           preview handles its own (paintBubblePreview). */
         if (!sig) {
-            document.querySelectorAll(".fmBubDeco").forEach((el) => el.remove());
-            document.querySelectorAll(".fmBubHasDeco").forEach((el) => el.classList.remove("fmBubHasDeco"));
+            document.querySelectorAll("#chatMessages .fmBubDeco").forEach((el) => el.remove());
+            document.querySelectorAll("#chatMessages .fmBubHasDeco").forEach((el) => el.classList.remove("fmBubHasDeco"));
         }
     }
 
@@ -5851,6 +5891,7 @@ function buildSimpleColorRowsHTML() {
             const st = readInputs();
             updateRows(st);
             applyBubbles(st);
+            paintBubblePreview(dialog, st);
         }
 
         function fill(st) {
@@ -5861,6 +5902,7 @@ function buildSimpleColorRowsHTML() {
             custom.checked = st.custom;
             Object.keys(pickers).forEach((k) => { pickers[k].value = st.colors[k]; });
             updateRows(st);
+            paintBubblePreview(dialog, st);
         }
 
         fill(readSavedBubbles());

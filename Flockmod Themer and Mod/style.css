@@ -3403,7 +3403,8 @@ html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmdTai
    ========================================================= */
 
 /* Layout: time + name on one row, the messages under it */
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .chatBlock.messageBlock,
+.themeModBubblePreview.fmPrevOn .chatBlock.messageBlock {
     display: flex !important;
     flex-wrap: wrap;
     align-items: baseline;
@@ -3411,21 +3412,25 @@ html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBu
     padding-top: 3px;
     padding-bottom: 3px;
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock > .msgContent {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .chatBlock.messageBlock > .msgContent,
+.themeModBubblePreview.fmPrevOn .chatBlock.messageBlock > .msgContent {
     flex: 0 0 100%;
     display: block !important;
     min-width: 0;
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgLine {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .chatBlock.messageBlock .msgLine,
+.themeModBubblePreview.fmPrevOn .chatBlock.messageBlock .msgLine {
     display: flex !important;
     align-items: flex-end;
     gap: 4px;
     margin: 4px 0;
     padding: 0 12px 0 4px;
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgLine > .msgTime:empty { display: none; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .chatBlock.messageBlock .msgLine > .msgTime:empty,
+.themeModBubblePreview.fmPrevOn .chatBlock.messageBlock .msgLine > .msgTime:empty { display: none; }
 
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .chatBlock.messageBlock .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .chatBlock.messageBlock .msgText,
+.themeModBubblePreview.fmPrevOn .chatBlock.messageBlock .msgText {
     position: relative;
     display: inline-block !important;
     max-width: 85%;
@@ -3436,40 +3441,55 @@ html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBu
 }
 
 /* Everyone else: plain, see-through bubbles (keeps chat colors) */
-html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubOthers :is(#chatMessages, .themeModBubblePreview) .messageBlock:not([data-type="MYMSG"]) .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubOthers #chatMessages .messageBlock:not([data-type="MYMSG"]) .msgText,
+.themeModBubblePreview.fmPrevOn.fmBubOthers .messageBlock:not([data-type="MYMSG"]) .msgText {
     background: rgba(128, 128, 128, .2);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled):not(.fmBubOthers) :is(#chatMessages, .themeModBubblePreview) .messageBlock:not([data-type="MYMSG"]) .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled):not(.fmBubOthers) #chatMessages .messageBlock:not([data-type="MYMSG"]) .msgText,
+.themeModBubblePreview.fmPrevOn:not(.fmBubOthers) .messageBlock:not([data-type="MYMSG"]) .msgText {
     padding-left: 4px;
     padding-right: 4px;
 }
 
 /* Yours on the right */
-html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] { justify-content: flex-end; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgLine { justify-content: flex-end; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] > .msgUsername { order: -1; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] > .msgTime { order: 0; margin-right: 12px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight #chatMessages .messageBlock[data-type="MYMSG"],
+.themeModBubblePreview.fmPrevOn.fmBubRight .messageBlock[data-type="MYMSG"] { justify-content: flex-end; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight #chatMessages .messageBlock[data-type="MYMSG"] .msgLine,
+.themeModBubblePreview.fmPrevOn.fmBubRight .messageBlock[data-type="MYMSG"] .msgLine { justify-content: flex-end; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight #chatMessages .messageBlock[data-type="MYMSG"] > .msgUsername,
+.themeModBubblePreview.fmPrevOn.fmBubRight .messageBlock[data-type="MYMSG"] > .msgUsername { order: -1; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled).fmBubRight #chatMessages .messageBlock[data-type="MYMSG"] > .msgTime,
+.themeModBubblePreview.fmPrevOn.fmBubRight .messageBlock[data-type="MYMSG"] > .msgTime { order: 0; margin-right: 12px; }
 
 /* Your bubble */
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn .messageBlock[data-type="MYMSG"] .msgText {
     background-color: var(--fmbub-bg) !important;
     color: var(--fmbub-text) !important;
     border: 1.5px solid var(--fmbub-border);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText a { color: inherit !important; text-decoration: underline; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .messageBlock[data-type="MYMSG"] .msgText a,
+.themeModBubblePreview.fmPrevOn .messageBlock[data-type="MYMSG"] .msgText a { color: inherit !important; text-decoration: underline; }
 
 /* Room above for decorations that stick out of the top */
-html.fmBubOn:not(.flockmodCustomizationsDisabled) :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 12px; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="bunny"] :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 26px; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="witch"] :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-top: 17px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled) #chatMessages .msgText.fmBubHasDeco,
+.themeModBubblePreview.fmPrevOn .msgText.fmBubHasDeco { margin-top: 12px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="bunny"] #chatMessages .msgText.fmBubHasDeco,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="bunny"] .msgText.fmBubHasDeco { margin-top: 26px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="witch"] #chatMessages .msgText.fmBubHasDeco,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="witch"] .msgText.fmBubHasDeco { margin-top: 17px; }
 /* Paws / petals / stars that hang below the bubble need a little room */
-html.fmBubOn:not(.flockmodCustomizationsDisabled):is([data-fm-bub="bear"], [data-fm-bub="stars"], [data-fm-bub="sakura"]) :is(#chatMessages, .themeModBubblePreview) .msgText.fmBubHasDeco { margin-bottom: 6px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled):is([data-fm-bub="bear"], [data-fm-bub="stars"], [data-fm-bub="sakura"]) #chatMessages .msgText.fmBubHasDeco,
+.themeModBubblePreview.fmPrevOn:is([data-fm-bub="bear"], [data-fm-bub="stars"], [data-fm-bub="sakura"]) .msgText.fmBubHasDeco { margin-bottom: 6px; }
 /* Tails sticking out on the right need room when bubbles are on the right */
-html.fmBubOn.fmBubRight:not(.flockmodCustomizationsDisabled):is([data-fm-bub="cat"], [data-fm-bub="fox"]) :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText.fmBubHasDeco { margin-right: 8px; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="stars"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 8px color-mix(in srgb, var(--fmbub-a) 25%, transparent); }
+html.fmBubOn.fmBubRight:not(.flockmodCustomizationsDisabled):is([data-fm-bub="cat"], [data-fm-bub="fox"]) #chatMessages .messageBlock[data-type="MYMSG"] .msgText.fmBubHasDeco,
+.themeModBubblePreview.fmPrevOn.fmBubRight:is([data-fm-bub="cat"], [data-fm-bub="fox"]) .messageBlock[data-type="MYMSG"] .msgText.fmBubHasDeco { margin-right: 8px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="stars"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="stars"] .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 8px color-mix(in srgb, var(--fmbub-a) 25%, transparent); }
 
 .fmBubDeco { display: none; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled) .fmBubDeco {
+html.fmBubOn:not(.flockmodCustomizationsDisabled) .fmBubDeco,
+.themeModBubblePreview.fmPrevOn .fmBubDeco {
     display: block;
     position: absolute;
     inset: 0;
@@ -3488,38 +3508,50 @@ html.fmBubOn:not(.flockmodCustomizationsDisabled) .fmBubDeco {
 .fmBubDeco .fmbTwinkle { transform-box: fill-box; transform-origin: center; }
 
 /* ---- per-style looks ---- */
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="simple"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-color: transparent; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="simple"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="simple"] .messageBlock[data-type="MYMSG"] .msgText { border-color: transparent; }
 
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="glitch"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="glitch"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="glitch"] .messageBlock[data-type="MYMSG"] .msgText {
     border-radius: 2px;
     font-family: ui-monospace, Consolas, monospace;
     box-shadow: -2px 0 0 var(--fmbub-a), 2px 0 0 var(--fmbub-b);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="strawberry"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="strawberry"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="strawberry"] .messageBlock[data-type="MYMSG"] .msgText {
     background-image:
         radial-gradient(1.1px 1.8px at 4px 5px, color-mix(in srgb, var(--fmbub-c) 60%, transparent) 99%, transparent),
         radial-gradient(1.1px 1.8px at 13px 13px, color-mix(in srgb, var(--fmbub-c) 60%, transparent) 99%, transparent);
     background-size: 18px 16px;
     text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="dragon"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="dragon"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="dragon"] .messageBlock[data-type="MYMSG"] .msgText {
     background-image: radial-gradient(circle at 50% 100%, transparent 5px,
         color-mix(in srgb, var(--fmbub-b) 18%, transparent) 5.5px,
         color-mix(in srgb, var(--fmbub-b) 18%, transparent) 6.6px, transparent 7px);
     background-size: 12px 7px;
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="gothic"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { font-family: Georgia, "Times New Roman", serif; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="gothic"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="gothic"] .messageBlock[data-type="MYMSG"] .msgText { font-family: Georgia, "Times New Roman", serif; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="terminal"] .messageBlock[data-type="MYMSG"] .msgText {
     border-radius: 2px;
     font-family: ui-monospace, Consolas, monospace;
     text-shadow: 0 0 6px color-mix(in srgb, var(--fmbub-text) 45%, transparent);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::before { content: "> "; opacity: .6; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ink"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 14px 5px 13px 6px; border-width: 1.5px 2.5px 3px 1.5px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .5); }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="deepsea"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 10px color-mix(in srgb, var(--fmbub-a) 35%, transparent); }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="minimal"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 8px 3px 3px 8px; border-right: 3px solid var(--fmbub-a); }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 16px 16px 3px 3px; margin-bottom: 6px; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::after {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="terminal"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText::before,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="terminal"] .messageBlock[data-type="MYMSG"] .msgText::before { content: "> "; opacity: .6; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ink"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="ink"] .messageBlock[data-type="MYMSG"] .msgText { border-radius: 14px 5px 13px 6px; border-width: 1.5px 2.5px 3px 1.5px; box-shadow: 2px 2px 0 rgba(0, 0, 0, .5); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="deepsea"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="deepsea"] .messageBlock[data-type="MYMSG"] .msgText { box-shadow: 0 0 10px color-mix(in srgb, var(--fmbub-a) 35%, transparent); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="minimal"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="minimal"] .messageBlock[data-type="MYMSG"] .msgText { border-radius: 8px 3px 3px 8px; border-right: 3px solid var(--fmbub-a); }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="ghost"] .messageBlock[data-type="MYMSG"] .msgText { border-radius: 16px 16px 3px 3px; margin-bottom: 6px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText::after,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="ghost"] .messageBlock[data-type="MYMSG"] .msgText::after {
     content: "";
     position: absolute;
     left: 0; right: 0; bottom: -6px;
@@ -3527,7 +3559,8 @@ html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="ghost"] :is(#chat
     background: radial-gradient(circle at 6px 0, var(--fmbub-bg) 6px, transparent 6.5px) repeat-x;
     background-size: 12px 6px;
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="pixel"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="pixel"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="pixel"] .messageBlock[data-type="MYMSG"] .msgText {
     border-radius: 0;
     border-color: transparent;
     font-family: ui-monospace, Consolas, monospace;
@@ -3535,8 +3568,10 @@ html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="pixel"] :is(#chat
         calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
     box-shadow: inset -3px -3px 0 var(--fmbub-a);
 }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText { border-radius: 2px; border-color: transparent; rotate: -1.5deg; box-shadow: 2px 3px 0 rgba(0, 0, 0, .25); margin-top: 6px; }
-html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] :is(#chatMessages, .themeModBubblePreview) .messageBlock[data-type="MYMSG"] .msgText::before {
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="sticky"] .messageBlock[data-type="MYMSG"] .msgText { border-radius: 2px; border-color: transparent; rotate: -1.5deg; box-shadow: 2px 3px 0 rgba(0, 0, 0, .25); margin-top: 6px; }
+html.fmBubOn:not(.flockmodCustomizationsDisabled)[data-fm-bub="sticky"] #chatMessages .messageBlock[data-type="MYMSG"] .msgText::before,
+.themeModBubblePreview.fmPrevOn[data-fm-bub="sticky"] .messageBlock[data-type="MYMSG"] .msgText::before {
     content: "";
     position: absolute;
     top: -7px; left: 50%;
