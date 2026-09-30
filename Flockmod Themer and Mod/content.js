@@ -6778,6 +6778,24 @@ function buildSimpleColorRowsHTML() {
 
                             </div>
 
+                            <div class="themeModSetting">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Quick tour
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        A short walkthrough of the basics: the on/off switch, simple coloring, colors, search and safety.
+                                    </div>
+                                </div>
+
+                                <button type="button" class="themeModButton themeModTourButton">
+                                    <i class="fas fa-play"></i> Replay tour
+                                </button>
+
+                            </div>
+
                         </div>
 
                         <div class="themeModSectionContent" data-theme-panel="interface">
@@ -8145,6 +8163,8 @@ const safetyControls = setupSafetyPanel(dialog);
             decoControls
         });
 
+        setupTour(dialog);
+
         return dialog;
     }
 
@@ -8297,6 +8317,370 @@ const safetyControls = setupSafetyPanel(dialog);
                 });
             });
         });
+    }
+
+    /* =========================================================
+       QUICK TOUR (sakura pink)
+       The first time the mod menu opens, a small card docked on
+       top of it asks if you'd like a tour. The tour is 6 short
+       steps shown in a card beside the menu (or on top of it when
+       there's no room beside), with a pink glow around whatever
+       the step is about. Skip is on every step, and General >
+       Quick tour replays it.
+       Nothing runs while the tour is closed: the observers and
+       listeners are only attached while a card is showing.
+       ========================================================= */
+
+    const TOUR_SEEN_LS = "flockmodTourSeen";
+
+    /* Same 5-petal flower as the bloom switch thumb */
+    const TOUR_FLOWER_HTML = '<span class="fmTourFlower" aria-hidden="true"></span>';
+
+    function getTourSteps(dialog) {
+        const openTab = (name) => () => {
+            const button = dialog.querySelector(`.themeModSidebarItem[data-theme-section="${name}"]`);
+
+            if (button && !button.classList.contains("active")) {
+                button.click();
+            }
+        };
+
+        const rowOf = (selector) => () => {
+            const el = dialog.querySelector(selector);
+            return el ? (el.closest(".themeModSetting") || el) : null;
+        };
+
+        return [
+            {
+                icon: "fa-power-off",
+                title: "Your on/off switch",
+                text: "Turns every customization on or off at once. Handy for comparing with plain FlockMod.",
+                before: openTab("general"),
+                target: rowOf("#themeModEnabled")
+            },
+            {
+                icon: "fa-seedling",
+                title: "Simple coloring",
+                text: "Pick just a few main colors and the mod fills in the rest. Your detailed colors are kept for later.",
+                before: openTab("general"),
+                target: rowOf("#themeModSimpleMode")
+            },
+            {
+                icon: "fa-palette",
+                title: "Colors",
+                text: "Every part of FlockMod lives here. Tap a chip to jump to a section, and \u21BA resets just that section.",
+                before: openTab("colors"),
+                target: () => dialog.querySelector(".themeModJumpBar")
+            },
+            {
+                icon: "fa-search",
+                title: "Can't find something?",
+                text: "Search looks through every tab at once. Try typing \u201Cchat\u201D or \u201Cfont\u201D.",
+                before: openTab("colors"),
+                target: () => dialog.querySelector(".themeModSearch")
+            },
+            {
+                icon: "fa-shield-alt",
+                title: "Safety",
+                text: "Flags possible griefers in the user list and chat. Everything stays on your computer.",
+                before: openTab("safety"),
+                target: () => dialog.querySelector('.themeModSidebarItem[data-theme-section="safety"]')
+            },
+            {
+                icon: "fa-check",
+                title: "Keep your changes",
+                text: "Nothing is saved until you press Apply Changes. Close the menu to undo anything you haven't applied.",
+                before: openTab("safety"),
+                target: () => dialog.querySelector(".themeModApplyButton")
+            }
+        ];
+    }
+
+    function setupTour(dialog) {
+        const steps = getTourSteps(dialog);
+        let card = null;
+        let ring = null;
+        let mode = null;        /* "prompt" | "step" | null */
+        let step = 0;
+        let queued = false;
+        let moveObserver = null;
+        let sizeObserver = null;
+
+        const build = (html) => {
+            const holder = document.createElement("div");
+            holder.innerHTML = html.trim();
+            return holder.firstChild;
+        };
+
+        /* ---- Follow the menu while it's dragged or resized ---- */
+        const queuePlace = () => {
+            if (queued) {
+                return;
+            }
+
+            queued = true;
+            requestAnimationFrame(() => {
+                queued = false;
+                place();
+            });
+        };
+
+        function watch() {
+            if (moveObserver) {
+                return;
+            }
+
+            moveObserver = new MutationObserver(queuePlace);
+            moveObserver.observe(dialog, { attributes: true, attributeFilter: ["style", "class"] });
+
+            if (window.ResizeObserver) {
+                sizeObserver = new ResizeObserver(queuePlace);
+                sizeObserver.observe(dialog);
+            }
+
+            window.addEventListener("resize", queuePlace);
+            dialog.querySelector(".themeModSectionsScroll")
+                ?.addEventListener("scroll", queuePlace, { passive: true });
+        }
+
+        function unwatch() {
+            moveObserver?.disconnect();
+            sizeObserver?.disconnect();
+            moveObserver = sizeObserver = null;
+            window.removeEventListener("resize", queuePlace);
+            dialog.querySelector(".themeModSectionsScroll")
+                ?.removeEventListener("scroll", queuePlace);
+        }
+
+        function closeTour() {
+            card?.remove();
+            ring?.remove();
+            card = ring = null;
+            mode = null;
+            unwatch();
+        }
+
+        function markSeen() {
+            localStorage.setItem(TOUR_SEEN_LS, "true");
+        }
+
+        /* ---- Welcome prompt ---- */
+        function showPrompt() {
+            closeTour();
+            mode = "prompt";
+
+            card = build(`
+                <div class="fmTour fmTourPrompt" role="dialog" aria-label="Mod tour">
+                    ${TOUR_FLOWER_HTML}
+                    <div class="fmTourBody">
+                        <div class="fmTourTitle">Welcome to FlockMod Themer!</div>
+                        <div class="fmTourText">Would you like a quick tour? It takes about 30 seconds.</div>
+                    </div>
+                    <div class="fmTourButtons">
+                        <button type="button" class="fmTourBtn fmTourGhost" data-act="no">No thanks</button>
+                        <button type="button" class="fmTourBtn fmTourMain" data-act="yes">Yes, show me</button>
+                    </div>
+                </div>`);
+
+            document.body.appendChild(card);
+
+            card.querySelector('[data-act="no"]').addEventListener("click", () => {
+                markSeen();
+                closeTour();
+            });
+
+            card.querySelector('[data-act="yes"]').addEventListener("click", () => {
+                markSeen();
+                startTour();
+            });
+
+            watch();
+            place();
+        }
+
+        /* ---- Steps ---- */
+        function startTour() {
+            closeTour();
+            mode = "step";
+
+            ring = build('<div class="fmTourRing" aria-hidden="true"></div>');
+            card = build(`
+                <div class="fmTour fmTourStep" role="dialog" aria-label="Mod tour" aria-live="polite">
+                    <div class="fmTourHead">
+                        <span class="fmTourIcon"><i class="fas"></i></span>
+                        <span class="fmTourTitle"></span>
+                        <button type="button" class="fmTourSkip" data-act="skip">Skip tour</button>
+                    </div>
+                    <div class="fmTourText"></div>
+                    <div class="fmTourFoot">
+                        <div class="fmTourDots"></div>
+                        <button type="button" class="fmTourBtn fmTourGhost" data-act="back">Back</button>
+                        <button type="button" class="fmTourBtn fmTourMain" data-act="next">Next</button>
+                    </div>
+                </div>`);
+
+            document.body.appendChild(ring);
+            document.body.appendChild(card);
+
+            card.querySelector('[data-act="skip"]').addEventListener("click", closeTour);
+            card.querySelector('[data-act="back"]').addEventListener("click", () => goTo(step - 1));
+            card.querySelector('[data-act="next"]').addEventListener("click", () => {
+                if (step >= steps.length - 1) {
+                    closeTour();
+                } else {
+                    goTo(step + 1);
+                }
+            });
+
+            watch();
+            goTo(0);
+        }
+
+        function goTo(index) {
+            if (!card) {
+                return;
+            }
+
+            step = Math.max(0, Math.min(steps.length - 1, index));
+            const s = steps[step];
+
+            /* If search is open, close it so the tabs show normally */
+            if (dialog.classList.contains("themeModSearching")) {
+                const input = dialog.querySelector(".themeModSearchInput");
+
+                if (input) {
+                    input.value = "";
+                    input.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+            }
+
+            s.before();
+
+            card.querySelector(".fmTourIcon i").className = `fas ${s.icon}`;
+            card.querySelector(".fmTourTitle").textContent = s.title;
+            card.querySelector(".fmTourText").textContent = s.text;
+            card.querySelector(".fmTourDots").innerHTML = steps.map((_, n) =>
+                `<span class="${n === step ? "on" : n < step ? "done" : ""}"></span>`
+            ).join("");
+            card.querySelector('[data-act="back"]').style.visibility = step ? "visible" : "hidden";
+            card.querySelector('[data-act="next"]').textContent =
+                step === steps.length - 1 ? "Done" : "Next";
+
+            const target = s.target();
+
+            if (target) {
+                target.scrollIntoView({ block: "nearest" });
+            }
+
+            requestAnimationFrame(() => {
+                place();
+
+                if (ring) {
+                    ring.classList.remove("fmTourPulse");
+                    void ring.offsetWidth;
+                    ring.classList.add("fmTourPulse");
+                }
+            });
+        }
+
+        /* ---- Positioning ---- */
+        function place() {
+            if (!card) {
+                return;
+            }
+
+            /* Menu closed some other way: tidy up */
+            if (!dialog.isConnected) {
+                closeTour();
+                return;
+            }
+
+            const m = dialog.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const gap = 14;
+
+            if (mode === "prompt") {
+                const width = Math.min(560, Math.max(280, m.width - 40), vw - 16);
+                card.style.width = `${width}px`;
+
+                const left = Math.min(Math.max(8, m.left + (m.width - width) / 2), vw - width - 8);
+                const aboveTop = m.top - card.offsetHeight - 12;
+
+                /* No room above the menu: tuck it just inside the top */
+                card.classList.toggle("fmTourInside", aboveTop < 8);
+                card.style.left = `${left}px`;
+                card.style.top = `${aboveTop < 8 ? m.top + 44 : aboveTop}px`;
+                card.style.setProperty("--fm-arrow-x", `${Math.min(Math.max(20, m.left + m.width / 2 - left), width - 20)}px`);
+                return;
+            }
+
+            const target = steps[step].target();
+            let t = target ? target.getBoundingClientRect() : null;
+
+            if (!t || (t.width === 0 && t.height === 0)) {
+                t = m;
+            }
+
+            /* Keep the glow inside the menu (the target may be scrolled out) */
+            const pad = 5;
+            const top = Math.max(m.top, t.top - pad);
+            const bottom = Math.min(m.bottom, t.bottom + pad);
+            const left = Math.max(m.left, t.left - pad);
+            const right = Math.min(m.right, t.right + pad);
+
+            Object.assign(ring.style, {
+                left: `${left}px`,
+                top: `${top}px`,
+                width: `${Math.max(0, right - left)}px`,
+                height: `${Math.max(0, bottom - top)}px`
+            });
+
+            const cw = card.offsetWidth;
+            const ch = card.offsetHeight;
+            const roomRight = vw - m.right;
+            const roomLeft = m.left;
+
+            card.classList.remove("fmArrowLeft", "fmArrowRight", "fmArrowDown", "fmTourInside");
+
+            if (roomRight >= cw + gap + 8 || roomLeft >= cw + gap + 8) {
+                const onRight = roomRight >= cw + gap + 8;
+                const middle = t.top + t.height / 2;
+                const y = Math.min(Math.max(8, middle - ch / 2), vh - ch - 8);
+
+                card.style.left = `${onRight ? m.right + gap : m.left - cw - gap}px`;
+                card.style.top = `${y}px`;
+                card.classList.add(onRight ? "fmArrowLeft" : "fmArrowRight");
+                card.style.setProperty("--fm-arrow-y", `${Math.min(Math.max(18, middle - y), ch - 18)}px`);
+            } else {
+                /* Menu fills the screen sideways: dock on top instead */
+                const x = Math.min(Math.max(8, m.left + (m.width - cw) / 2), vw - cw - 8);
+                const aboveTop = m.top - ch - 12;
+                const inside = aboveTop < 8;
+
+                card.style.left = `${x}px`;
+                /* Inside the menu: sit at whichever end is away from the glow */
+                const lowTarget = t.top + t.height / 2 > m.top + m.height / 2;
+                const insideTop = lowTarget ? m.top + 50 : m.bottom - ch - 60;
+
+                card.style.top = `${inside ? insideTop : aboveTop}px`;
+                card.classList.add(inside ? "fmTourInside" : "fmArrowDown");
+                card.style.setProperty("--fm-arrow-x", `${Math.min(Math.max(20, m.left + m.width / 2 - x), cw - 20)}px`);
+            }
+        }
+
+        /* ---- Wiring ---- */
+        dialog.querySelector(".themeModTourButton")?.addEventListener("click", startTour);
+        dialog.querySelector(".closeButton")?.addEventListener("click", closeTour);
+
+        if (localStorage.getItem(TOUR_SEEN_LS) !== "true") {
+            /* Let the menu finish opening first */
+            setTimeout(() => {
+                if (dialog.isConnected && !card) {
+                    showPrompt();
+                }
+            }, 350);
+        }
     }
 
     function setupDragging(dialog) {
