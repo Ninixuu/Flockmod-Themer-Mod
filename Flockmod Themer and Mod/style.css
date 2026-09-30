@@ -3766,3 +3766,111 @@ html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThan
     .dialog[name="themeModMenu"] .themeModThanksFlower { transition: none; }
     html.fmAnimMenu .dialog[name="themeModMenu"] .themeModThanks:hover .themeModThanksPetal { animation: none; }
 }
+
+/* =========================================================
+   WHAT'S NEW CARD (inside the mod menu, sakura pink)
+   Uses the tour's flower + pink button styles.
+   ========================================================= */
+
+.dialog[name="themeModMenu"] .fmWhatsNew {
+    position: absolute;
+    z-index: 60;
+    top: 48px;
+    left: 50%;
+    translate: -50% 0;
+    width: min(420px, calc(100% - 32px));
+    max-height: calc(100% - 70px);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 14px 16px 12px;
+    border: 1px solid #f7a1c0;
+    border-radius: 10px;
+    color: #4a2433;
+    background: linear-gradient(160deg, #fff4f8 0%, #ffe1ec 55%, #fcd0e0 100%);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .45), 0 0 18px rgba(244, 143, 177, .45);
+    font-family: Rubik, sans-serif;
+    letter-spacing: .02rem;
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .fmWhatsNew {
+    animation: fmWhatsNewIn calc(.35s * var(--fm-anim-speed, 1)) cubic-bezier(.25, .8, .25, 1);
+}
+
+@keyframes fmWhatsNewIn {
+    from { opacity: 0; scale: .96; }
+    to   { opacity: 1; scale: 1; }
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewHead .fmTourFlower {
+    width: 26px;
+    height: 26px;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewTitle {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #b83d6c;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewClose {
+    border: none;
+    background: none;
+    padding: 0 4px;
+    font-size: 1.2rem;
+    line-height: 1;
+    color: #c1668a;
+    cursor: pointer;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewClose:hover {
+    color: #b83d6c;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewBody {
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewVersion {
+    display: inline-block;
+    margin: 4px 0 4px;
+    padding: 1px 8px;
+    border-radius: 8px;
+    font-size: .68rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #f48fb1, #e0668f);
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewBody ul {
+    margin: 2px 0 8px;
+    padding-left: 18px;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewBody li {
+    margin: 3px 0;
+    font-size: .78rem;
+    line-height: 1.45;
+    color: #5c3444;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewBody li::marker {
+    content: "\2740  ";
+    color: #e0668f;
+}
+
+.dialog[name="themeModMenu"] .fmWhatsNewFoot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+}

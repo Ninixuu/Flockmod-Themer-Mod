@@ -1,4 +1,27 @@
 (() => {
+    /* =========================================================
+       WHAT'S NEW  <-- edit this list for every release
+       Newest version goes FIRST. The "version" must match the
+       "version" in manifest.json. Each note is one bullet point.
+       People who update see these once in a small pink card the
+       next time they open the mod menu (General > What's new
+       shows them again anytime).
+       ========================================================= */
+    const CHANGELOG = [
+        {
+            version: "1.1",
+            notes: [
+                "Reset buttons (\u21BA) on every section in Colors and Interface, so you can reset just one part.",
+                "Bigger section titles and thin divider lines between sections.",
+                "A quick tour of the basics. Find it in General > Quick tour.",
+                "The mod's version is shown in the menu, with a Check for updates button (and an optional automatic check).",
+                "Full backup file: save everything (themes, images, sounds, fonts) and load it on another browser or computer.",
+                "Long room descriptions are now colored all the way down.",
+                "Help links and a little thank-you note in General."
+            ]
+        }
+    ];
+
     let customizationsEnabled = true;
 
     const MOD_BUTTON_SELECTOR = ".themeModMenuButton";
@@ -6814,9 +6837,14 @@ function buildSimpleColorRowsHTML() {
                                     </div>
                                 </div>
 
-                                <button type="button" class="themeModButton themeModUpdateButton">
-                                    <i class="fas fa-sync-alt"></i> Check for updates
-                                </button>
+                                <div class="themeModBackupButtons">
+                                    <button type="button" class="themeModButton themeModWhatsNewButton">
+                                        <i class="fas fa-seedling"></i> What's new
+                                    </button>
+                                    <button type="button" class="themeModButton themeModUpdateButton">
+                                        <i class="fas fa-sync-alt"></i> Check for updates
+                                    </button>
+                                </div>
 
                             </div>
 
@@ -8298,6 +8326,8 @@ const safetyControls = setupSafetyPanel(dialog);
 
         setupBackup(dialog);
 
+        setupWhatsNew(dialog);
+
         return dialog;
     }
 
@@ -8656,6 +8686,132 @@ const safetyControls = setupSafetyPanel(dialog);
         });
 
         autoCheck();
+    }
+
+    /* =========================================================
+       WHAT'S NEW CARD
+       Shown inside the mod menu (so it moves and resizes with it).
+       After an update it pops up once on its own; brand-new users
+       get the tour prompt instead and never see it on first open.
+       ========================================================= */
+
+    const WHATS_NEW_SEEN_LS = "flockmodLastSeenVersion";
+
+    function hasExistingModData() {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+
+            if (key && key.startsWith("flockmod") && key !== "flockmodMenuRect" && key !== WHATS_NEW_SEEN_LS) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function setupWhatsNew(dialog) {
+        const current = getModVersion();
+        const button = dialog.querySelector(".themeModWhatsNewButton");
+        let card = null;
+
+        const close = () => {
+            card?.remove();
+            card = null;
+            localStorage.setItem(WHATS_NEW_SEEN_LS, current);
+        };
+
+        /* Entries to show: newer than lastSeen (auto) or the latest few (button) */
+        const pickEntries = (lastSeen) => {
+            const list = CHANGELOG.filter((entry) =>
+                entry && entry.version && Array.isArray(entry.notes) &&
+                compareVersions(entry.version, current) <= 0
+            );
+
+            return lastSeen
+                ? list.filter((entry) => compareVersions(entry.version, lastSeen) > 0)
+                : list.slice(0, 3);
+        };
+
+        const open = (entries, updated) => {
+            if (!entries.length) {
+                return;
+            }
+
+            card?.remove();
+
+            card = document.createElement("div");
+            card.className = "fmWhatsNew";
+            card.setAttribute("role", "dialog");
+            card.setAttribute("aria-label", "What's new");
+
+            const head = document.createElement("div");
+            head.className = "fmWhatsNewHead";
+            head.innerHTML = `<span class="fmTourFlower" aria-hidden="true"></span>`;
+
+            const title = document.createElement("div");
+            title.className = "fmWhatsNewTitle";
+            title.textContent = updated ? `Updated to v${current}!` : "What's new";
+            head.appendChild(title);
+
+            const closeX = document.createElement("button");
+            closeX.type = "button";
+            closeX.className = "fmWhatsNewClose";
+            closeX.title = "Close";
+            closeX.innerHTML = "&times;";
+            closeX.addEventListener("click", close);
+            head.appendChild(closeX);
+
+            const body = document.createElement("div");
+            body.className = "fmWhatsNewBody";
+
+            entries.forEach((entry) => {
+                const label = document.createElement("div");
+                label.className = "fmWhatsNewVersion";
+                label.textContent = `v${entry.version}`;
+                body.appendChild(label);
+
+                const ul = document.createElement("ul");
+
+                entry.notes.forEach((note) => {
+                    const li = document.createElement("li");
+                    li.textContent = String(note);
+                    ul.appendChild(li);
+                });
+
+                body.appendChild(ul);
+            });
+
+            const foot = document.createElement("div");
+            foot.className = "fmWhatsNewFoot";
+
+            const ok = document.createElement("button");
+            ok.type = "button";
+            ok.className = "fmTourBtn fmTourMain";
+            ok.textContent = "Got it!";
+            ok.addEventListener("click", close);
+            foot.appendChild(ok);
+
+            card.append(head, body, foot);
+            (dialog.querySelector(".themeModDialogInner") || dialog).appendChild(card);
+        };
+
+        button?.addEventListener("click", () => open(pickEntries(null), false));
+
+        /* ---- Automatic, once per update ---- */
+        const lastSeen = localStorage.getItem(WHATS_NEW_SEEN_LS);
+
+        if (lastSeen === null) {
+            /* Brand-new user (the tour handles them) vs. someone
+               updating from a version before this card existed */
+            if (localStorage.getItem("flockmodTourSeen") === "true" || hasExistingModData()) {
+                const entries = pickEntries(null).slice(0, 1);
+                setTimeout(() => dialog.isConnected && open(entries, true), 400);
+            } else {
+                localStorage.setItem(WHATS_NEW_SEEN_LS, current);
+            }
+        } else if (compareVersions(current, lastSeen) > 0) {
+            setTimeout(() => dialog.isConnected && open(pickEntries(lastSeen), true), 400);
+        }
     }
 
     /* =========================================================
