@@ -4298,25 +4298,11 @@ html.fmAnimMenu .dialog[name="themeModMenu"] .fmWhatsNew {
 }
 
 /* =========================================================
-   POPUP DECORATIONS: "Color popups to match" (fmDecoFrameOn)
-   The style's own popup colors, stronger than the theme's and
-   the Colors panel's popup colors. Only on decorated popups,
-   never on the mod menu.
+   POPUP DECORATIONS: Title bar color (fmDecoFrameOn) and
+   Border color (fmDecoFrameBorderOn), each with its own switch.
+   Only on decorated popups, never on the mod menu. Popup
+   backgrounds and text are left to your theme.
    ========================================================= */
-html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) {
-    background: var(--fmframe-bg) !important;
-    color: var(--fmframe-text) !important;
-}
-/* Border + resize edges only with "Popup border" ON */
-html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) {
-    border-color: var(--fmframe-border) !important;
-}
-html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dynamicDialogArea,
-html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogArea,
-html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .submodal .subcontent {
-    background: var(--fmframe-content) !important;
-    color: var(--fmframe-text) !important;
-}
 html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitlebar,
 html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitlebar.inactive {
     background: var(--fmframe-title) !important;
@@ -4327,28 +4313,228 @@ html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([n
 html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogTitle a {
     color: var(--fmframe-titletext) !important;
 }
-html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsBar,
-html.fmDecoFrameOn.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsCorner {
+html.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) {
+    border-color: var(--fmframe-border) !important;
+}
+html.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsBar,
+html.fmDecoFrameBorderOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .dialogSize.dsCorner {
     background-color: var(--fmframe-border) !important;
     border-color: var(--fmframe-border) !important;
 }
-html.fmDecoFrameOn:not(.flockmodCustomizationsDisabled) .dialog.fmHasDeco:not([name="themeModMenu"]) .scrollNotBottom:not(.scrollNoOverflow)::after {
-    background: linear-gradient(to bottom, transparent 0, var(--fmframe-content) 100%) !important;
-}
 
-/* The menu's little preview box shows the popup colors too */
-html.fmDecoFrameOn .dialog[name="themeModMenu"] .themeModDecoPreview {
-    background: var(--fmframe-bg);
-    color: var(--fmframe-text);
-}
-html.fmDecoFrameOn.fmDecoFrameBorderOn .dialog[name="themeModMenu"] .themeModDecoPreview {
-    border-color: var(--fmframe-border);
-}
-
-/* The popup color pickers sit indented under their toggle */
-.dialog[name="themeModMenu"] .themeModDecoFrameColors .themeModDecoColorRow { padding-left: 14px; }
+/* The menu's little preview box shows them too */
 html.fmDecoFrameOn .dialog[name="themeModMenu"] .themeModDecoPreviewBar {
     background: var(--fmframe-title);
     color: var(--fmframe-titletext);
     text-shadow: none;
+}
+html.fmDecoFrameBorderOn .dialog[name="themeModMenu"] .themeModDecoPreview {
+    border-color: var(--fmframe-border);
+}
+
+/* Pickers sit indented under their switch */
+.dialog[name="themeModMenu"] .themeModDecoSubColors .themeModDecoColorRow { padding-left: 14px; }
+
+/* Decoration colors: 3-way choice */
+.dialog[name="themeModMenu"] .themeModDecoModeRow .themeModSettingText { flex: 1; }
+.dialog[name="themeModMenu"] .themeModDecoSeg {
+    display: flex;
+    margin-top: 8px;
+    border: 1px solid #4f5156;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.dialog[name="themeModMenu"] .themeModDecoSeg button {
+    flex: 1;
+    padding: 6px 4px;
+    border: 0;
+    background: #1e1f22;
+    color: #b4b6ba;
+    font-family: var(--flockmod-custom-ui-font, Rubik, sans-serif);
+    font-size: .72rem;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+.dialog[name="themeModMenu"] .themeModDecoSeg button + button { border-left: 1px solid #4f5156; }
+.dialog[name="themeModMenu"] .themeModDecoSeg button:hover:not(:disabled):not(.themeModDecoSegOn) { background: #2c2d31; color: #fff; }
+.dialog[name="themeModMenu"] .themeModDecoSeg button.themeModDecoSegOn { background: #f48fb1; color: #3a1020; font-weight: 600; }
+.dialog[name="themeModMenu"] .themeModDecoSeg button:disabled { opacity: .4; cursor: not-allowed; }
+html.fmDecoFrameOn .dialog[name="themeModMenu"] .themeModDecoPreviewBar {
+    background: var(--fmframe-title);
+    color: var(--fmframe-titletext);
+    text-shadow: none;
+}
+
+/* =========================================================
+   CALMER MENU LAYOUT (v1.3)
+   Section titles everywhere: bigger, white, thin pink bar.
+   Colors panel: cards you can fold, one aligned control
+   column, Gradient pills, group labels, one-line descriptions.
+   ========================================================= */
+
+.dialog[name="themeModMenu"] .themeModSubsectionTitle {
+    justify-content: flex-start;
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: .02rem;
+}
+.dialog[name="themeModMenu"] .themeModSubsectionTitle::before {
+    content: "";
+    flex-shrink: 0;
+    width: 4px;
+    height: 1.05em;
+    border-radius: 2px;
+    background: #f48fb1;
+}
+.dialog[name="themeModMenu"] .themeModSubsectionLabel { margin-right: auto; }
+/* Titles without a reset button: push nothing, text sits after the bar */
+
+/* ---- cards ---- */
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardHead {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    background: #2a2b30;
+    border: 1px solid #37393e;
+    border-radius: 8px 8px 0 0;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardHead.fmFolded,
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardHead.fmCardEmpty {
+    border-radius: 8px;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardHead:not(.fmFolded):not(.fmCardEmpty) {
+    border-bottom-color: #35373c;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardItem {
+    margin: 0;
+    padding: 9px 14px;
+    background: #2a2b30;
+    border-left: 1px solid #37393e;
+    border-right: 1px solid #37393e;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .fmCardItem.fmCardLast {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #37393e;
+    border-radius: 0 0 8px 8px;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting.fmCardItem + .themeModSetting.fmCardItem:not(.themeModGradientRow) {
+    border-top: 1px solid #313338;
+}
+.dialog[name="themeModMenu"]:not(.themeModSearching) .fmCardsPanel .fmFoldHidden {
+    display: none !important;
+}
+
+/* Count ("6 settings · 3 on") right after the title */
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSubsectionLabel[data-fm-count]::after {
+    content: attr(data-fm-count);
+    margin-left: 10px;
+    font-size: .68rem;
+    font-weight: 400;
+    color: #9a9ca1;
+    letter-spacing: 0;
+}
+.dialog[name="themeModMenu"] .fmFoldable { cursor: pointer; }
+
+.dialog[name="themeModMenu"] .fmFoldButton {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #9b9da2;
+    font-size: .7rem;
+    cursor: pointer;
+    transition: color .15s ease, transform .2s ease;
+}
+.dialog[name="themeModMenu"] .fmFoldButton:hover { color: #fff; }
+.dialog[name="themeModMenu"] .fmCardHead.fmFolded .fmFoldButton { transform: rotate(-90deg); }
+.dialog[name="themeModMenu"].themeModSearching .fmFoldButton { display: none; }
+
+/* Group labels (Backgrounds, Accents...) */
+.dialog[name="themeModMenu"] .fmCardsPanel .fmGroupLabel {
+    padding-top: 12px;
+    padding-bottom: 0;
+    font-size: .62rem;
+    letter-spacing: .09rem;
+    text-transform: uppercase;
+    color: #f7a1c0;
+    opacity: .9;
+}
+.dialog[name="themeModMenu"].themeModSearching .fmGroupLabel { display: none !important; }
+
+/* ---- rows: text on the left, one aligned control column ---- */
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting {
+    gap: 8px;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting > .themeModSettingText {
+    flex: 1 1 0;
+    margin-right: 10px;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSettingName { margin-bottom: 2px; }
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting:not(.themeModDecoModeRow) .themeModSettingDescription {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting > .fmGradPill { order: 1; }
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting > input[type="color"] { order: 2; flex-shrink: 0; }
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting > .themeModToggle { order: 3; margin-right: 0 !important; flex-shrink: 0; }
+
+/* The swatch fades while its color is OFF (still clickable) */
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting:has(> .themeModToggle input:not(:checked)) > input[type="color"] {
+    opacity: .35;
+}
+
+/* ---- Gradient pill + its compact row ---- */
+.dialog[name="themeModMenu"] .fmGradPill {
+    flex-shrink: 0;
+    height: 22px;
+    padding: 0 9px;
+    border: 1px solid #4f5156;
+    border-radius: 11px;
+    background: transparent;
+    color: #9a9ca1;
+    font-family: inherit;
+    font-size: .65rem;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease;
+}
+.dialog[name="themeModMenu"] .fmGradPill:hover { border-color: #707379; color: #fff; }
+.dialog[name="themeModMenu"] .fmGradPill.fmOn { border-color: #f48fb1; background: #4a2f3b; color: #ffd1e0; }
+.dialog[name="themeModMenu"] .fmGradPill.fmDim { opacity: .45; }
+
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModGradientRow:not(.fmGradOpen) { display: none !important; }
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModGradientRow {
+    padding-top: 0;
+    padding-left: 30px;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModGradientRow .themeModSettingName {
+    margin: 0;
+    font-size: .72rem;
+    color: #c9cacd;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModGradientRow .themeModSettingDescription,
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModGradientRow .themeModToggle {
+    display: none;
+}
+.dialog[name="themeModMenu"] .fmCardsPanel .themeModSetting.fmHasGradOpen { padding-bottom: 6px; }
+
+/* ---- "Unsaved changes" beside Reset / Apply ---- */
+.dialog[name="themeModMenu"] .themeModUnsaved {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-right: 4px;
+    font-size: .72rem;
+    color: #ffd1e0;
+    white-space: nowrap;
+}
+.dialog[name="themeModMenu"].themeModDirty .themeModUnsaved { display: inline-flex; }
+.dialog[name="themeModMenu"] .themeModUnsavedDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f48fb1;
+    box-shadow: 0 0 6px rgba(244, 143, 177, .7);
 }

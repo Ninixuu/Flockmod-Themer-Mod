@@ -9,10 +9,22 @@
        ========================================================= */
     const CHANGELOG = [
         {
+            version: "1.4",
+            notes: [
+                "A calmer Colors tab: every section is a card you can fold away (click its title), and the menu remembers what you folded.",
+                "Each section title shows how many of its colors are on.",
+                "All switches and color pickers line up on the right, and a color's picker fades while it's OFF.",
+                "Gradients are now a small Gradient button next to the color, instead of a full extra row.",
+                "Small labels split long sections into groups, and descriptions are one line (hover a row to read all of it).",
+                "Bigger, easier to read section titles in every tab.",
+                "A pink Unsaved changes note shows beside Apply until you apply or reset."
+            ]
+        },
+        {
             version: "1.3",
             notes: [
                 "13 new popup decoration styles: Glitch, Moth, Leaves, Strawberry, Dragon, Gothic lace, Night sky, Terminal, Ink, Spiderweb, Thorned rose, Deep sea and Minimal.",
-                "Every decoration style has a Use style colors button and a Color popups to match switch, with your own title bar, background and text colors (and an optional border color).",
+                "Decoration colors: match your theme, use the style's own colors, or pick your own. Title bar and border colors each have their own switch.",
                 "Chat Bubbles (Interface): 27 styles for your own messages, including cat, dog, bear, fox, stars, sakura and witch hat to match the popups.",
                 "Bubble options: your messages on the right, bubbles for everyone else, decorations on or off, and your own bubble colors.",
                 "Decorations and bubbles play a small animation once when they appear.",
@@ -567,7 +579,7 @@ function gradientRowHTML(setting) {
 
         <div class="themeModSettingText">
             <div class="themeModSettingName">
-                <i class="fas fa-level-up-alt fa-rotate-90"></i> Gradient
+                <i class="fas fa-level-up-alt fa-rotate-90"></i> Gradient: blends into
             </div>
 
             <div class="themeModSettingDescription">
@@ -4152,27 +4164,30 @@ function buildSimpleColorRowsHTML() {
         outline: "flockmodDecoOutlineColor",
         detail: "flockmodDecoDetailColor",
         sparkle: "flockmodDecoSparkleColor",
-        frame: "flockmodDecoFrame",
-        /* v1.3: your own popup colors for "Color popups to match".
-           frameCustom OFF = use the style's colors (so old theme
-           codes without these keys look exactly like before). */
-        frameCustom: "flockmodDecoFrameCustom",
-        frameBorder: "flockmodDecoFrameBorder",
+        frame: "flockmodDecoFrame",               /* Title bar color ON/OFF (was "Color popups to match") */
+        /* v1.3 */
+        colorMode: "flockmodDecoColorMode",       /* "theme" | "style" | "own" ("auto" = decide from the old match switch) */
+        frameCustom: "flockmodDecoFrameCustom",   /* OFF = title bar / border pickers use the style's colors */
+        frameBorder: "flockmodDecoFrameBorder",   /* Border color ON/OFF */
         frameTitle: "flockmodDecoFrameTitle",
         frameTitleText: "flockmodDecoFrameTitleText",
-        frameBg: "flockmodDecoFrameBg",
-        frameText: "flockmodDecoFrameText",
         frameBorderColor: "flockmodDecoFrameBorderColor"
     };
 
-    /* The popup color pickers, in menu order: [key in frame, LS key, label] */
+    const DECO_COLOR_MODES = ["theme", "style", "own"];
+    const DECO_COLOR_MODE_TEXT = {
+        theme: "Follows your popup colors, on any theme.",
+        style: "The colors this style was designed with.",
+        own: "Pick the decoration colors yourself."
+    };
+
+    /* Title bar / border pickers: [key, LS key, label] */
     const DECO_FRAME_PICKERS = [
         ["title", "frameTitle", "Title bar"],
         ["titleText", "frameTitleText", "Title text"],
-        ["bg", "frameBg", "Background"],
-        ["text", "frameText", "Text"]
+        ["border", "frameBorderColor", "Border"]
     ];
-    const DECO_FRAME_FALLBACK = { bg: "#1d1e21", content: "#1d1e21", title: "#2a2c30", titleText: "#e6e7ea", text: "#c5c7cc", border: "#3a3d43" };
+    const DECO_FRAME_FALLBACK = { title: "#2a2c30", titleText: "#e6e7ea", border: "#3a3d43" };
 
     const DECO_COLOR_DEFAULTS = {
         main: "#d7b9c4",
@@ -4732,31 +4747,34 @@ function buildSimpleColorRowsHTML() {
         const placement = localStorage.getItem(DECO_LS.placement);
         const size = Number(localStorage.getItem(DECO_LS.size));
         const colors = {};
+        const hex = (v) => /^#[0-9a-f]{6}$/i.test(v || "") ? v : null;
 
         Object.keys(DECO_COLOR_DEFAULTS).forEach((key) => {
-            const v = localStorage.getItem(DECO_LS[key]);
-            colors[key] = /^#[0-9a-f]{6}$/i.test(v || "") ? v : DECO_COLOR_DEFAULTS[key];
+            colors[key] = hex(localStorage.getItem(DECO_LS[key])) || DECO_COLOR_DEFAULTS[key];
         });
+
+        /* Older settings only had "Match my theme": ON = theme, OFF = own colors */
+        const savedMode = localStorage.getItem(DECO_LS.colorMode);
+        const colorMode = DECO_COLOR_MODES.includes(savedMode)
+            ? savedMode
+            : (localStorage.getItem(DECO_LS.match) === "false" ? "own" : "theme");
 
         const st = {
             style: DECO_STYLES[style] ? style : "none",
             placement: DECO_PLACEMENT_CHOICES.includes(placement) ? placement : "side",
             size: Number.isInteger(size) && size >= 70 && size <= 150 ? size : 100,
-            match: localStorage.getItem(DECO_LS.match) !== "false",   /* default ON */
+            colorMode,
             menu: localStorage.getItem(DECO_LS.menu) === "true",
             frame: localStorage.getItem(DECO_LS.frame) === "true",
             frameCustom: localStorage.getItem(DECO_LS.frameCustom) === "true",
-            frameBorder: localStorage.getItem(DECO_LS.frameBorder) === "true",   /* default OFF: keeps your theme's border */
+            frameBorder: localStorage.getItem(DECO_LS.frameBorder) === "true",
             frameColors: {},
             colors
         };
 
-        const hex = (v) => /^#[0-9a-f]{6}$/i.test(v || "") ? v : null;
-        const styleFrame = (DECO_STYLES[st.style] && DECO_STYLES[st.style].frame) || DECO_FRAME_FALLBACK;
         DECO_FRAME_PICKERS.forEach(([k, ls]) => {
-            st.frameColors[k] = hex(localStorage.getItem(DECO_LS[ls])) || styleFrame[k];
+            st.frameColors[k] = hex(localStorage.getItem(DECO_LS[ls]));
         });
-        st.frameColors.border = hex(localStorage.getItem(DECO_LS.frameBorderColor)) || styleFrame.border;
 
         return normalizeDecoPlacement(st);
     }
@@ -4768,33 +4786,38 @@ function buildSimpleColorRowsHTML() {
             st.placement = allowed[0];
         }
 
+        st.match = st.colorMode === "theme";
         return st;
     }
 
     let liveDeco = null;
 
-    /* The popup colors actually used: the style's own, or your
-       picked ones when you've changed them */
+    /* Title bar + border colors: the style's own, or your picked
+       ones once you've changed them */
     function resolveDecoFrame(st) {
-        const base = DECO_STYLES[st.style] && DECO_STYLES[st.style].frame;
+        const base = (DECO_STYLES[st.style] && DECO_STYLES[st.style].frame) || DECO_FRAME_FALLBACK;
+        const own = st.frameCustom && st.frameColors ? st.frameColors : {};
 
-        if (!base) {
-            return null;
-        }
-
-        if (!st.frameCustom || !st.frameColors) {
-            return base;
-        }
-
-        const c = st.frameColors;
         return {
-            bg: c.bg || base.bg,
-            content: c.bg || base.content,
-            title: c.title || base.title,
-            titleText: c.titleText || base.titleText,
-            text: c.text || base.text,
-            border: c.border || base.border
+            title: own.title || base.title,
+            titleText: own.titleText || base.titleText,
+            border: own.border || base.border
         };
+    }
+
+    /* The 4 decoration colors in use, or null for "Match my theme" */
+    function resolveDecoColors(st) {
+        const style = DECO_STYLES[st.style];
+
+        if (st.colorMode === "style" && style && style.palette) {
+            return { ...DECO_COLOR_DEFAULTS, ...style.palette };
+        }
+
+        if (st.colorMode === "own") {
+            return st.colors;
+        }
+
+        return null;
     }
 
     function applySavedDeco() {
@@ -4804,33 +4827,28 @@ function buildSimpleColorRowsHTML() {
     function applyDeco(st) {
         liveDeco = st;
         const root = document.documentElement;
+        const on = st.style !== "none";
+        const colors = resolveDecoColors(st);
 
         root.style.setProperty("--fmdeco-size", String(st.size / 100));
-        root.classList.toggle("fmDecoCustomColors", !st.match);
+        root.classList.toggle("fmDecoCustomColors", Boolean(colors));
         root.classList.toggle("fmDecoOnMenu", st.menu);
 
-        if (!st.match) {
-            root.style.setProperty("--fmdeco-c-main", st.colors.main);
-            root.style.setProperty("--fmdeco-c-outline", st.colors.outline);
-            root.style.setProperty("--fmdeco-c-detail", st.colors.detail);
-            root.style.setProperty("--fmdeco-c-sparkle", st.colors.sparkle);
+        if (colors) {
+            root.style.setProperty("--fmdeco-c-main", colors.main);
+            root.style.setProperty("--fmdeco-c-outline", colors.outline);
+            root.style.setProperty("--fmdeco-c-detail", colors.detail);
+            root.style.setProperty("--fmdeco-c-sparkle", colors.sparkle);
         }
 
-        /* "Color popups to match": the style's own popup colors
-           (title bar, background, text, border) beat the theme's */
+        /* Title bar and border colors, each with its own switch.
+           Only decorated popups get them, never the mod menu. */
         const frame = resolveDecoFrame(st);
-        const frameOn = Boolean(st.frame && frame);
-        root.classList.toggle("fmDecoFrameOn", frameOn);
-        root.classList.toggle("fmDecoFrameBorderOn", frameOn && Boolean(st.frameBorder));
-
-        if (frameOn) {
-            root.style.setProperty("--fmframe-bg", frame.bg);
-            root.style.setProperty("--fmframe-content", frame.content);
-            root.style.setProperty("--fmframe-title", frame.title);
-            root.style.setProperty("--fmframe-titletext", frame.titleText);
-            root.style.setProperty("--fmframe-text", frame.text);
-            root.style.setProperty("--fmframe-border", frame.border);
-        }
+        root.classList.toggle("fmDecoFrameOn", on && Boolean(st.frame));
+        root.classList.toggle("fmDecoFrameBorderOn", on && Boolean(st.frameBorder));
+        root.style.setProperty("--fmframe-title", frame.title);
+        root.style.setProperty("--fmframe-titletext", frame.titleText);
+        root.style.setProperty("--fmframe-border", frame.border);
 
         lastThemeDecoColors = "";
         updateDecorations(true);
@@ -5037,6 +5055,12 @@ function buildSimpleColorRowsHTML() {
                 </span>
             </label>`;
 
+        const picker = (attr, key, label, value) => `
+    <div class="themeModSetting themeModNoDivider themeModDecoColorRow" data-${attr}-row="${key}">
+        <div class="themeModSettingText"><div class="themeModSettingName" data-${attr}-label="${key}">${label}</div></div>
+        <input type="color" data-${attr}="${key}" value="${value}">
+    </div>`;
+
         return `
 <div class="themeModSubsectionTitle themeModSpacingSubsection">
     Popup Decorations
@@ -5089,57 +5113,45 @@ function buildSimpleColorRowsHTML() {
     ${toggle("themeModDecoMenu")}
 </div>
 
-<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow themeModDecoModeRow">
     <div class="themeModSettingText">
-        <div class="themeModSettingName">Match my theme</div>
-        <div class="themeModSettingDescription">Uses your popup's title bar, border and accent colors. Turn OFF to pick your own.</div>
-    </div>
-    ${toggle("themeModDecoMatch")}
-</div>
-
-<div class="themeModSetting themeModNoDivider themeModDecoOptionRow themeModDecoPaletteRow">
-    <div class="themeModSettingText">
-        <div class="themeModSettingName">Style colors</div>
-        <div class="themeModSettingDescription">Use the colors this style was designed with, for the decorations and the popup colors. Turns Match my theme off so you can tweak them.</div>
-    </div>
-    <button type="button" class="themeModButton themeModDecoUsePalette"><i class="fas fa-palette"></i> Use style colors</button>
-</div>
-
-<div class="themeModSetting themeModNoDivider themeModDecoOptionRow themeModDecoFrameRow">
-    <div class="themeModSettingText">
-        <div class="themeModSettingName">Color popups to match</div>
-        <div class="themeModSettingDescription">Gives every popup this style's own title bar, background and text colors, on top of your theme. Change them below if you like. OFF keeps your theme's popup colors.</div>
-    </div>
-    ${toggle("themeModDecoFrame")}
-</div>
-
-<div class="themeModDecoFrameColors">
-    ${DECO_FRAME_PICKERS.map(([k, , label]) => `
-    <div class="themeModSetting themeModNoDivider themeModDecoColorRow">
-        <div class="themeModSettingText"><div class="themeModSettingName">${label}</div></div>
-        <input type="color" data-deco-frame-color="${k}" value="${DECO_FRAME_FALLBACK[k]}">
-    </div>`).join("")}
-    <div class="themeModSetting themeModNoDivider themeModDecoColorRow">
-        <div class="themeModSettingText">
-            <div class="themeModSettingName">Popup border</div>
-            <div class="themeModSettingDescription">ON also colors the popup's border and resize edges. OFF keeps your theme's border.</div>
+        <div class="themeModSettingName">Decoration colors</div>
+        <div class="themeModSettingDescription themeModDecoModeText">${DECO_COLOR_MODE_TEXT.theme}</div>
+        <div class="themeModDecoSeg" id="themeModDecoColorMode" role="radiogroup" aria-label="Decoration colors">
+            <button type="button" role="radio" data-deco-mode="theme">Match my theme</button>
+            <button type="button" role="radio" data-deco-mode="style">Style colors</button>
+            <button type="button" role="radio" data-deco-mode="own">My own</button>
         </div>
-        ${toggle("themeModDecoFrameBorder")}
-    </div>
-    <div class="themeModSetting themeModNoDivider themeModDecoColorRow themeModDecoFrameBorderRow">
-        <div class="themeModSettingText"><div class="themeModSettingName">Border color</div></div>
-        <input type="color" data-deco-frame-color="border" value="${DECO_FRAME_FALLBACK.border}">
     </div>
 </div>
 
 <div class="themeModDecoColors">
-    ${Object.keys(DECO_COLOR_DEFAULTS).map((key) => `
-    <div class="themeModSetting themeModNoDivider themeModDecoColorRow" data-deco-color-row="${key}">
-        <div class="themeModSettingText">
-            <div class="themeModSettingName" data-deco-color-label="${key}"></div>
-        </div>
-        <input type="color" data-deco-color="${key}" value="${DECO_COLOR_DEFAULTS[key]}">
-    </div>`).join("")}
+    ${Object.keys(DECO_COLOR_DEFAULTS).map((key) => picker("deco-color", key, "", DECO_COLOR_DEFAULTS[key])).join("")}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Title bar color</div>
+        <div class="themeModSettingDescription">Color the popup title bars to match. OFF keeps your theme.</div>
+    </div>
+    ${toggle("themeModDecoFrame")}
+</div>
+
+<div class="themeModDecoSubColors themeModDecoTitleColors">
+    ${picker("deco-frame-color", "title", "Title bar", DECO_FRAME_FALLBACK.title)}
+    ${picker("deco-frame-color", "titleText", "Title text", DECO_FRAME_FALLBACK.titleText)}
+</div>
+
+<div class="themeModSetting themeModNoDivider themeModDecoOptionRow">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName">Border color</div>
+        <div class="themeModSettingDescription">Color the popup border and resize edges. OFF keeps your theme.</div>
+    </div>
+    ${toggle("themeModDecoFrameBorder")}
+</div>
+
+<div class="themeModDecoSubColors themeModDecoBorderColors">
+    ${picker("deco-frame-color", "border", "Border", DECO_FRAME_FALLBACK.border)}
 </div>`;
     }
 
@@ -5149,19 +5161,23 @@ function buildSimpleColorRowsHTML() {
         const size = dialog.querySelector("#themeModDecoSize");
         const sizeValue = dialog.querySelector("#themeModDecoSizeValue");
         const menuToggle = dialog.querySelector("#themeModDecoMenu");
-        const match = dialog.querySelector("#themeModDecoMatch");
+        const modeSeg = dialog.querySelector("#themeModDecoColorMode");
+        const modeText = dialog.querySelector(".themeModDecoModeText");
         const colorsBox = dialog.querySelector(".themeModDecoColors");
         const previewDeco = dialog.querySelector(".themeModDecoPreview .fmDeco");
-        const paletteRow = dialog.querySelector(".themeModDecoPaletteRow");
-        const paletteButton = dialog.querySelector(".themeModDecoUsePalette");
-        const frameToggle = dialog.querySelector("#themeModDecoFrame");
-        const frameBox = dialog.querySelector(".themeModDecoFrameColors");
-        const frameBorderToggle = dialog.querySelector("#themeModDecoFrameBorder");
-        const frameBorderRow = dialog.querySelector(".themeModDecoFrameBorderRow");
+        const titleToggle = dialog.querySelector("#themeModDecoFrame");
+        const borderToggle = dialog.querySelector("#themeModDecoFrameBorder");
+        const titleBox = dialog.querySelector(".themeModDecoTitleColors");
+        const borderBox = dialog.querySelector(".themeModDecoBorderColors");
         const pickers = {};
         const framePickers = {};
-        /* true once you change a popup color yourself */
+        let colorMode = "theme";
+        /* true once you change a title bar / border color yourself */
         let frameCustom = false;
+
+        if (!styleSelect) {
+            return { save() {}, reset() {}, resetPreview() {} };
+        }
 
         dialog.querySelectorAll("[data-deco-color]").forEach((input) => {
             pickers[input.dataset.decoColor] = input;
@@ -5170,15 +5186,21 @@ function buildSimpleColorRowsHTML() {
             framePickers[input.dataset.decoFrameColor] = input;
         });
 
-        /* Puts a style's own popup colors into the popup pickers */
+        /* Puts a style's own title bar / border colors into their pickers */
         function framePickersFromStyle(styleKey) {
             const f = (DECO_STYLES[styleKey] && DECO_STYLES[styleKey].frame) || DECO_FRAME_FALLBACK;
             frameCustom = false;
             Object.keys(framePickers).forEach((k) => { framePickers[k].value = f[k]; });
         }
 
-        if (!styleSelect) {
-            return { save() {}, reset() {}, resetPreview() {} };
+        function setMode(mode) {
+            colorMode = DECO_COLOR_MODES.includes(mode) ? mode : "theme";
+            modeSeg.querySelectorAll("[data-deco-mode]").forEach((b) => {
+                const on = b.dataset.decoMode === colorMode;
+                b.classList.toggle("themeModDecoSegOn", on);
+                b.setAttribute("aria-checked", String(on));
+            });
+            modeText.textContent = DECO_COLOR_MODE_TEXT[colorMode];
         }
 
         function fillPlacements(styleKey, wanted) {
@@ -5197,11 +5219,11 @@ function buildSimpleColorRowsHTML() {
                 style: styleSelect.value,
                 placement: placement.value || "side",
                 size: Number(size.value),
-                match: match.checked,
+                colorMode,
                 menu: menuToggle.checked,
-                frame: frameToggle ? frameToggle.checked : false,
+                frame: titleToggle.checked,
                 frameCustom,
-                frameBorder: frameBorderToggle ? frameBorderToggle.checked : false,
+                frameBorder: borderToggle.checked,
                 frameColors: Object.fromEntries(Object.keys(framePickers).map((k) => [k, framePickers[k].value])),
                 colors
             });
@@ -5216,17 +5238,13 @@ function buildSimpleColorRowsHTML() {
             });
 
             placement.closest(".themeModSetting").style.display = on && style.placements.length ? "" : "none";
-            if (paletteRow) {
-                paletteRow.style.display = on && style.palette ? "" : "none";
-            }
-            if (frameToggle) {
-                frameToggle.closest(".themeModSetting").style.display = on && style.frame ? "" : "none";
-            }
-            if (frameBox) {
-                frameBox.style.display = on && style.frame && st.frame ? "" : "none";
-                frameBorderRow.style.display = st.frameBorder ? "" : "none";
-            }
-            colorsBox.style.display = on && !st.match ? "" : "none";
+            colorsBox.style.display = on && st.colorMode === "own" ? "" : "none";
+            titleBox.style.display = on && st.frame ? "" : "none";
+            borderBox.style.display = on && st.frameBorder ? "" : "none";
+
+            /* Styles without their own colors can't pick "Style colors" */
+            const styleBtn = modeSeg.querySelector('[data-deco-mode="style"]');
+            styleBtn.disabled = !style.palette;
 
             Object.keys(pickers).forEach((key) => {
                 const label = style.colors[key];
@@ -5250,10 +5268,10 @@ function buildSimpleColorRowsHTML() {
             fillPlacements(st.style, st.placement);
             size.value = String(st.size);
             sizeValue.textContent = `${st.size}%`;
-            match.checked = st.match;
+            setMode(st.colorMode);
             menuToggle.checked = st.menu;
-            if (frameToggle) frameToggle.checked = st.frame;
-            if (frameBorderToggle) frameBorderToggle.checked = Boolean(st.frameBorder);
+            titleToggle.checked = Boolean(st.frame);
+            borderToggle.checked = Boolean(st.frameBorder);
             framePickersFromStyle(st.style);
             if (st.frameCustom && st.frameColors) {
                 frameCustom = true;
@@ -5265,9 +5283,17 @@ function buildSimpleColorRowsHTML() {
             updateRows(st);
         }
 
-        /* Turning "Match my theme" off starts the pickers from the
-           colors you're currently seeing, instead of random defaults */
-        function seedPickersFromTheme() {
+        /* Switching to "My own" starts the pickers from the colors
+           you're seeing right now, instead of random defaults */
+        function seedPickers(fromMode) {
+            if (fromMode === "style") {
+                const palette = DECO_STYLES[styleSelect.value] && DECO_STYLES[styleSelect.value].palette;
+                if (palette) {
+                    Object.keys(pickers).forEach((k) => { if (palette[k]) pickers[k].value = palette[k]; });
+                }
+                return;
+            }
+
             refreshThemeDecoColors();
             const cs = getComputedStyle(document.documentElement);
             const toHex = (c) => {
@@ -5291,45 +5317,44 @@ function buildSimpleColorRowsHTML() {
 
         styleSelect.addEventListener("change", () => {
             fillPlacements(styleSelect.value, placement.value);
-            framePickersFromStyle(styleSelect.value);   /* each style starts with its own popup colors */
+            framePickersFromStyle(styleSelect.value);   /* each style starts with its own title bar / border colors */
+            if (colorMode === "style" && !DECO_STYLES[styleSelect.value].palette) {
+                setMode("theme");
+            }
             preview();
         });
         placement.addEventListener("change", preview);
         size.addEventListener("input", preview);
         menuToggle.addEventListener("change", preview);
-        if (frameToggle) frameToggle.addEventListener("change", preview);
-        if (frameBorderToggle) frameBorderToggle.addEventListener("change", preview);
+        titleToggle.addEventListener("change", preview);
+        borderToggle.addEventListener("change", preview);
+
+        modeSeg.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-deco-mode]");
+
+            if (!button || button.disabled || button.dataset.decoMode === colorMode) {
+                return;
+            }
+
+            if (button.dataset.decoMode === "own") {
+                seedPickers(colorMode);
+            }
+
+            setMode(button.dataset.decoMode);
+            preview();
+        });
+
+        Object.values(pickers).forEach((input) => input.addEventListener("input", preview));
         Object.values(framePickers).forEach((input) => input.addEventListener("input", () => {
             frameCustom = true;
             preview();
         }));
-        match.addEventListener("change", () => {
-            if (!match.checked) {
-                seedPickersFromTheme();
-            }
-            preview();
+
+        const defaults = () => ({
+            style: "none", placement: "side", size: 100, colorMode: "theme", match: true, menu: false,
+            frame: false, frameCustom: false, frameBorder: false, frameColors: {},
+            colors: { ...DECO_COLOR_DEFAULTS }
         });
-        Object.values(pickers).forEach((input) => input.addEventListener("input", preview));
-
-        /* Copies the style's own palette into the 4 pickers */
-        if (paletteButton) {
-            paletteButton.addEventListener("click", () => {
-                const palette = DECO_STYLES[styleSelect.value] && DECO_STYLES[styleSelect.value].palette;
-
-                if (!palette) {
-                    return;
-                }
-
-                match.checked = false;
-                Object.keys(pickers).forEach((k) => {
-                    if (palette[k]) {
-                        pickers[k].value = palette[k];
-                    }
-                });
-                framePickersFromStyle(styleSelect.value);
-                preview();
-            });
-        }
 
         return {
             save() {
@@ -5337,21 +5362,17 @@ function buildSimpleColorRowsHTML() {
                 localStorage.setItem(DECO_LS.style, st.style);
                 localStorage.setItem(DECO_LS.placement, st.placement);
                 localStorage.setItem(DECO_LS.size, st.size);
-                localStorage.setItem(DECO_LS.match, st.match);
+                localStorage.setItem(DECO_LS.colorMode, st.colorMode);
+                localStorage.setItem(DECO_LS.match, st.colorMode === "theme");   /* kept for older versions */
                 localStorage.setItem(DECO_LS.menu, st.menu);
                 localStorage.setItem(DECO_LS.frame, st.frame);
                 localStorage.setItem(DECO_LS.frameCustom, st.frameCustom);
                 localStorage.setItem(DECO_LS.frameBorder, st.frameBorder);
                 DECO_FRAME_PICKERS.forEach(([k, ls]) => localStorage.setItem(DECO_LS[ls], st.frameColors[k]));
-                localStorage.setItem(DECO_LS.frameBorderColor, st.frameColors.border);
                 Object.keys(DECO_COLOR_DEFAULTS).forEach((k) => localStorage.setItem(DECO_LS[k], st.colors[k]));
             },
             reset() {
-                const st = {
-                    style: "none", placement: "side", size: 100, match: true, menu: false, frame: false,
-                    frameCustom: false, frameBorder: false, frameColors: {},
-                    colors: { ...DECO_COLOR_DEFAULTS }
-                };
+                const st = defaults();
                 fill(st);
                 applyDeco(st);
                 this.save();
@@ -5359,11 +5380,7 @@ function buildSimpleColorRowsHTML() {
             /* Same as reset() but doesn't save: used by the
                Popup Decorations subsection's own reset button */
             resetPreview() {
-                const st = {
-                    style: "none", placement: "side", size: 100, match: true, menu: false, frame: false,
-                    frameCustom: false, frameBorder: false, frameColors: {},
-                    colors: { ...DECO_COLOR_DEFAULTS }
-                };
+                const st = defaults();
                 fill(st);
                 applyDeco(st);
             }
@@ -7308,10 +7325,11 @@ function buildSimpleColorRowsHTML() {
         add(DECO_LS.match, "bool", true);
         add(DECO_LS.menu, "bool", false);
         add(DECO_LS.frame, "bool", false);
+        /* "auto" = older codes: decided by the match switch above */
+        add(DECO_LS.colorMode, "enum", "auto", { choices: ["auto", ...DECO_COLOR_MODES] });
         add(DECO_LS.frameCustom, "bool", false);
         add(DECO_LS.frameBorder, "bool", false);
         DECO_FRAME_PICKERS.forEach(([k, ls]) => add(DECO_LS[ls], "color", DECO_FRAME_FALLBACK[k]));
-        add(DECO_LS.frameBorderColor, "color", DECO_FRAME_FALLBACK.border);
         add(BUB_LS.style, "enum", "none", { choices: BUB_STYLE_CHOICES });
         add(BUB_LS.right, "bool", true);
         add(BUB_LS.others, "bool", true);
@@ -8434,9 +8452,9 @@ ${buildBubbleRowsHTML()}
 
     <div class="themeModDetailedColors">
 
-    <div class="themeModLocalNote">
+    <div class="themeModLocalNote" title="Some colors have a Gradient option. It only shows while that color is ON, and only in detailed mode (Simple coloring turns gradients off). Sidebar gradients stretch across the whole sidebar instead of restarting in each section. A background image sits on top of the gradient and covers it (the gradient only shows through see-through parts of the image), and sidebar sections drop their gradient while the sidebar image is see-through, so the image still shows through them. Slider fills and switches use Accent 1's gradient too.">
         <i class="fas fa-circle-info"></i>
-        <span>Some colors have a Gradient option. It only shows while that color is ON, and only in detailed mode (Simple coloring turns gradients off). Sidebar gradients stretch across the whole sidebar instead of restarting in each section. A background image sits on top of the gradient and covers it (the gradient only shows through see-through parts of the image), and sidebar sections drop their gradient while the sidebar image is see-through, so the image still shows through them. Slider fills and switches use Accent 1's gradient too.</span>
+        <span>Click a section title to fold it. Gradient buttons only work in detailed mode. Hover here for more about gradients.</span>
     </div>
 
     <div class="themeModSubsectionTitle">
@@ -9549,6 +9567,9 @@ const safetyControls = setupSafetyPanel(dialog);
             decoControls
         });
 
+        enhanceColorsLayout(dialog);
+        setupUnsavedNote(dialog);
+
         setupTour(dialog);
 
         dialog.querySelector(".themeModPanelHelp")?.addEventListener("click", () => {
@@ -10552,9 +10573,10 @@ const safetyControls = setupSafetyPanel(dialog);
             ] : [
                 step("fa-toggle-on", "ON + color", "Each color has a switch and a picker. Switch it ON, then pick. OFF keeps FlockMod's own color.", row("Text Color 1")),
                 step("fa-map-signs", "Jump around", "The chips up top jump to Sidebar, Top Bar, Chat and more.", () => dialog.querySelector(".themeModJumpBar")),
-                step("fa-fill-drip", "Gradients", "Some colors can blend into a second color. The Gradient row shows up while that color is ON.", el(".themeModGradientRow")),
+                step("fa-fill-drip", "Gradients", "Some colors have a small Gradient button. Turn it on (with the color ON) to blend into a second color and pick its direction.", el(".fmGradPill")),
                 step("fa-undo-alt", "Reset one part", "\u21BA next to a section title resets just that section.", el(".themeModSubsectionReset")),
-                step("fa-check", "Apply", "Press Apply Changes to keep your colors.", () => dialog.querySelector(".themeModApplyButton"))
+                step("fa-chevron-down", "Fold sections", "Click a section title (or its arrow) to fold it away. The menu remembers which ones you folded.", el(".fmFoldButton")),
+                step("fa-check", "Apply", "Press Apply Changes to keep your colors. A pink note reminds you when something isn't applied yet.", () => dialog.querySelector(".themeModApplyButton"))
             ],
             themes: [
                 step("fa-share-alt", "Share a theme", "Copy code gives you a theme code for friends. Paste someone's code below and press Import.", row("Export theme")),
@@ -11449,6 +11471,284 @@ const safetyControls = setupSafetyPanel(dialog);
                 dialog.remove();
             }
         );
+    }
+
+
+    /* =========================================================
+       COLORS PANEL LAYOUT (cards, folding, aligned controls,
+       Gradient pills, group labels) + "Unsaved changes" note.
+       Purely visual: it only adds classes and a few small
+       elements around the existing rows, so every setting,
+       search, the jump chips and the per-section resets work
+       exactly as before.
+       ========================================================= */
+
+    const FOLDED_SECTIONS_LS = "flockmodMenuFoldedSections";
+
+    /* Small labels that split long sections into groups:
+       the row with this switch gets the label above it */
+    const COLOR_GROUP_LABELS = {
+        themeModText1ColorEnabled: "Text",
+        themeModSelectedColorEnabled: "States",
+        themeModSidebarPrimaryEnabled: "Backgrounds",
+        themeModSidebarAccentEnabled: "Accents",
+        themeModSidebarIconEnabled: "Icons",
+        themeModTopBarBackgroundEnabled: "Bar",
+        themeModTopBarTextColorEnabled: "Buttons",
+        themeModTopBarBrandEnabled: "Extras",
+        themeModPopupBackgroundEnabled: "Window",
+        themeModPopupFieldEnabled: "Fields & buttons"
+    };
+
+    function readFoldedSections() {
+        try {
+            const list = JSON.parse(localStorage.getItem(FOLDED_SECTIONS_LS) || "[]");
+            return new Set(Array.isArray(list) ? list : []);
+        } catch (error) {
+            return new Set();
+        }
+    }
+
+    function enhanceColorsLayout(dialog) {
+        const panel = dialog.querySelector('.themeModSectionContent[data-theme-panel="colors"]');
+
+        if (!panel || panel.classList.contains("fmCardsPanel")) {
+            return;
+        }
+
+        panel.classList.add("fmCardsPanel");
+
+        const folded = readFoldedSections();
+        const saveFolded = () => {
+            localStorage.setItem(FOLDED_SECTIONS_LS, JSON.stringify([...folded]));
+        };
+
+        /* ---- group labels ---- */
+        Object.entries(COLOR_GROUP_LABELS).forEach(([id, text]) => {
+            const input = panel.querySelector(`#${id}`);
+            const row = input && input.closest(".themeModSetting");
+
+            if (row) {
+                const label = document.createElement("div");
+                label.className = "fmGroupLabel";
+                label.textContent = text;
+                row.before(label);
+            }
+        });
+
+        /* ---- one-line descriptions: the full text shows on hover ---- */
+        panel.querySelectorAll(".themeModSetting").forEach((row) => {
+            const text = row.querySelector(".themeModSettingText");
+            const desc = row.querySelector(".themeModSettingDescription");
+
+            if (text && desc) {
+                text.title = desc.textContent.replace(/\s+/g, " ").trim();
+            }
+        });
+
+        /* ---- Gradient pills: the gradient's own switch stays (hidden),
+           the pill just flips it ---- */
+        const gradients = [];
+
+        panel.querySelectorAll(".themeModGradientRow").forEach((gradRow) => {
+            let mainRow = gradRow.previousElementSibling;
+
+            while (mainRow && !mainRow.classList.contains("themeModSetting")) {
+                mainRow = mainRow.previousElementSibling;
+            }
+
+            const gradToggle = gradRow.querySelector(".themeModToggle input");
+            const mainToggle = mainRow && mainRow.querySelector(".themeModToggle input");
+            const mainColor = mainRow && mainRow.querySelector(':scope > input[type="color"]');
+
+            if (!gradToggle || !mainToggle) {
+                return;
+            }
+
+            const pill = document.createElement("button");
+            pill.type = "button";
+            pill.className = "fmGradPill";
+            pill.textContent = "Gradient";
+            pill.title = "Blend this color into a second color";
+
+            if (mainColor) {
+                mainColor.before(pill);
+            } else {
+                mainRow.appendChild(pill);
+            }
+
+            pill.addEventListener("click", (event) => {
+                event.preventDefault();
+                gradToggle.checked = !gradToggle.checked;
+                gradToggle.dispatchEvent(new Event("change", { bubbles: true }));
+                refresh();
+            });
+
+            gradients.push({ gradRow, mainRow, gradToggle, mainToggle, pill });
+        });
+
+        /* ---- cards ---- */
+        const cards = [];
+
+        panel.querySelectorAll(".themeModSubsectionTitle").forEach((title) => {
+            const items = getSubsectionElements(title);
+            const labelEl = title.querySelector(".themeModSubsectionLabel");
+            const key = (labelEl || title).textContent.replace(/\s+/g, " ").trim();
+
+            title.classList.add("fmCardHead");
+            items.forEach((el) => el.classList.add("fmCardItem"));
+
+            const fold = document.createElement("button");
+            fold.type = "button";
+            fold.className = "fmFoldButton";
+            fold.title = "Fold / unfold this section";
+            fold.setAttribute("aria-label", `Fold or unfold ${key}`);
+            fold.innerHTML = '<i class="fas fa-chevron-down"></i>';
+            title.appendChild(fold);
+
+            const card = { title, items, key, labelEl, fold };
+            cards.push(card);
+
+            const toggleFold = (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setFolded(card, !title.classList.contains("fmFolded"));
+                folded[title.classList.contains("fmFolded") ? "add" : "delete"](key);
+                saveFolded();
+                refresh();
+            };
+
+            fold.addEventListener("click", toggleFold);
+
+            if (labelEl) {
+                labelEl.classList.add("fmFoldable");
+                labelEl.addEventListener("click", toggleFold);
+            }
+
+            setFolded(card, folded.has(key));
+        });
+
+        function setFolded(card, isFolded) {
+            card.title.classList.toggle("fmFolded", isFolded);
+            card.items.forEach((el) => el.classList.toggle("fmFoldHidden", isFolded));
+            card.fold.setAttribute("aria-expanded", String(!isFolded));
+        }
+
+        /* Counts, pills, open gradients and which row closes each card */
+        function refresh() {
+            gradients.forEach(({ gradRow, mainRow, gradToggle, mainToggle, pill }) => {
+                pill.classList.toggle("fmOn", gradToggle.checked);
+                pill.classList.toggle("fmDim", !mainToggle.checked);
+                pill.setAttribute("aria-pressed", String(gradToggle.checked));
+                const open = gradToggle.checked && mainToggle.checked;
+                gradRow.classList.toggle("fmGradOpen", open);
+                mainRow.classList.toggle("fmHasGradOpen", open);
+            });
+
+            cards.forEach(({ title, items, labelEl }) => {
+                const rows = items.filter((el) =>
+                    el.classList.contains("themeModSetting") && !el.classList.contains("themeModGradientRow"));
+                const switches = rows
+                    .map((row) => row.querySelector(":scope > .themeModToggle input"))
+                    .filter(Boolean);
+                const on = switches.filter((input) => input.checked).length;
+
+                if (labelEl && switches.length) {
+                    labelEl.dataset.fmCount = `${switches.length} setting${switches.length === 1 ? "" : "s"} · ${on ? `${on} on` : "none on"}`;
+                }
+
+                let last = null;
+                items.forEach((el) => {
+                    el.classList.remove("fmCardLast");
+                    if (getComputedStyle(el).display !== "none") {
+                        last = el;
+                    }
+                });
+
+                if (last) {
+                    last.classList.add("fmCardLast");
+                }
+
+                title.classList.toggle("fmCardEmpty", !last);
+            });
+        }
+
+        /* Opening a section from its jump chip unfolds it first
+           (capture: runs before the chip scrolls) */
+        const jumpBar = dialog.querySelector(".themeModJumpBar");
+
+        if (jumpBar) {
+            jumpBar.addEventListener("click", (event) => {
+                const chip = event.target.closest(".themeModJumpChip");
+                const card = chip && cards.find((c) => c.key === chip.textContent.trim() && c.title.offsetParent !== null);
+
+                if (card && card.title.classList.contains("fmFolded")) {
+                    setFolded(card, false);
+                    folded.delete(card.key);
+                    saveFolded();
+                    refresh();
+                }
+            }, true);
+        }
+
+        /* Keep everything in sync. Resets change controls without
+           events, so clicks re-check too (cheap: ~40 rows). */
+        let queued = false;
+        const queueRefresh = () => {
+            if (!queued) {
+                queued = true;
+                requestAnimationFrame(() => {
+                    queued = false;
+                    refresh();
+                });
+            }
+        };
+
+        dialog.addEventListener("change", queueRefresh);
+        dialog.addEventListener("click", queueRefresh);
+        dialog.querySelector(".themeModSearchInput")?.addEventListener("input", queueRefresh);
+
+        refresh();
+    }
+
+    /* Pink "Unsaved changes" note beside Reset / Apply. Shows after
+       you change something, hides after Apply or Reset. */
+    function setupUnsavedNote(dialog) {
+        const actions = dialog.querySelector(".themeModActions");
+        const reset = actions && actions.querySelector(".themeModResetButton");
+        const apply = actions && actions.querySelector(".themeModApplyButton");
+        const scroll = dialog.querySelector(".themeModSectionsScroll");
+
+        if (!reset || !apply || !scroll || actions.querySelector(".themeModUnsaved")) {
+            return;
+        }
+
+        const note = document.createElement("span");
+        note.className = "themeModUnsaved";
+        note.innerHTML = '<span class="themeModUnsavedDot"></span>Unsaved changes';
+        reset.before(note);
+
+        /* Typing a theme name or searching isn't a change to apply */
+        const ignored = (target) => !target || !target.closest ||
+            target.closest(".themeModSearch") ||
+            target.closest('[data-theme-panel="themes"]');
+
+        const mark = (event) => {
+            if (event.isTrusted && !ignored(event.target)) {
+                dialog.classList.add("themeModDirty");
+            }
+        };
+
+        scroll.addEventListener("input", mark, true);
+        scroll.addEventListener("change", mark, true);
+        scroll.addEventListener("click", (event) => {
+            if (event.target.closest && event.target.closest(".themeModSubsectionReset, [data-deco-mode], .fmGradPill")) {
+                dialog.classList.add("themeModDirty");
+            }
+        }, true);
+
+        apply.addEventListener("click", () => dialog.classList.remove("themeModDirty"));
+        reset.addEventListener("click", () => dialog.classList.remove("themeModDirty"));
     }
 
 
