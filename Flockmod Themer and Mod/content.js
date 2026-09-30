@@ -3084,6 +3084,861 @@ function buildSimpleColorRowsHTML() {
         };
     }
 
+
+    /* =========================================================
+       REFERENCE IMAGES WINDOW
+       A floating window for reference pictures, opened from the
+       bottom bar (next to the flower). Images are kept only in
+       this browser (IndexedDB) and never touch FlockMod's board or
+       servers. Only the current picture is on screen; zoom and pan
+       only move/scale it (graphics card), and nothing runs while
+       you aren't touching it. Built as a normal FlockMod-style
+       popup, so it takes your popup colors automatically.
+       ========================================================= */
+
+    const REF_SELECTOR = '.dialog[name="themeModReference"]';
+    const REF_BUTTON_SELECTOR = ".themeModRefButton";
+    const REF_DB_NAME = "flockmodThemeModRefs";
+    const REF_DB_STORE = "images";
+    const REF_LIST_LS = "flockmodRefList";
+    const REF_INDEX_LS = "flockmodRefIndex";
+    const REF_RECT_LS = "flockmodRefRect";
+    const REF_VIEW_LS = "flockmodRefView";
+    const REF_MAX_IMAGES = 20;
+    const REF_MAX_SIDE = 2560;
+    const REF_THUMB_SIDE = 120;
+    const REF_MAX_FILE_BYTES = 30 * 1024 * 1024;
+
+    /* Hanging picture frame with a sakura inside (FlockMod already
+       uses the plain "image" icon for board uploads) */
+    const REF_ICON_SVG = `
+        <svg class="themeModRefIcon" viewBox="0 0 24 24" aria-hidden="true" style="fill: currentColor;">
+            <path d="M8 8 L12 3.2 L16 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="12" cy="3" r="1.3"/>
+            <rect x="3" y="8" width="18" height="13.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+            <g transform="translate(12 14.9)">
+                <ellipse cx="0" cy="-2.3" rx="1.7" ry="2.1"/>
+                <ellipse cx="0" cy="-2.3" rx="1.7" ry="2.1" transform="rotate(72)"/>
+                <ellipse cx="0" cy="-2.3" rx="1.7" ry="2.1" transform="rotate(144)"/>
+                <ellipse cx="0" cy="-2.3" rx="1.7" ry="2.1" transform="rotate(216)"/>
+                <ellipse cx="0" cy="-2.3" rx="1.7" ry="2.1" transform="rotate(288)"/>
+            </g>
+        </svg>`;
+
+    function openRefDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(REF_DB_NAME, 1);
+            request.onupgradeneeded = () => request.result.createObjectStore(REF_DB_STORE);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function refDB(mode, action) {
+        const db = await openRefDB();
+
+        try {
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(REF_DB_STORE, mode);
+                const request = action(tx.objectStore(REF_DB_STORE));
+                tx.oncomplete = () => resolve(request ? request.result : undefined);
+                tx.onerror = () => reject(tx.error);
+            });
+        } finally {
+            db.close();
+        }
+    }
+
+    function getRefList() {
+        try {
+            const list = JSON.parse(localStorage.getItem(REF_LIST_LS) || "[]");
+            return Array.isArray(list) ? list.filter((id) => typeof id === "string") : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function setRefList(list) {
+        localStorage.setItem(REF_LIST_LS, JSON.stringify(list));
+    }
+
+    function readRefView() {
+        try {
+            const v = JSON.parse(localStorage.getItem(REF_VIEW_LS) || "{}");
+            return {
+                flip: Boolean(v.flip),
+                gray: Boolean(v.gray),
+                opacity: Number.isFinite(v.opacity) ? Math.min(100, Math.max(30, v.opacity)) : 100,
+                strip: Boolean(v.strip)
+            };
+        } catch (error) {
+            return { flip: false, gray: false, opacity: 100, strip: false };
+        }
+    }
+
+    function saveRefView(view) {
+        localStorage.setItem(REF_VIEW_LS, JSON.stringify(view));
+    }
+
+    /* Shrinks big pictures once, when they're added, so memory and
+       storage stay reasonable. Returns { full, thumb } blobs. */
+    async function prepareRefImage(file) {
+        if (!file || !/^image\//.test(file.type)) {
+            throw new Error("not an image");
+        }
+
+        if (file.size > REF_MAX_FILE_BYTES) {
+            throw new Error("too big");
+        }
+
+        const bitmap = await createImageBitmap(file);
+
+        const draw = (maxSide, type, quality) => {
+            const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+            canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+            const g = canvas.getContext("2d");
+            g.imageSmoothingQuality = "high";
+            g.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            return canvasToBlob(canvas, type, quality);
+        };
+
+        try {
+            const full = (await draw(REF_MAX_SIDE, "image/webp", 0.92)) || (await draw(REF_MAX_SIDE, "image/png"));
+            const thumb = (await draw(REF_THUMB_SIDE, "image/webp", 0.8)) || (await draw(REF_THUMB_SIDE, "image/png"));
+            return { full, thumb };
+        } finally {
+            bitmap.close();
+        }
+    }
+
+    /* Keeps the reference window above FlockMod's other popups
+       when you use it, but always under the mod menu */
+    function raiseRefWindow(win) {
+        let top = 0;
+
+        document.querySelectorAll(".dialog").forEach((d) => {
+            if (d !== win && d.getAttribute("name") !== "themeModMenu") {
+                const z = parseInt(getComputedStyle(d).zIndex, 10);
+
+                if (Number.isFinite(z)) {
+                    top = Math.max(top, z);
+                }
+            }
+        });
+
+        win.style.zIndex = String(Math.min(99990, Math.max(1000, top + 1)));
+    }
+
+    function getInitialRefRect() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let r = null;
+
+        try {
+            r = JSON.parse(localStorage.getItem(REF_RECT_LS) || "null");
+        } catch (error) {
+            r = null;
+        }
+
+        let width = r && Number(r.width) ? r.width : Math.min(420, vw * 0.4);
+        let height = r && Number(r.height) ? r.height : Math.min(460, vh * 0.6);
+        width = Math.max(240, Math.min(width, vw - 20));
+        height = Math.max(200, Math.min(height, vh - 20));
+
+        let left = r && Number.isFinite(r.left) ? r.left : vw - width - 80;
+        let top = r && Number.isFinite(r.top) ? r.top : 80;
+        left = Math.max(0, Math.min(left, vw - width));
+        top = Math.max(0, Math.min(top, vh - 40));
+
+        return {
+            width: `${Math.round(width)}px`,
+            height: `${Math.round(height)}px`,
+            left: `${Math.round(left)}px`,
+            top: `${Math.round(top)}px`
+        };
+    }
+
+    function toggleRefWindow() {
+        const existing = document.querySelector(REF_SELECTOR);
+
+        if (existing) {
+            existing._closeRef();
+            return;
+        }
+
+        createRefWindow();
+    }
+
+    function createRefWindow() {
+        const container = document.querySelector("#dialogContainer");
+
+        if (!container) {
+            return null;
+        }
+
+        const win = document.createElement("div");
+        win.className = "dialog dialogVisible themeModRefWindow";
+        win.setAttribute("name", "themeModReference");
+        Object.assign(win.style, getInitialRefRect());
+
+        win.innerHTML = `
+            <div class="themeModRefInner">
+                <div class="dialogTitlebar movable">
+                    <div class="dialogTitle">
+                        <div class="pull-left">
+                            ${REF_ICON_SVG}
+                            <span>References</span>
+                            <span class="themeModRefCount"></span>
+                        </div>
+                        <div class="dialogTitleButtons">
+                            <div style="text-align: right;">
+                                <a href="#" class="btn btn-md themeModRefMinimize" title="Minimize">
+                                    <i class="fas fa-window-minimize titleButton"></i>
+                                </a>
+                                <a href="#" class="btn btn-md closeButton" title="Close">
+                                    <i class="fas fa-window-close titleButton"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="themeModRefToolbar">
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="add" title="Add images (you can also drop or paste them)"><i class="fas fa-plus"></i></button>
+                    <span class="themeModRefSep"></span>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="zoomOut" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+                    <button type="button" class="btn btn-default themeModRefBtn themeModRefZoom" data-ref="fit" title="Fit to window">100%</button>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="zoomIn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+                    <span class="themeModRefSep"></span>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="flip" title="Flip horizontally"><i class="fas fa-arrows-alt-h"></i></button>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="gray" title="Grayscale (check values)"><i class="fas fa-adjust"></i></button>
+                    <input type="range" class="themeModRefOpacity" min="30" max="100" step="5" title="Window opacity">
+                    <span class="themeModRefGrow"></span>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="strip" title="Show all images"><i class="fas fa-th-large"></i></button>
+                    <button type="button" class="btn btn-default themeModRefBtn" data-ref="remove" title="Remove this image"><i class="fas fa-trash-alt"></i></button>
+                </div>
+
+                <div class="themeModRefStage" tabindex="0">
+                    <div class="themeModRefLayer">
+                        <img class="themeModRefImg" alt="" draggable="false">
+                    </div>
+                    <div class="themeModRefEmpty">
+                        ${REF_ICON_SVG}
+                        <div>Add reference images with <b>+</b>,<br>drop them here, or paste (Ctrl+V).</div>
+                        <div class="themeModRefEmptyNote">Saved only in this browser. Nobody else sees them.</div>
+                    </div>
+                    <button type="button" class="themeModRefNav themeModRefPrev" data-ref="prev" title="Previous"><i class="fas fa-chevron-left"></i></button>
+                    <button type="button" class="themeModRefNav themeModRefNext" data-ref="next" title="Next"><i class="fas fa-chevron-right"></i></button>
+                    <div class="themeModRefToast"></div>
+                </div>
+
+                <div class="themeModRefStrip"></div>
+
+                <input type="file" class="themeModRefFile" accept="image/*" multiple style="display: none;">
+            </div>
+
+            <div class="dialogSize dsBar sbTop"></div>
+            <div class="dialogSize dsBar sbBottom"></div>
+            <div class="dialogSize dsBar sbLeft"></div>
+            <div class="dialogSize dsBar sbRight"></div>
+            <div class="dialogSize dsCorner sbTopLeft"></div>
+            <div class="dialogSize dsCorner sbTopRight"></div>
+            <div class="dialogSize dsCorner sbBottomLeft"></div>
+            <div class="dialogSize dsCorner sbBottomRight"></div>
+        `;
+
+        container.appendChild(win);
+        raiseRefWindow(win);
+        setupDragging(win);
+        setupResizing(win, 240, 200);
+
+        const q = (sel) => win.querySelector(sel);
+        const stage = q(".themeModRefStage");
+        const layer = q(".themeModRefLayer");
+        const img = q(".themeModRefImg");
+        const empty = q(".themeModRefEmpty");
+        const strip = q(".themeModRefStrip");
+        const fileInput = q(".themeModRefFile");
+        const zoomLabel = q(".themeModRefZoom");
+        const countLabel = q(".themeModRefCount");
+        const toast = q(".themeModRefToast");
+        const opacity = q(".themeModRefOpacity");
+        const removeBtn = q('[data-ref="remove"]');
+
+        let list = getRefList();
+        let index = Math.min(Math.max(0, Number(localStorage.getItem(REF_INDEX_LS)) || 0), Math.max(0, list.length - 1));
+        let view = readRefView();
+        let currentURL = null;
+        let thumbURLs = [];
+        let natW = 0;
+        let natH = 0;
+        let fitted = true;
+        const t = { s: 1, x: 0, y: 0 };
+        let frame = 0;
+        let resizeObserver = null;
+
+        /* ---------- view transform ---------- */
+
+        function render() {
+            frame = 0;
+            img.style.transform = `translate(${t.x}px, ${t.y}px) scale(${t.s})`;
+            zoomLabel.textContent = `${Math.round(t.s * 100)}%`;
+        }
+
+        function schedule() {
+            if (!frame) {
+                frame = requestAnimationFrame(render);
+            }
+        }
+
+        function stageSize() {
+            return { w: stage.clientWidth, h: stage.clientHeight };
+        }
+
+        function fit() {
+            if (!natW) {
+                return;
+            }
+
+            const { w, h } = stageSize();
+            t.s = Math.min(w / natW, h / natH, 4);
+            t.x = (w - natW * t.s) / 2;
+            t.y = (h - natH * t.s) / 2;
+            fitted = true;
+            schedule();
+        }
+
+        /* Zoom keeping the point (px, py) of the stage in place */
+        function zoomAt(factor, px, py) {
+            if (!natW) {
+                return;
+            }
+
+            const s = Math.min(16, Math.max(0.05, t.s * factor));
+            const k = s / t.s;
+            t.x = px - (px - t.x) * k;
+            t.y = py - (py - t.y) * k;
+            t.s = s;
+            fitted = false;
+            schedule();
+        }
+
+        /* Stage point under the pointer. With flip on, the layer is
+           mirrored, so x is measured from the other side. */
+        function localPoint(clientX, clientY) {
+            const r = stage.getBoundingClientRect();
+            const x = clientX - r.left;
+            return { x: view.flip ? r.width - x : x, y: clientY - r.top };
+        }
+
+        /* ---------- showing images ---------- */
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add("visible");
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove("visible"), 2600);
+        }
+
+        function updateChrome() {
+            const has = list.length > 0;
+            empty.style.display = has ? "none" : "";
+            img.style.display = has ? "" : "none";
+            win.classList.toggle("themeModRefMulti", list.length > 1);
+            countLabel.textContent = has ? `${index + 1} / ${list.length}` : "";
+            removeBtn.disabled = !has;
+            layer.style.transform = view.flip ? "scaleX(-1)" : "";
+            img.style.filter = view.gray ? "grayscale(1)" : "";
+            win.style.opacity = String(view.opacity / 100);
+            opacity.value = String(view.opacity);
+            q('[data-ref="flip"]').classList.toggle("active", view.flip);
+            q('[data-ref="gray"]').classList.toggle("active", view.gray);
+            q('[data-ref="strip"]').classList.toggle("active", view.strip);
+            win.classList.toggle("themeModRefStripOpen", view.strip && has);
+        }
+
+        async function showCurrent() {
+            if (currentURL) {
+                URL.revokeObjectURL(currentURL);
+                currentURL = null;
+            }
+
+            natW = 0;
+            updateChrome();
+
+            if (!list.length) {
+                img.removeAttribute("src");
+                renderStrip();
+                return;
+            }
+
+            localStorage.setItem(REF_INDEX_LS, String(index));
+            const id = list[index];
+            let blob = null;
+
+            try {
+                blob = await refDB("readonly", (store) => store.get(id));
+            } catch (error) {
+                blob = null;
+            }
+
+            if (!blob || id !== list[index]) {
+                return;
+            }
+
+            currentURL = URL.createObjectURL(blob);
+            img.onload = () => {
+                natW = img.naturalWidth;
+                natH = img.naturalHeight;
+                fit();
+            };
+            img.src = currentURL;
+            markStrip();
+        }
+
+        function go(step) {
+            if (list.length < 2) {
+                return;
+            }
+
+            index = (index + step + list.length) % list.length;
+            showCurrent();
+        }
+
+        /* ---------- thumbnail strip (hidden behind a button) ---------- */
+
+        async function renderStrip() {
+            thumbURLs.forEach((u) => URL.revokeObjectURL(u));
+            thumbURLs = [];
+            strip.innerHTML = "";
+
+            if (!view.strip || !list.length) {
+                return;
+            }
+
+            for (let i = 0; i < list.length; i++) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "themeModRefThumb";
+                button.dataset.index = String(i);
+                button.title = `Image ${i + 1}`;
+                strip.appendChild(button);
+            }
+
+            markStrip();
+
+            /* Thumbnails are small separate copies, so opening the
+               strip never loads the full-size pictures */
+            for (let i = 0; i < list.length; i++) {
+                try {
+                    const blob = await refDB("readonly", (store) => store.get(`${list[i]}_t`));
+                    const button = strip.children[i];
+
+                    if (blob && button) {
+                        const url = URL.createObjectURL(blob);
+                        thumbURLs.push(url);
+                        button.style.backgroundImage = `url("${url}")`;
+                    }
+                } catch (error) {
+                    /* missing thumbnail: leave the square blank */
+                }
+            }
+        }
+
+        function markStrip() {
+            [...strip.children].forEach((el, i) => el.classList.toggle("current", i === index));
+        }
+
+        strip.addEventListener("click", (event) => {
+            const button = event.target.closest(".themeModRefThumb");
+
+            if (button) {
+                index = Number(button.dataset.index);
+                showCurrent();
+            }
+        });
+
+        /* ---------- adding / removing ---------- */
+
+        async function addFiles(files) {
+            const images = [...files].filter((f) => f && /^image\//.test(f.type));
+
+            if (!images.length) {
+                showToast("Those weren't images.");
+                return;
+            }
+
+            const room = REF_MAX_IMAGES - list.length;
+
+            if (room <= 0) {
+                showToast(`You can keep up to ${REF_MAX_IMAGES} images. Remove one to add more.`);
+                return;
+            }
+
+            showToast(images.length > 1 ? `Adding ${Math.min(room, images.length)} images...` : "Adding image...");
+
+            let added = 0;
+            let failed = 0;
+
+            for (const file of images.slice(0, room)) {
+                try {
+                    const { full, thumb } = await prepareRefImage(file);
+                    const id = `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+                    await refDB("readwrite", (store) => {
+                        store.put(thumb, `${id}_t`);
+                        return store.put(full, id);
+                    });
+                    list.push(id);
+                    added++;
+                } catch (error) {
+                    failed++;
+                }
+            }
+
+            setRefList(list);
+
+            if (added) {
+                index = list.length - 1;
+                await showCurrent();
+                renderStrip();
+            }
+
+            let message = added ? `Added ${added} image${added > 1 ? "s" : ""}.` : "";
+
+            if (failed) {
+                message += ` ${failed} couldn't be read.`;
+            }
+
+            if (images.length > room) {
+                message += ` Only ${REF_MAX_IMAGES} images fit, so ${images.length - room} were skipped.`;
+            }
+
+            showToast(message.trim());
+        }
+
+        let removeArmed = 0;
+
+        async function removeCurrent() {
+            if (!list.length) {
+                return;
+            }
+
+            /* Two taps, so a stray click can't delete a reference */
+            if (Date.now() - removeArmed > 2500) {
+                removeArmed = Date.now();
+                removeBtn.classList.add("themeModRefArmed");
+                showToast("Tap the trash again to remove this image.");
+                setTimeout(() => removeBtn.classList.remove("themeModRefArmed"), 2500);
+                return;
+            }
+
+            removeArmed = 0;
+            removeBtn.classList.remove("themeModRefArmed");
+
+            const id = list[index];
+
+            try {
+                await refDB("readwrite", (store) => {
+                    store.delete(`${id}_t`);
+                    return store.delete(id);
+                });
+            } catch (error) {
+                /* already gone */
+            }
+
+            list.splice(index, 1);
+            setRefList(list);
+            index = Math.min(index, Math.max(0, list.length - 1));
+            await showCurrent();
+            renderStrip();
+            showToast("Image removed.");
+        }
+
+        /* ---------- toolbar ---------- */
+
+        win.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-ref]");
+
+            if (!button || !win.contains(button)) {
+                return;
+            }
+
+            const { w, h } = stageSize();
+
+            switch (button.dataset.ref) {
+                case "add": fileInput.click(); break;
+                case "zoomIn": zoomAt(1.25, w / 2, h / 2); break;
+                case "zoomOut": zoomAt(0.8, w / 2, h / 2); break;
+                case "fit": fit(); break;
+                case "flip": view.flip = !view.flip; saveRefView(view); updateChrome(); break;
+                case "gray": view.gray = !view.gray; saveRefView(view); updateChrome(); break;
+                case "strip": view.strip = !view.strip; saveRefView(view); updateChrome(); renderStrip(); break;
+                case "remove": removeCurrent(); break;
+                case "prev": go(-1); break;
+                case "next": go(1); break;
+                default: break;
+            }
+        });
+
+        opacity.addEventListener("input", () => {
+            view.opacity = Number(opacity.value);
+            win.style.opacity = String(view.opacity / 100);
+        });
+
+        opacity.addEventListener("change", () => saveRefView(view));
+
+        fileInput.addEventListener("change", () => {
+            const files = fileInput.files ? [...fileInput.files] : [];
+            fileInput.value = "";
+
+            if (files.length) {
+                addFiles(files);
+            }
+        });
+
+        /* ---------- mouse, touch and pen ---------- */
+
+        const pointers = new Map();
+        let pinch = null;
+        let lastTap = { time: 0, x: 0, y: 0 };
+
+        stage.addEventListener("pointerdown", (event) => {
+            if (event.target.closest(".themeModRefNav") || !list.length) {
+                return;
+            }
+
+            stage.focus({ preventScroll: true });
+            stage.setPointerCapture(event.pointerId);
+            pointers.set(event.pointerId, localPoint(event.clientX, event.clientY));
+
+            if (pointers.size === 2) {
+                const [a, b] = [...pointers.values()];
+                pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
+            }
+
+            /* Double tap / double click = fit (or 100% if already fitted) */
+            const now = Date.now();
+            const p = pointers.get(event.pointerId);
+
+            if (pointers.size === 1 && now - lastTap.time < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 30) {
+                if (fitted) {
+                    zoomAt(1 / t.s, p.x, p.y);
+                } else {
+                    fit();
+                }
+                lastTap.time = 0;
+            } else if (pointers.size === 1) {
+                lastTap = { time: now, x: p.x, y: p.y };
+            }
+
+            stage.classList.add("themeModRefGrabbing");
+            event.preventDefault();
+        });
+
+        stage.addEventListener("pointermove", (event) => {
+            if (!pointers.has(event.pointerId)) {
+                return;
+            }
+
+            const prev = pointers.get(event.pointerId);
+            const p = localPoint(event.clientX, event.clientY);
+            pointers.set(event.pointerId, p);
+
+            if (pointers.size >= 2 && pinch) {
+                const [a, b] = [...pointers.values()];
+                const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+                const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+
+                t.x += mid.x - pinch.mid.x;
+                t.y += mid.y - pinch.mid.y;
+                zoomAt(dist / pinch.dist, mid.x, mid.y);
+                pinch = { dist, mid };
+            } else if (pointers.size === 1) {
+                t.x += p.x - prev.x;
+                t.y += p.y - prev.y;
+                fitted = false;
+                schedule();
+            }
+        });
+
+        const endPointer = (event) => {
+            pointers.delete(event.pointerId);
+
+            if (pointers.size < 2) {
+                pinch = null;
+            }
+
+            if (!pointers.size) {
+                stage.classList.remove("themeModRefGrabbing");
+            }
+        };
+
+        stage.addEventListener("pointerup", endPointer);
+        stage.addEventListener("pointercancel", endPointer);
+
+        /* Wheel = zoom at the cursor (trackpad pinch sends this too) */
+        stage.addEventListener("wheel", (event) => {
+            event.preventDefault();
+
+            if (!list.length) {
+                return;
+            }
+
+            const p = localPoint(event.clientX, event.clientY);
+            const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+            zoomAt(Math.exp(-delta * 0.0015), p.x, p.y);
+        }, { passive: false });
+
+        /* ---------- drop + paste ---------- */
+
+        stage.addEventListener("dragover", (event) => {
+            if (event.dataTransfer && [...event.dataTransfer.types].includes("Files")) {
+                event.preventDefault();
+                stage.classList.add("themeModRefDropping");
+            }
+        });
+
+        stage.addEventListener("dragleave", () => stage.classList.remove("themeModRefDropping"));
+
+        stage.addEventListener("drop", (event) => {
+            stage.classList.remove("themeModRefDropping");
+
+            if (event.dataTransfer && event.dataTransfer.files.length) {
+                event.preventDefault();
+                event.stopPropagation();
+                addFiles(event.dataTransfer.files);
+            }
+        });
+
+        /* Only while this window is focused, so FlockMod's own
+           "paste an image onto the board" keeps working elsewhere */
+        win.addEventListener("paste", (event) => {
+            const files = event.clipboardData ? [...event.clipboardData.files] : [];
+
+            if (files.length) {
+                event.preventDefault();
+                event.stopPropagation();
+                addFiles(files);
+            }
+        });
+
+        /* Keys while the picture is focused (the keyboard shield keeps
+           them away from FlockMod's hotkeys) */
+        stage.addEventListener("themeModRefKey", (event) => {
+            const { w, h } = stageSize();
+            const key = event.detail.key;
+
+            if (key === "ArrowLeft") go(-1);
+            else if (key === "ArrowRight") go(1);
+            else if (key === "+" || key === "=") zoomAt(1.25, w / 2, h / 2);
+            else if (key === "-") zoomAt(0.8, w / 2, h / 2);
+            else if (key === "0") fit();
+        });
+
+        /* ---------- window behaviour ---------- */
+
+        win.addEventListener("pointerdown", () => raiseRefWindow(win), true);
+
+        /* Keep the picture fitted while you resize the window */
+        let lastSize = stageSize();
+        resizeObserver = new ResizeObserver(() => {
+            const size = stageSize();
+
+            if (fitted) {
+                fit();
+            } else {
+                /* keep the same spot centered */
+                t.x += (size.w - lastSize.w) / 2;
+                t.y += (size.h - lastSize.h) / 2;
+                schedule();
+            }
+
+            lastSize = size;
+        });
+        resizeObserver.observe(stage);
+
+        function saveRect() {
+            const rect = {
+                width: parseFloat(win.style.width),
+                height: parseFloat(win.dataset.fullHeight || win.style.height),
+                left: parseFloat(win.style.left),
+                top: parseFloat(win.style.top)
+            };
+
+            if (Object.values(rect).every(Number.isFinite)) {
+                localStorage.setItem(REF_RECT_LS, JSON.stringify(rect));
+            }
+        }
+
+        q(".themeModRefMinimize").addEventListener("click", (event) => {
+            event.preventDefault();
+
+            if (win.classList.contains("themeModRefMinimized")) {
+                win.classList.remove("themeModRefMinimized");
+                win.style.height = `${win.dataset.fullHeight}px`;
+                delete win.dataset.fullHeight;
+            } else {
+                win.dataset.fullHeight = String(win.offsetHeight);
+                win.classList.add("themeModRefMinimized");
+                win.style.height = `${q(".dialogTitlebar").offsetHeight + 4}px`;
+            }
+        });
+
+        win._closeRef = () => {
+            saveRect();
+            saveRefView(view);
+            resizeObserver.disconnect();
+            thumbURLs.forEach((u) => URL.revokeObjectURL(u));
+
+            if (currentURL) {
+                URL.revokeObjectURL(currentURL);
+            }
+
+            win.remove();
+        };
+
+        q(".closeButton").addEventListener("click", (event) => {
+            event.preventDefault();
+            win._closeRef();
+        });
+
+        showCurrent().then(renderStrip);
+        return win;
+    }
+
+    function addRefButton() {
+        const bottomBar = document.querySelector("#bottombar > nav > div > ul:nth-child(3)");
+
+        if (!bottomBar || bottomBar.querySelector(REF_BUTTON_SELECTOR)) {
+            return;
+        }
+
+        const modItem = bottomBar.querySelector(MOD_BUTTON_SELECTOR);
+
+        if (!modItem) {
+            return;
+        }
+
+        const item = document.createElement("li");
+        item.className = "nav-item";
+
+        const button = document.createElement("a");
+        button.href = "#";
+        button.className = "nav-link themeModRefButton";
+        button.title = "Reference images (only you can see them)";
+        button.innerHTML = REF_ICON_SVG;
+
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            toggleRefWindow();
+        });
+
+        item.appendChild(button);
+        modItem.closest("li").after(item);
+    }
+
     function setupThumbShape(dialog) {
         const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
         const select = dialog.querySelector("#themeModThumbShape");
@@ -5842,7 +6697,7 @@ const soundControls = setupSoundsPanel(dialog);
 
                 if (
                     event.target.closest(
-                        ".closeButton"
+                        ".closeButton, .dialogTitleButtons a, button"
                     )
                 ) {
                     return;
@@ -5957,9 +6812,7 @@ const soundControls = setupSoundsPanel(dialog);
         );
     }
 
-    function setupResizing(dialog) {
-        const minWidth = 400;
-        const minHeight = 300;
+    function setupResizing(dialog, minWidth = 400, minHeight = 300) {
 
         function setupHandle(
             handle,
@@ -6807,7 +7660,7 @@ const soundControls = setupSoundsPanel(dialog);
         const shield = (event) => {
             const target = event.target;
 
-            if (!(target instanceof Element) || !target.closest(MOD_DIALOG_SELECTOR)) {
+            if (!(target instanceof Element) || !target.closest(`${MOD_DIALOG_SELECTOR}, ${REF_SELECTOR}`)) {
                 return;
             }
 
@@ -6818,6 +7671,11 @@ const soundControls = setupSoundsPanel(dialog);
 
             if (event.type === "keydown" && event.key === "Enter" && target.matches("input")) {
                 target.dispatchEvent(new CustomEvent("themeModEnter"));
+            }
+
+            /* Reference window: hand its keys over as a custom event */
+            if (event.type === "keydown" && target.closest(REF_SELECTOR) && !target.matches("input")) {
+                target.dispatchEvent(new CustomEvent("themeModRefKey", { detail: { key: event.key } }));
             }
 
             event.stopImmediatePropagation();
@@ -6838,6 +7696,7 @@ const soundControls = setupSoundsPanel(dialog);
 
         setInterval(() => {
             addModButton();
+            addRefButton();
             checkSeeThroughTargets();
             makeThumbRoom();     /* for sliders in popups opened later */
             watchSoundTargets(); /* chat / Messenger boxes for sounds */
