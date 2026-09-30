@@ -2677,3 +2677,45 @@ html.fmAnimHover:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a:a
 html.fmAnimSelect:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu .selectedTool {
     animation: fmPop calc(.22s * var(--fm-anim-speed, 1)) ease-out;
 }
+
+/* =========================================================
+   SOUNDS PANEL
+   ========================================================= */
+
+.dialog[name="themeModMenu"] .themeModSoundRow {
+    padding-top: 0;
+    padding-left: 14px;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundRow .themeModSettingName i {
+    font-size: .65rem;
+    opacity: .6;
+    margin-right: 4px;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundControls .themeModRange {
+    width: 80px;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundSelect {
+    width: 140px;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundPlay {
+    height: 28px;
+    min-width: 30px;
+    padding: 0 8px;
+}
+
+.dialog[name="themeModMenu"] .themeModSoundKeywords {
+    width: 170px;
+    flex-shrink: 0;
+    padding: 0 8px;
+}

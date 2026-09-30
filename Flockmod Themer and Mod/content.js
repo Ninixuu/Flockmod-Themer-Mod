@@ -2243,6 +2243,847 @@ function buildSimpleColorRowsHTML() {
         }
     }
 
+
+    /* =========================================================
+       SOUNDS (Sounds tab)
+       Watches only the chat messages box and the Messenger
+       conversation (nothing else on the page), and plays a sound
+       on your computer when something happens. Built-in sounds are
+       made in code with Web Audio (no files). Uploaded sounds are
+       kept in this browser only. Nothing is sent anywhere.
+       Personal setting: not part of share codes.
+       ========================================================= */
+
+    const SOUND_DB_NAME = "flockmodThemeModSounds";
+    const SOUND_DB_STORE = "files";
+    const SOUND_LIBRARY_LS = "flockmodSoundLibrary";
+    const MAX_SOUND_FILE_BYTES = 1024 * 1024;
+
+    const SOUND_EVENTS = [
+        {
+            key: "Mention",
+            name: "Your name mentioned",
+            description: "Someone says your name, or one of your extra words below, in public or staff chat.",
+            def: { enabled: true, sound: "builtin:petal", volume: 80 }
+        },
+        {
+            key: "Private",
+            name: "Private chat message",
+            description: "A new message in a private chat tab. (FlockMod's own: \"Private message tone\")",
+            def: { enabled: true, sound: "builtin:chime", volume: 70 }
+        },
+        {
+            key: "Messenger",
+            name: "Messenger message",
+            description: "A new message in the Messenger. Works while the Messenger is open. (FlockMod's own: \"Messenger message tone\")",
+            def: { enabled: true, sound: "builtin:bell", volume: 70 }
+        },
+        {
+            key: "Chat",
+            name: "Any chat message",
+            description: "Every new message in public or staff chat. Busy rooms get noisy! (FlockMod's own: \"Public/Staff chat message tone\")",
+            def: { enabled: false, sound: "builtin:pop", volume: 45 }
+        },
+        {
+            key: "JoinLeave",
+            name: "Someone joins or leaves",
+            description: "The grey \"has entered the room\" / left messages.",
+            def: { enabled: false, sound: "builtin:sparkle", volume: 45 }
+        }
+    ];
+
+    /* ---------- Built-in sounds (made in code) ---------- */
+
+    function playTone(ctx, dest, start, freq, dur, type, peak, attack = 0.008) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(peak, start + attack);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start(start);
+        osc.stop(start + dur + 0.05);
+    }
+
+    const BUILTIN_SOUNDS = {
+        petal: {
+            label: "Petal (sakura)",
+            play(ctx, dest, t) {
+                [1046.5, 1318.5, 1568, 2093].forEach((f, i) => {
+                    playTone(ctx, dest, t + i * 0.085, f, 0.55, "triangle", 0.28, 0.02);
+                });
+            }
+        },
+        chime: {
+            label: "Soft chime",
+            play(ctx, dest, t) {
+                playTone(ctx, dest, t, 1318.5, 0.6, "sine", 0.45);
+                playTone(ctx, dest, t + 0.13, 1975.5, 0.7, "sine", 0.35);
+            }
+        },
+        bell: {
+            label: "Bell",
+            play(ctx, dest, t) {
+                [[880, 0.4], [880 * 2.76, 0.14], [880 * 5.4, 0.06]].forEach(([f, p]) => {
+                    playTone(ctx, dest, t, f, 1.1, "sine", p, 0.004);
+                });
+            }
+        },
+        pop: {
+            label: "Bubble pop",
+            play(ctx, dest, t) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(750, t);
+                osc.frequency.exponentialRampToValueAtTime(190, t + 0.09);
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(0.55, t + 0.005);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+                osc.connect(gain);
+                gain.connect(dest);
+                osc.start(t);
+                osc.stop(t + 0.15);
+            }
+        },
+        sparkle: {
+            label: "Sparkle",
+            play(ctx, dest, t) {
+                [2093, 2637, 3136, 4186].forEach((f, i) => {
+                    playTone(ctx, dest, t + i * 0.05, f, 0.22, "triangle", 0.16, 0.004);
+                });
+            }
+        }
+    };
+
+    /* ---------- Audio plumbing ---------- */
+
+    let soundCtx = null;
+
+    function getSoundCtx() {
+        if (!soundCtx) {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+
+            if (!Ctx) {
+                return null;
+            }
+
+            soundCtx = new Ctx();
+        }
+
+        if (soundCtx.state === "suspended") {
+            soundCtx.resume().catch(() => {});
+        }
+
+        return soundCtx;
+    }
+
+    /* Browsers only allow sound after you've clicked or typed once */
+    function setupSoundUnlock() {
+        const unlock = () => {
+            if (soundCtx || readSavedSoundSettings().enabled) {
+                getSoundCtx();
+            }
+        };
+
+        window.addEventListener("pointerdown", unlock, true);
+        window.addEventListener("keydown", unlock, true);
+    }
+
+    function openSoundDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(SOUND_DB_NAME, 1);
+            request.onupgradeneeded = () => request.result.createObjectStore(SOUND_DB_STORE);
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async function soundDB(mode, action) {
+        const db = await openSoundDB();
+
+        try {
+            return await new Promise((resolve, reject) => {
+                const tx = db.transaction(SOUND_DB_STORE, mode);
+                const request = action(tx.objectStore(SOUND_DB_STORE));
+                tx.oncomplete = () => resolve(request ? request.result : undefined);
+                tx.onerror = () => reject(tx.error);
+            });
+        } finally {
+            db.close();
+        }
+    }
+
+    function getSoundLibrary() {
+        try {
+            const list = JSON.parse(localStorage.getItem(SOUND_LIBRARY_LS) || "[]");
+            return Array.isArray(list)
+                ? list.filter((s) => s && typeof s.id === "string" && typeof s.name === "string")
+                : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function setSoundLibrary(list) {
+        localStorage.setItem(SOUND_LIBRARY_LS, JSON.stringify(list));
+    }
+
+    const soundBufferCache = new Map();
+
+    async function getUploadedBuffer(ctx, id) {
+        if (soundBufferCache.has(id)) {
+            return soundBufferCache.get(id);
+        }
+
+        const blob = await soundDB("readonly", (store) => store.get(id));
+
+        if (!blob) {
+            return null;
+        }
+
+        const buffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+        soundBufferCache.set(id, buffer);
+        return buffer;
+    }
+
+    function isValidSoundValue(value) {
+        if (typeof value !== "string") {
+            return false;
+        }
+
+        if (value.startsWith("builtin:")) {
+            return Boolean(BUILTIN_SOUNDS[value.slice(8)]);
+        }
+
+        if (value.startsWith("upload:")) {
+            return getSoundLibrary().some((s) => s.id === value.slice(7));
+        }
+
+        return false;
+    }
+
+    /* volume: 0..1 */
+    async function playSoundValue(value, volume) {
+        const ctx = getSoundCtx();
+
+        if (!ctx || volume <= 0) {
+            return;
+        }
+
+        const out = ctx.createGain();
+        out.gain.value = Math.min(1, volume);
+        out.connect(ctx.destination);
+
+        const t = ctx.currentTime + 0.01;
+
+        if (value.startsWith("builtin:") && BUILTIN_SOUNDS[value.slice(8)]) {
+            BUILTIN_SOUNDS[value.slice(8)].play(ctx, out, t);
+        } else if (value.startsWith("upload:")) {
+            try {
+                const buffer = await getUploadedBuffer(ctx, value.slice(7));
+
+                if (buffer) {
+                    const src = ctx.createBufferSource();
+                    src.buffer = buffer;
+                    src.connect(out);
+                    src.start(t);
+                }
+            } catch (error) {
+                /* Unreadable file: stay quiet rather than break anything */
+            }
+        }
+
+        setTimeout(() => out.disconnect(), 4000);
+    }
+
+    /* ---------- Settings ---------- */
+
+    function soundLs(key, suffix) {
+        return `flockmodSound${key}${suffix}`;
+    }
+
+    function clampVolume(n, def) {
+        return Number.isInteger(n) && n >= 0 && n <= 100 ? n : def;
+    }
+
+    function readSavedSoundSettings() {
+        const events = {};
+
+        SOUND_EVENTS.forEach((ev) => {
+            const enabledRaw = localStorage.getItem(soundLs(ev.key, "Enabled"));
+            const sound = localStorage.getItem(soundLs(ev.key, "Sound"));
+            const volRaw = localStorage.getItem(soundLs(ev.key, "Volume"));
+
+            events[ev.key] = {
+                enabled: enabledRaw === null ? ev.def.enabled : enabledRaw === "true",
+                sound: isValidSoundValue(sound) ? sound : ev.def.sound,
+                volume: volRaw === null ? ev.def.volume : clampVolume(Number(volRaw), ev.def.volume)
+            };
+        });
+
+        const masterRaw = localStorage.getItem("flockmodSoundsVolume");
+
+        return {
+            enabled: localStorage.getItem("flockmodSoundsEnabled") === "true",   /* default OFF */
+            volume: masterRaw === null ? 80 : clampVolume(Number(masterRaw), 80),
+            quietDrawing: localStorage.getItem("flockmodSoundsQuietDrawing") === "true",
+            keywords: (localStorage.getItem("flockmodSoundsKeywords") || "").slice(0, 120),
+            events
+        };
+    }
+
+    function defaultSoundSettings() {
+        const events = {};
+        SOUND_EVENTS.forEach((ev) => { events[ev.key] = { ...ev.def }; });
+        return { enabled: false, volume: 80, quietDrawing: false, keywords: "", events };
+    }
+
+    function writeSoundSettings(st) {
+        localStorage.setItem("flockmodSoundsEnabled", st.enabled);
+        localStorage.setItem("flockmodSoundsVolume", st.volume);
+        localStorage.setItem("flockmodSoundsQuietDrawing", st.quietDrawing);
+        localStorage.setItem("flockmodSoundsKeywords", st.keywords);
+
+        SOUND_EVENTS.forEach((ev) => {
+            const e = st.events[ev.key];
+            localStorage.setItem(soundLs(ev.key, "Enabled"), e.enabled);
+            localStorage.setItem(soundLs(ev.key, "Sound"), e.sound);
+            localStorage.setItem(soundLs(ev.key, "Volume"), e.volume);
+        });
+    }
+
+    /* What the watcher uses. The menu updates it live (preview);
+       closing without Apply reloads it from storage. */
+    let liveSoundSettings = null;
+
+    function applySavedSounds() {
+        liveSoundSettings = readSavedSoundSettings();
+    }
+
+    /* ---------- Firing ---------- */
+
+    let drawingNow = false;
+    let lastSentAt = 0;
+    let lastAnySoundAt = 0;
+    const lastSoundAt = {};
+
+    function setupSoundActivityTracking() {
+        /* Drawing = pressing on a canvas */
+        window.addEventListener("pointerdown", (event) => {
+            drawingNow = event.target instanceof HTMLCanvasElement;
+        }, true);
+
+        ["pointerup", "pointercancel"].forEach((type) => {
+            window.addEventListener(type, () => { drawingNow = false; }, true);
+        });
+
+        /* Your own messages: anything that shows up right after you
+           send (Enter or a click in the chat / Messenger) is yours */
+        const markSent = (event) => {
+            const target = event.target;
+
+            if (target instanceof Element && target.closest('.dialog[name="chat"], .dialog[name="messenger"]')) {
+                if (event.type === "click" || event.key === "Enter") {
+                    lastSentAt = Date.now();
+                }
+            }
+        };
+
+        window.addEventListener("keydown", markSent, true);
+        window.addEventListener("click", markSent, true);
+    }
+
+    function fireSoundEvent(key) {
+        const st = liveSoundSettings;
+
+        if (!st || !st.enabled || !customizationsEnabled) {
+            return;
+        }
+
+        const ev = st.events[key];
+
+        if (!ev || !ev.enabled) {
+            return;
+        }
+
+        if (st.quietDrawing && drawingNow) {
+            return;
+        }
+
+        const now = Date.now();
+
+        /* Floods: one sound per event every 1.5s, and never two
+           different sounds on top of each other */
+        if (now - (lastSoundAt[key] || 0) < 1500 || now - lastAnySoundAt < 250) {
+            return;
+        }
+
+        lastSoundAt[key] = now;
+        lastAnySoundAt = now;
+
+        playSoundValue(ev.sound, (st.volume / 100) * (ev.volume / 100));
+    }
+
+    function getMyName() {
+        const row = document.querySelector("#sidebar tr.myself");
+        const cells = row ? row.querySelectorAll("td") : [];
+        const cell = cells.length ? cells[cells.length - 1] : null;
+        return cell ? cell.textContent.trim() : "";
+    }
+
+    function isMention(text) {
+        const st = liveSoundSettings;
+        const words = [getMyName(), ...(st ? st.keywords.split(",") : [])]
+            .map((w) => w.trim().toLowerCase())
+            .filter((w) => w.length >= 2);
+        const lower = text.toLowerCase();
+
+        return words.some((w) => lower.includes(w));
+    }
+
+    /* Only small additions count as "new". Loading history, joining
+       a room or opening a conversation adds lots at once (or clears
+       the box first), and those are ignored. */
+    function newElementsIn(record) {
+        if (record.removedNodes.length) {
+            return [];
+        }
+
+        const added = [...record.addedNodes].filter((n) => n.nodeType === 1);
+        return added.length <= 3 ? added : [];
+    }
+
+    function handleChatMutations(records, watch) {
+        if (!liveSoundSettings || !liveSoundSettings.enabled || Date.now() < watch.armedAt) {
+            return;
+        }
+
+        records.forEach((record) => {
+            newElementsIn(record).forEach((node) => {
+                const block = node.matches(".chatBlock")
+                    ? node
+                    : (node.matches(".msgLine") ? node.closest(".chatBlock") : null);
+
+                if (!block || block.classList.contains("motdBlock")) {
+                    return;
+                }
+
+                const textEls = node.matches(".msgText") ? [node] : [...node.querySelectorAll(".msgText")];
+                const text = textEls.map((el) => el.textContent).join(" ");
+
+                if (block.classList.contains("eventBlock")) {
+                    if (/(entered|left|joined)/i.test(text)) {
+                        fireSoundEvent("JoinLeave");
+                    }
+                    return;
+                }
+
+                if (Date.now() - lastSentAt < 2000) {
+                    return; /* probably your own message */
+                }
+
+                const channel = block.closest(".channelMessages");
+                const channelName = channel ? channel.getAttribute("name") || "" : "";
+
+                if (channelName && !channelName.startsWith("#")) {
+                    fireSoundEvent("Private");
+                } else if (isMention(text)) {
+                    fireSoundEvent("Mention");
+                } else {
+                    fireSoundEvent("Chat");
+                }
+            });
+        });
+    }
+
+    function handleMessengerMutations(records, watch) {
+        if (!liveSoundSettings || !liveSoundSettings.enabled || Date.now() < watch.armedAt) {
+            return;
+        }
+
+        records.forEach((record) => {
+            newElementsIn(record).forEach((node) => {
+                let own = null;
+
+                if (node.matches(".offlineMessage")) {
+                    own = node.classList.contains("offlineOwn");
+                } else if (node.matches(".offlineBlock")) {
+                    const msg = node.closest(".offlineMessage");
+                    own = msg ? msg.classList.contains("offlineOwn") : null;
+                }
+
+                if (own === false) {
+                    fireSoundEvent("Messenger");
+                }
+            });
+        });
+    }
+
+    const soundWatches = {
+        chat: { id: "chatMessages", el: null, observer: null, armedAt: 0, handler: handleChatMutations },
+        messenger: { id: "messengerConversation", el: null, observer: null, armedAt: 0, handler: handleMessengerMutations }
+    };
+
+    /* Called from the 500ms check loop: (re)attaches the two
+       watchers when FlockMod creates or replaces those boxes */
+    function watchSoundTargets() {
+        Object.values(soundWatches).forEach((watch) => {
+            const el = document.getElementById(watch.id);
+
+            if (el === watch.el) {
+                return;
+            }
+
+            if (watch.observer) {
+                watch.observer.disconnect();
+            }
+
+            watch.el = el;
+            watch.observer = null;
+
+            if (el) {
+                /* Give FlockMod a moment to fill in old messages */
+                watch.armedAt = Date.now() + 3000;
+                watch.observer = new MutationObserver((records) => watch.handler(records, watch));
+                watch.observer.observe(el, { childList: true, subtree: true });
+            }
+        });
+    }
+
+    /* ---------- Sounds panel ---------- */
+
+    function soundOptionsHTML() {
+        const builtins = Object.entries(BUILTIN_SOUNDS)
+            .map(([key, s]) => `<option value="builtin:${key}">${s.label}</option>`)
+            .join("");
+        const uploads = getSoundLibrary()
+            .map((s) => `<option value="upload:${escapeHTML(s.id)}">${escapeHTML(s.name)}</option>`)
+            .join("");
+
+        return `<optgroup label="Built-in">${builtins}</optgroup>` +
+            (uploads ? `<optgroup label="Your sounds">${uploads}</optgroup>` : "");
+    }
+
+    function soundToggleHTML(id) {
+        return `
+            <label class="themeModToggle">
+                <input type="checkbox" id="${id}">
+                <span class="themeModToggleTrack">
+                    <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                    <span class="themeModToggleOption themeModToggleOn">ON</span>
+                    <span class="themeModToggleThumb"></span>
+                </span>
+            </label>`;
+    }
+
+    function buildSoundsPanelHTML() {
+        return `
+                        <div class="themeModSectionContent" data-theme-panel="sounds">
+
+                            <div class="themeModLocalNote">
+                                <i class="fas fa-volume-up"></i>
+                                <span>To hear only the mod's sounds, turn off the matching tones in FlockMod's Configuration &gt; Settings &gt; Sounds. Otherwise you'll hear both.</span>
+                            </div>
+
+                            <div class="themeModSubsectionTitle">
+                                Sounds
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Enable sounds</div>
+                                    <div class="themeModSettingDescription">Play the mod's notification sounds.</div>
+                                </div>
+                                ${soundToggleHTML("themeModSoundsEnabled")}
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Master volume</div>
+                                    <div class="themeModSettingDescription">Turns every sound below up or down.</div>
+                                </div>
+                                <div class="themeModRangeControl">
+                                    <input type="range" id="themeModSoundsVolume" class="themeModRange" min="0" max="100" step="5" value="80">
+                                    <span id="themeModSoundsVolumeValue" class="themeModRangeValue">80%</span>
+                                </div>
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Quiet while drawing</div>
+                                    <div class="themeModSettingDescription">Skip sounds while your pen or mouse is pressed on the canvas.</div>
+                                </div>
+                                ${soundToggleHTML("themeModSoundsQuietDrawing")}
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Extra mention words</div>
+                                    <div class="themeModSettingDescription">Your username always counts. Add nicknames too, separated by commas.</div>
+                                </div>
+                                <input type="text" id="themeModSoundsKeywords" class="themeModTextInput themeModSoundKeywords" placeholder="e.g. nene, nini" maxlength="120" spellcheck="false">
+                            </div>
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Events
+                            </div>
+
+                            ${SOUND_EVENTS.map((ev) => `
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">${ev.name}</div>
+                                    <div class="themeModSettingDescription">${ev.description}</div>
+                                </div>
+                                ${soundToggleHTML(`themeModSound${ev.key}Enabled`)}
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider themeModSoundRow">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        <i class="fas fa-level-up-alt fa-rotate-90"></i> Sound
+                                    </div>
+                                </div>
+                                <div class="themeModSoundControls">
+                                    <select class="themeModSelect themeModSoundSelect" data-sound-select="${ev.key}"></select>
+                                    <input type="range" class="themeModRange" data-sound-volume="${ev.key}" min="0" max="100" step="5" value="${ev.def.volume}">
+                                    <span class="themeModRangeValue" data-sound-volume-value="${ev.key}">${ev.def.volume}%</span>
+                                    <button type="button" class="themeModButton themeModSoundPlay" data-sound-preview="${ev.key}" title="Preview">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>`).join("")}
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Your Sounds
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Upload a sound</div>
+                                    <div class="themeModSettingDescription">An .mp3, .wav or .ogg file up to 1 MB. Short sounds (under 2 seconds) work best. Uploaded sounds show up in every sound list above.</div>
+                                </div>
+                                <button type="button" class="themeModButton themeModSoundUpload">
+                                    <i class="fas fa-upload"></i> Upload sound
+                                </button>
+                                <input type="file" class="themeModSoundFile" accept=".mp3,.wav,.ogg,.m4a,audio/*" style="display: none;">
+                            </div>
+
+                            <div class="themeModFontStatus themeModSoundStatus" style="display: none;"></div>
+
+                            <div class="themeModFontList themeModSoundList"></div>
+
+                            <div class="themeModLocalNote">
+                                <i class="fas fa-circle-info"></i>
+                                <span>Sounds only play on your computer, and nothing is sent to FlockMod. Uploaded sounds are saved only in this browser, so nobody else hears them. Sound settings aren't included in share codes, and clearing your browser's data for FlockMod removes your uploads. The Messenger sound works while the Messenger is open.</span>
+                            </div>
+
+                        </div>`;
+    }
+
+    function setupSoundsPanel(dialog) {
+        const panel = dialog.querySelector('[data-theme-panel="sounds"]');
+        const master = panel.querySelector("#themeModSoundsEnabled");
+        const volume = panel.querySelector("#themeModSoundsVolume");
+        const volumeValue = panel.querySelector("#themeModSoundsVolumeValue");
+        const quiet = panel.querySelector("#themeModSoundsQuietDrawing");
+        const keywords = panel.querySelector("#themeModSoundsKeywords");
+        const uploadButton = panel.querySelector(".themeModSoundUpload");
+        const fileInput = panel.querySelector(".themeModSoundFile");
+        const status = panel.querySelector(".themeModSoundStatus");
+        const list = panel.querySelector(".themeModSoundList");
+
+        const rows = SOUND_EVENTS.map((ev) => ({
+            ev,
+            toggle: panel.querySelector(`#themeModSound${ev.key}Enabled`),
+            select: panel.querySelector(`[data-sound-select="${ev.key}"]`),
+            vol: panel.querySelector(`[data-sound-volume="${ev.key}"]`),
+            volValue: panel.querySelector(`[data-sound-volume-value="${ev.key}"]`),
+            play: panel.querySelector(`[data-sound-preview="${ev.key}"]`)
+        }));
+
+        function refreshSelects() {
+            const html = soundOptionsHTML();
+
+            rows.forEach(({ ev, select }) => {
+                const keep = select.value;
+                select.innerHTML = html;
+                select.value = isValidSoundValue(keep) ? keep : ev.def.sound;
+            });
+        }
+
+        function fill(st) {
+            master.checked = st.enabled;
+            volume.value = String(st.volume);
+            volumeValue.textContent = `${st.volume}%`;
+            quiet.checked = st.quietDrawing;
+            keywords.value = st.keywords;
+
+            refreshSelects();
+
+            rows.forEach(({ ev, toggle, select, vol, volValue }) => {
+                const e = st.events[ev.key];
+                toggle.checked = e.enabled;
+                select.value = isValidSoundValue(e.sound) ? e.sound : ev.def.sound;
+                vol.value = String(e.volume);
+                volValue.textContent = `${e.volume}%`;
+            });
+        }
+
+        function readInputs() {
+            const events = {};
+
+            rows.forEach(({ ev, toggle, select, vol }) => {
+                events[ev.key] = {
+                    enabled: toggle.checked,
+                    sound: isValidSoundValue(select.value) ? select.value : ev.def.sound,
+                    volume: Number(vol.value)
+                };
+            });
+
+            return {
+                enabled: master.checked,
+                volume: Number(volume.value),
+                quietDrawing: quiet.checked,
+                keywords: keywords.value.slice(0, 120),
+                events
+            };
+        }
+
+        function preview() {
+            volumeValue.textContent = `${volume.value}%`;
+            rows.forEach(({ vol, volValue }) => { volValue.textContent = `${vol.value}%`; });
+            liveSoundSettings = readInputs();
+        }
+
+        function showStatus(message, kind = "ok") {
+            status.textContent = message;
+            status.dataset.kind = kind;
+            status.style.display = message ? "block" : "none";
+        }
+
+        function renderList() {
+            const library = getSoundLibrary();
+
+            list.innerHTML = library.map((s) => `
+                <div class="themeModFontItem" data-sound-id="${escapeHTML(s.id)}">
+                    <span class="themeModFontSample">${escapeHTML(s.name)}</span>
+                    <button type="button" class="themeModButton themeModSoundPlay" data-action="play" title="Play"><i class="fas fa-play"></i></button>
+                    <button type="button" class="themeModButton themeModDangerButton" data-action="remove">Remove</button>
+                </div>
+            `).join("");
+        }
+
+        fill(readSavedSoundSettings());
+        renderList();
+
+        [master, quiet].forEach((el) => el.addEventListener("change", preview));
+        volume.addEventListener("input", preview);
+        keywords.addEventListener("input", preview);
+
+        rows.forEach(({ ev, toggle, select, vol, play }) => {
+            toggle.addEventListener("change", preview);
+            select.addEventListener("change", () => {
+                preview();
+                playSoundValue(select.value, (Number(volume.value) / 100) * (Number(vol.value) / 100));
+            });
+            vol.addEventListener("input", preview);
+            play.addEventListener("click", () => {
+                /* Preview ignores ON/OFF and cooldowns so you can always listen */
+                playSoundValue(select.value, (Number(volume.value) / 100) * (Number(vol.value) / 100));
+            });
+        });
+
+        /* Uploads */
+        uploadButton.addEventListener("click", () => fileInput.click());
+
+        fileInput.addEventListener("change", async () => {
+            const file = fileInput.files && fileInput.files[0];
+            fileInput.value = "";
+
+            if (!file) {
+                return;
+            }
+
+            if (file.size > MAX_SOUND_FILE_BYTES) {
+                showStatus("That file is over 1 MB. Try a shorter clip.", "error");
+                return;
+            }
+
+            showStatus("Checking sound...");
+
+            try {
+                const ctx = getSoundCtx();
+
+                if (!ctx) {
+                    throw new Error("no audio");
+                }
+
+                /* Make sure the browser can actually play it */
+                await ctx.decodeAudioData(await file.arrayBuffer());
+
+                const id = `s${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+                const name = file.name.replace(/\.[^.]+$/, "").slice(0, 40) || "My sound";
+
+                await soundDB("readwrite", (store) => store.put(file, id));
+                setSoundLibrary([...getSoundLibrary(), { id, name }]);
+
+                renderList();
+                refreshSelects();
+                showStatus(`Added "${name}". Pick it in any sound list above.`);
+            } catch (error) {
+                showStatus("Couldn't read that file as a sound. Try an .mp3, .wav or .ogg.", "error");
+            }
+        });
+
+        list.addEventListener("click", async (event) => {
+            const button = event.target.closest("button[data-action]");
+            const item = button && button.closest("[data-sound-id]");
+
+            if (!item) {
+                return;
+            }
+
+            const id = item.dataset.soundId;
+
+            if (button.dataset.action === "play") {
+                playSoundValue(`upload:${id}`, Number(volume.value) / 100);
+                return;
+            }
+
+            try {
+                await soundDB("readwrite", (store) => store.delete(id));
+            } catch (error) {
+                /* Already gone: still remove it from the list */
+            }
+
+            soundBufferCache.delete(id);
+            setSoundLibrary(getSoundLibrary().filter((s) => s.id !== id));
+            renderList();
+            refreshSelects();   /* events using it fall back to their default sound */
+            preview();
+            showStatus("Sound removed.");
+        });
+
+        return {
+            save() {
+                writeSoundSettings(readInputs());
+                applySavedSounds();
+            },
+            reset() {
+                const st = defaultSoundSettings();
+                fill(st);
+                writeSoundSettings(st);
+                applySavedSounds();
+            }
+        };
+    }
+
     function setupThumbShape(dialog) {
         const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
         const select = dialog.querySelector("#themeModThumbShape");
@@ -3539,6 +4380,10 @@ function buildSimpleColorRowsHTML() {
                             Animations
                         </button>
 
+                        <button class="themeModSidebarItem" data-theme-section="sounds">
+                            Sounds
+                        </button>
+
                         <button class="themeModSidebarItem" data-theme-section="backgrounds">
                             Backgrounds
                         </button>
@@ -4098,6 +4943,8 @@ function buildSimpleColorRowsHTML() {
 
 ${buildAnimationsPanelHTML()}
 
+${buildSoundsPanelHTML()}
+
                         <div class="themeModSectionContent" data-theme-panel="backgrounds">
 
                             <div class="themeModLocalNote">
@@ -4570,6 +5417,9 @@ const gradientControls = setupGradientControls(dialog);
 /* Animations tab (bloom switch + swatch pulse live in here too) */
 const animationControls = setupAnimationsPanel(dialog);
 
+/* Sounds tab */
+const soundControls = setupSoundsPanel(dialog);
+
         fontSelect.addEventListener("change", () => {
             applyFontValue(fontSelect.value);
         });
@@ -4710,6 +5560,7 @@ const animationControls = setupAnimationsPanel(dialog);
 
             gradientControls.save();
             animationControls.save();
+            soundControls.save();
         });
 
         /* ---------- Copy to detailed ----------
@@ -4847,6 +5698,7 @@ const animationControls = setupAnimationsPanel(dialog);
             );
 
             animationControls.reset();
+            soundControls.reset();
 
             /* Reset only clears the colors of the mode you are in, so
                your detailed theme survives a reset in simple mode. */
@@ -5493,6 +6345,7 @@ const animationControls = setupAnimationsPanel(dialog);
                 applySavedSimpleColorsIfActive();
                 applySavedGradients();
                 applySavedAnimations();
+                applySavedSounds();
                 rememberMenuRect(dialog);
 
                 dialog.remove();
@@ -5860,7 +6713,8 @@ const animationControls = setupAnimationsPanel(dialog);
                             sectionName === "interface" ||
                             sectionName === "colors" ||
                             sectionName === "backgrounds" ||
-                            sectionName === "animations"
+                            sectionName === "animations" ||
+                            sectionName === "sounds"
                         ) {
                             actions.style.display =
                                 "flex";
@@ -5928,6 +6782,7 @@ const animationControls = setupAnimationsPanel(dialog);
         applySavedSimpleColorsIfActive();
         applySavedGradients();
         applySavedAnimations();
+        applySavedSounds();
         applySavedBackgrounds();
         applySavedThumbShape();
 
@@ -5975,6 +6830,8 @@ const animationControls = setupAnimationsPanel(dialog);
 
     function initialize() {
         setupKeyboardShield();
+        setupSoundUnlock();
+        setupSoundActivityTracking();
         loadSavedCustomizations();
 
         addModButton();
@@ -5983,6 +6840,7 @@ const animationControls = setupAnimationsPanel(dialog);
             addModButton();
             checkSeeThroughTargets();
             makeThumbRoom();     /* for sliders in popups opened later */
+            watchSoundTargets(); /* chat / Messenger boxes for sounds */
         }, 500);
     }
 
