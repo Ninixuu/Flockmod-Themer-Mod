@@ -4523,7 +4523,7 @@ function buildSimpleColorRowsHTML() {
         });
 
         if (!styleSelect) {
-            return { save() {}, reset() {} };
+            return { save() {}, reset() {}, resetPreview() {} };
         }
 
         function fillPlacements(styleKey, wanted) {
@@ -4644,6 +4644,16 @@ function buildSimpleColorRowsHTML() {
                 fill(st);
                 applyDeco(st);
                 this.save();
+            },
+            /* Same as reset() but doesn't save: used by the
+               Popup Decorations subsection's own reset button */
+            resetPreview() {
+                const st = {
+                    style: "none", placement: "side", size: 100, match: true, menu: false,
+                    colors: { ...DECO_COLOR_DEFAULTS }
+                };
+                fill(st);
+                applyDeco(st);
             }
         };
     }
@@ -6789,7 +6799,7 @@ function buildSimpleColorRowsHTML() {
                                 </div>
 
                                 <!-- Options are filled in by buildFontOptionsHTML() -->
-                                <select id="themeModUIFont" class="themeModSelect"></select>
+                                <select id="themeModUIFont" class="themeModSelect" data-default="default"></select>
 
                             </div>
 
@@ -6977,7 +6987,7 @@ function buildSimpleColorRowsHTML() {
         </span>
     </label>
 
-    <select id="themeModThumbShape" class="themeModSelect themeModThumbSelect">
+    <select id="themeModThumbShape" class="themeModSelect themeModThumbSelect" data-default="heart">
         ${buildThumbShapeOptionsHTML()}
     </select>
 
@@ -7097,7 +7107,7 @@ ${buildDecoRowsHTML()}
         </div>
 
         <label class="themeModToggle" style="margin-right: 10px;">
-            <input type="checkbox" id="themeModSelectedColorEnabled">
+            <input type="checkbox" id="themeModSelectedColorEnabled" data-default="true">
             <span class="themeModToggleTrack">
                 <span class="themeModToggleOption themeModToggleOff">OFF</span>
                 <span class="themeModToggleOption themeModToggleOn">ON</span>
@@ -7122,7 +7132,7 @@ ${buildDecoRowsHTML()}
         </div>
 
         <label class="themeModToggle" style="margin-right: 10px;">
-            <input type="checkbox" id="themeModHoverColorEnabled">
+            <input type="checkbox" id="themeModHoverColorEnabled" data-default="true">
             <span class="themeModToggleTrack">
                 <span class="themeModToggleOption themeModToggleOff">OFF</span>
                 <span class="themeModToggleOption themeModToggleOn">ON</span>
@@ -8130,7 +8140,163 @@ const safetyControls = setupSafetyPanel(dialog);
             refreshColorPreview();
         });
 
+        setupSubsectionResets(dialog, {
+            actionsNote,
+            decoControls
+        });
+
         return dialog;
+    }
+
+    /* =========================================================
+       SUBSECTION RESETS (Colors + Interface panels)
+       Every subsection title gets a small reset button. It puts
+       only that subsection's controls back to their defaults and
+       previews them. Nothing is saved until Apply Changes, and
+       closing the menu without applying brings your old values
+       back. The big Reset button in the bottom bar still resets
+       everything at once.
+
+       Defaults come from the markup itself (a control's value /
+       checked attribute), or from data-default when the real
+       default differs from that (e.g. Selected/Hover are ON).
+       ========================================================= */
+
+    function getControlDefault(el) {
+        if (el.dataset.default !== undefined) {
+            return el.type === "checkbox"
+                ? el.dataset.default === "true"
+                : el.dataset.default;
+        }
+
+        if (el.type === "checkbox") {
+            return el.defaultChecked;
+        }
+
+        if (el.tagName === "SELECT") {
+            const preset = Array.from(el.options).find((o) => o.defaultSelected);
+            return preset ? preset.value : (el.options[0] ? el.options[0].value : "");
+        }
+
+        return el.defaultValue;
+    }
+
+    function resetControlToDefault(el) {
+        const def = getControlDefault(el);
+
+        if (el.type === "checkbox") {
+            el.checked = def;
+        } else if (el.tagName === "SELECT") {
+            /* Fall back to the first option if the default isn't listed */
+            const exists = Array.from(el.options).some((o) => o.value === def);
+            el.value = exists ? def : (el.options[0] ? el.options[0].value : "");
+        } else {
+            el.value = def;
+        }
+
+        /* Fire both so every existing preview listener runs
+           (colors/ranges listen to input, toggles/selects to change) */
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    /* Everything after a subsection title up to the next title */
+    function getSubsectionElements(title) {
+        const elements = [];
+        let node = title.nextElementSibling;
+
+        while (node && !node.classList.contains("themeModSubsectionTitle")) {
+            elements.push(node);
+            node = node.nextElementSibling;
+        }
+
+        return elements;
+    }
+
+    function setupSubsectionResets(dialog, { actionsNote, decoControls }) {
+        const panels = dialog.querySelectorAll(
+            '.themeModSectionContent[data-theme-panel="colors"], ' +
+            '.themeModSectionContent[data-theme-panel="interface"]'
+        );
+
+        const showNote = (text) => {
+            if (!actionsNote) {
+                return;
+            }
+
+            actionsNote.textContent = text;
+            actionsNote.classList.add("visible");
+
+            clearTimeout(actionsNote._timer);
+            actionsNote._timer = setTimeout(() => {
+                actionsNote.classList.remove("visible");
+            }, 4000);
+        };
+
+        panels.forEach((panel) => {
+            panel.querySelectorAll(".themeModSubsectionTitle").forEach((title) => {
+                if (title.querySelector(".themeModSubsectionReset")) {
+                    return;
+                }
+
+                /* Wrap the text so the button can sit on the right
+                   (chips/search still read the title's text fine,
+                   the button has no text of its own) */
+                const label = document.createElement("span");
+                label.className = "themeModSubsectionLabel";
+
+                while (title.firstChild) {
+                    label.appendChild(title.firstChild);
+                }
+
+                const name = label.textContent.trim();
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "themeModSubsectionReset";
+                button.title = `Reset ${name} to default`;
+                button.setAttribute("aria-label", `Reset ${name} to default`);
+                button.innerHTML = '<i class="fas fa-undo-alt"></i>';
+
+                title.appendChild(label);
+                title.appendChild(button);
+
+                button.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const elements = getSubsectionElements(title);
+                    const hasDeco = elements.some((el) =>
+                        el.matches(".themeModDecoColors, .themeModDecoPreviewWrap") ||
+                        el.querySelector("#themeModDecoStyle")
+                    );
+
+                    elements.forEach((el) => {
+                        /* Popup Decorations has its own reset below */
+                        if (hasDeco && (
+                            el.querySelector('[id^="themeModDeco"], [data-deco-color]') ||
+                            el.matches(".themeModDecoColors, .themeModDecoPreviewWrap")
+                        )) {
+                            return;
+                        }
+
+                        el.querySelectorAll(
+                            'input[type="checkbox"], input[type="color"], input[type="range"], select'
+                        ).forEach(resetControlToDefault);
+                    });
+
+                    if (hasDeco && decoControls && decoControls.resetPreview) {
+                        decoControls.resetPreview();
+                    }
+
+                    button.classList.remove("themeModSubsectionResetSpin");
+                    void button.offsetWidth;
+                    button.classList.add("themeModSubsectionResetSpin");
+
+                    showNote(`${name} reset. Press Apply Changes to keep it.`);
+                });
+            });
+        });
     }
 
     function setupDragging(dialog) {

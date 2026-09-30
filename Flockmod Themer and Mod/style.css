@@ -186,16 +186,73 @@
 }
 
 .themeModSubsectionTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     margin-top: 14px;
-    margin-bottom: 2px;
-    font-size: .85rem;
-    font-weight: 500;
-    color: #b4b6ba;
+    margin-bottom: 4px;
+    font-size: .98rem;
+    font-weight: 600;
+    color: #c8cace;
     letter-spacing: .03rem;
 }
 
+/* Thin divider line between subsections (the first subsection
+   in a panel has no line above it) */
 .themeModSpacingSubsection {
-    margin-top: 18px;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid #36383d;
+}
+
+/* ---- Per-subsection reset button (Colors + Interface) ---- */
+.themeModSubsectionLabel {
+    min-width: 0;
+}
+
+.dialog[name="themeModMenu"] .themeModSubsectionReset {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #4f5156;
+    border-radius: 2px;
+    background-color: #303136;
+    color: #9b9da2;
+    font-size: .7rem;
+    cursor: pointer;
+    outline: none;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.dialog[name="themeModMenu"] .themeModSubsectionReset:hover {
+    background-color: #3a3b40;
+    border-color: #707379;
+    color: #fff;
+}
+
+.dialog[name="themeModMenu"] .themeModSubsectionReset:active {
+    background-color: #28292d;
+}
+
+/* One quick spin when clicked (plays once, then stops) */
+.dialog[name="themeModMenu"] .themeModSubsectionResetSpin i {
+    animation: themeModResetSpin .45s ease;
+}
+
+@keyframes themeModResetSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dialog[name="themeModMenu"] .themeModSubsectionResetSpin i {
+        animation: none;
+    }
 }
 
 .themeModSectionContent {
@@ -3258,4 +3315,34 @@ html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .fmTrollToast {
 
 html.fmAnimPopups .fmTrollToast {
     animation: fmTrollToastIn calc(.22s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* =========================================================
+   SELECTED TOOL ICON: readable on the selected background.
+   Uses Primary Sidebar Color (inverted pairing, like the top
+   sidebar button); white if Primary isn't set.
+   ========================================================= */
+
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #drawingTools a.selectedTool,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) #drawingTools a.selectedTool i,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .toolbar a.selectedTool,
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .toolbar a.selectedTool i {
+    color: #fff !important;
+}
+
+html.flockmodSelectedColorActive.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #drawingTools a.selectedTool,
+html.flockmodSelectedColorActive.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) #drawingTools a.selectedTool i,
+html.flockmodSelectedColorActive.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) .toolbar a.selectedTool,
+html.flockmodSelectedColorActive.flockmodSidebarPrimaryActive:not(.flockmodCustomizationsDisabled) .toolbar a.selectedTool i {
+    color: var(--flockmod-custom-sidebar-primary, #1d1e22) !important;
+}
+
+/* =========================================================
+   CHECKMARKS (Pressure, preset-load and layer checkboxes)
+   The ✔ follows Accent 1, like slider fills and switch ON sides.
+   ========================================================= */
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmCheckbox > .fmOn,
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmCheckbox.fmOn {
+    color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
 }
