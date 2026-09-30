@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FlockMod Themer",
-  "version": "1.0.0",
-  "description": "My personal FlockMod UI customization.",
+  "version": "1.0",
+  "description": "The ultimate customization tool for Flockmod. Have fun!",
   "content_scripts": [
     {
       "matches": ["https://flockmod.com/*"],
