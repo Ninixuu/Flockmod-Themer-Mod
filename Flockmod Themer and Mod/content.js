@@ -9,6 +9,15 @@
        ========================================================= */
     const CHANGELOG = [
         {
+            version: "1.2",
+            notes: [
+                "Every tab has its own quick tour. Press \u24D8 next to search.",
+                "The reference window has its own tour too (\u24D8 in its title bar).",
+                "The first-time tour now also shows Themes and the reference window.",
+                "Tails and side decorations hide while the reference window is minimized."
+            ]
+        },
+        {
             version: "1.1",
             notes: [
                 "Reset buttons (\u21BA) on every section in Colors and Interface, so you can reset just one part.",
@@ -4388,7 +4397,7 @@ function buildSimpleColorRowsHTML() {
 
         const tail = piece.edge === "right" || piece.edge === "bottom" ? " fmDecoTail" : "";
 
-        return `<div class="fmDecoPiece${tail}" style="${pos.join("; ")}; width: ${piece.w}px; height: ${piece.h}px; transform-origin: ${origin};">` +
+        return `<div class="fmDecoPiece${tail} fmDecoEdge-${piece.edge}" style="${pos.join("; ")}; width: ${piece.w}px; height: ${piece.h}px; transform-origin: ${origin};">` +
                `<svg viewBox="0 0 ${piece.w} ${piece.h}" width="${piece.w}" height="${piece.h}"${piece.mirror ? ' style="transform: scaleX(-1)"' : ""}>${piece.svg}</svg></div>`;
     }
 
@@ -6817,6 +6826,10 @@ function buildSimpleColorRowsHTML() {
                             <!-- Filled in by setupJumpNavAndSearch() with one chip per subsection -->
                             <div class="themeModJumpBar"></div>
 
+                            <button type="button" class="themeModPanelHelp" title="Quick tour of this tab" aria-label="Quick tour of this tab">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+
                             <div class="themeModSearch">
                                 <button type="button" class="themeModSearchButton" title="Search settings">
                                     <i class="fas fa-search"></i>
@@ -8405,6 +8418,12 @@ const safetyControls = setupSafetyPanel(dialog);
 
         setupTour(dialog);
 
+        dialog.querySelector(".themeModPanelHelp")?.addEventListener("click", () => {
+            const active = dialog.querySelector(".themeModSidebarItem.active");
+            const section = active ? active.dataset.themeSection : "general";
+            dialog._startTour?.(getPanelTourSteps(dialog, section));
+        });
+
         setupUpdateCheck(dialog);
 
         setupBackup(dialog);
@@ -9239,14 +9258,61 @@ const safetyControls = setupSafetyPanel(dialog);
     /* Same 5-petal flower as the bloom switch thumb */
     const TOUR_FLOWER_HTML = '<span class="fmTourFlower" aria-hidden="true"></span>';
 
-    function getTourSteps(dialog) {
-        const openTab = (name) => () => {
+    /* Small helpers the tours use to find things */
+    function tourOpenTab(dialog, name) {
+        return () => {
             const button = dialog.querySelector(`.themeModSidebarItem[data-theme-section="${name}"]`);
 
             if (button && !button.classList.contains("active")) {
                 button.click();
             }
         };
+    }
+
+    function tourPanel(dialog, name) {
+        return dialog.querySelector(`.themeModSectionContent[data-theme-panel="${name}"]`);
+    }
+
+    /* The setting row (in one tab) whose name starts with the given text */
+    function tourRow(dialog, panelName, nameText) {
+        return () => {
+            const panel = tourPanel(dialog, panelName);
+
+            if (!panel) {
+                return null;
+            }
+
+            const want = nameText.toLowerCase();
+
+            return Array.from(panel.querySelectorAll(".themeModSetting")).find((row) => {
+                const n = row.querySelector(".themeModSettingName");
+                return n && n.textContent.trim().toLowerCase().startsWith(want) && row.offsetParent !== null;
+            }) || null;
+        };
+    }
+
+    function tourTitle(dialog, panelName, titleText) {
+        return () => {
+            const panel = tourPanel(dialog, panelName);
+            const want = titleText.toLowerCase();
+
+            return panel
+                ? Array.from(panel.querySelectorAll(".themeModSubsectionTitle")).find((el) =>
+                    el.textContent.trim().toLowerCase().startsWith(want) && el.offsetParent !== null) || null
+                : null;
+        };
+    }
+
+    function tourEl(dialog, selector) {
+        return () => {
+            const found = Array.from(dialog.querySelectorAll(selector)).find((el) => el.offsetParent !== null);
+            return found || null;
+        };
+    }
+
+    /* ---- The first-open tour: the highlights, a stop at each big feature ---- */
+    function getTourSteps(dialog) {
+        const openTab = (name) => tourOpenTab(dialog, name);
 
         const rowOf = (selector) => () => {
             const el = dialog.querySelector(selector);
@@ -9283,6 +9349,13 @@ const safetyControls = setupSafetyPanel(dialog);
                 target: () => dialog.querySelector(".themeModSearch")
             },
             {
+                icon: "fa-swatchbook",
+                title: "Themes",
+                text: "Save your looks, try a preset, or share a theme code with friends.",
+                before: openTab("themes"),
+                target: () => dialog.querySelector('.themeModSidebarItem[data-theme-section="themes"]')
+            },
+            {
                 icon: "fa-shield-alt",
                 title: "Safety",
                 text: "Flags possible griefers in the user list and chat. Everything stays on your computer.",
@@ -9290,19 +9363,103 @@ const safetyControls = setupSafetyPanel(dialog);
                 target: () => dialog.querySelector('.themeModSidebarItem[data-theme-section="safety"]')
             },
             {
+                icon: "fa-images",
+                title: "Reference window",
+                text: "This button opens a window for your reference images. Only you can see it, and it has its own \u24D8 tour.",
+                before: () => {},
+                target: () => document.querySelector(REF_BUTTON_SELECTOR)
+            },
+            {
+                icon: "fa-info-circle",
+                title: "A tour for every tab",
+                text: "Interface, Animations, Sounds, Backgrounds and the rest each have their own quick tour. Press \u24D8 up here on any tab.",
+                before: openTab("general"),
+                target: () => dialog.querySelector(".themeModPanelHelp")
+            },
+            {
                 icon: "fa-check",
                 title: "Keep your changes",
                 text: "Nothing is saved until you press Apply Changes. Close the menu to undo anything you haven't applied.",
-                before: openTab("safety"),
+                before: openTab("colors"),
                 target: () => dialog.querySelector(".themeModApplyButton")
             }
         ];
     }
 
+    /* ---- Short tours for each tab (the \u24D8 button in the header) ---- */
+    function getPanelTourSteps(dialog, section) {
+        const open = tourOpenTab(dialog, section);
+        const row = (text) => tourRow(dialog, section, text);
+        const title = (text) => tourTitle(dialog, section, text);
+        const el = (selector) => tourEl(dialog, `.themeModSectionContent[data-theme-panel="${section}"] ${selector}`);
+        const simple = dialog.classList.contains("themeModSimpleMode");
+        const step = (icon, stepTitle, text, target) => ({ icon, title: stepTitle, text, before: open, target });
+
+        const tours = {
+            general: [
+                step("fa-power-off", "On/off switch", "Turns all your customizations on or off at once.", row("Enable customizations")),
+                step("fa-seedling", "Simple coloring", "A few main colors fill in everything else. Your detailed colors are kept.", row("Simple coloring")),
+                step("fa-play", "Tours", "Show welcome brings back the first popup, Replay tour starts the main tour.", row("Quick tour")),
+                step("fa-sync-alt", "Updates", "See your version, what's new, and check GitHub for a newer one.", row("Version")),
+                step("fa-download", "Backup", "Save everything to one file and load it on another browser or computer.", row("Full backup file")),
+                step("fa-bug", "Help", "Links to the GitHub page and to report a bug.", row("Links"))
+            ],
+            interface: [
+                step("fa-font", "Font", "Change the font, its size and weight. You can add any Google Font by name, or upload your own.", title("Font")),
+                step("fa-arrows-alt-v", "Spacing and corners", "Make FlockMod roomier or more compact, and round the corners of buttons and boxes.", title("Spacing")),
+                step("fa-heart", "Slider thumbs", "Turn slider and switch thumbs into shapes like hearts, stars or cats.", title("Slider Thumbs")),
+                step("fa-cat", "Popup decorations", "Add ears, tails, flowers or a hat to every popup. The preview shows how it looks.", title("Popup Decorations")),
+                step("fa-undo-alt", "Reset one part", "\u21BA next to a section title resets just that section.", el(".themeModSubsectionReset"))
+            ],
+            colors: simple ? [
+                step("fa-seedling", "Simple colors", "You're in simple coloring. These few colors fill in the whole theme.", title("Simple Colors")),
+                step("fa-toggle-on", "ON + color", "Switch a color ON, then pick it. OFF keeps FlockMod's own color.", el(".themeModSimpleColors .themeModSetting")),
+                step("fa-layer-group", "Want more control?", "Copy to detailed turns these into detailed colors you can fine-tune.", () => dialog.querySelector(".themeModCopyToDetailed")),
+                step("fa-check", "Apply", "Press Apply Changes to keep your colors.", () => dialog.querySelector(".themeModApplyButton"))
+            ] : [
+                step("fa-toggle-on", "ON + color", "Each color has a switch and a picker. Switch it ON, then pick. OFF keeps FlockMod's own color.", row("Text Color 1")),
+                step("fa-map-signs", "Jump around", "The chips up top jump to Sidebar, Top Bar, Chat and more.", () => dialog.querySelector(".themeModJumpBar")),
+                step("fa-fill-drip", "Gradients", "Some colors can blend into a second color. The Gradient row shows up while that color is ON.", el(".themeModGradientRow")),
+                step("fa-undo-alt", "Reset one part", "\u21BA next to a section title resets just that section.", el(".themeModSubsectionReset")),
+                step("fa-check", "Apply", "Press Apply Changes to keep your colors.", () => dialog.querySelector(".themeModApplyButton"))
+            ],
+            themes: [
+                step("fa-share-alt", "Share a theme", "Copy code gives you a theme code for friends. Paste someone's code below and press Import.", row("Export theme")),
+                step("fa-bookmark", "My Themes", "Save your current look with a name, then load it again anytime.", row("Save current theme")),
+                step("fa-swatchbook", "Presets", "Ready-made looks to start from. They only change your simple colors.", title("Presets")),
+                step("fa-undo", "Undo", "Loaded a theme by mistake? An Undo button shows up right after.", title("Share"))
+            ],
+            animations: [
+                step("fa-magic", "Animations", "Turn the mod's little effects on or off, and set how fast they play.", title("Animations")),
+                step("fa-sliders-h", "Pick your effects", "Choose exactly which effects you like. Every effect plays once and stops, so nothing slows your drawing.", title("Effects"))
+            ],
+            sounds: [
+                step("fa-volume-up", "Sounds", "Turn notification sounds on, set the volume, and stay quiet while you draw.", title("Sounds")),
+                step("fa-at", "Mention words", "Extra words (like your nickname) that count as a mention.", row("Extra mention words")),
+                step("fa-bell", "Events", "Pick a sound for each event and press \u25B6 to hear it.", title("Events")),
+                step("fa-upload", "Your sounds", "Upload your own sounds to use for any event. They stay in this browser.", title("Your Sounds"))
+            ],
+            safety: [
+                step("fa-shield-alt", "Troll detection", "Flags people who seem to be griefing: their name turns red in the user list and chat.", title("Troll Detection")),
+                step("fa-clock", "Timing", "How quickly someone gets flagged, and how long their name stays red.", title("Timing")),
+                step("fa-eye", "Watch for", "Pick which kinds of griefing count, like big erasing or scribbling.", title("Watch For")),
+                step("fa-bell", "Warnings", "The popup and highlight color used when someone is flagged. It's all local and only you see it.", title("Warnings"))
+            ],
+            backgrounds: [
+                step("fa-image", "Background images", "Put your own image behind the sidebar, chat or messenger.", row("Sidebar Background Image")),
+                step("fa-adjust", "See-through", "Let the image show through the boxes on top of it, and fine-tune how it fits.", title("Sidebar")),
+                step("fa-lock", "Only on your computer", "Images are saved in this browser only. Nobody else sees them.", el(".themeModLocalNote"))
+            ]
+        };
+
+        return tours[section] || tours.general;
+    }
+
     /* opts (all optional, defaults = the mod menu's tour):
        steps, seenKey, title, text, replayButton, welcomeButton */
     function setupTour(dialog, opts = {}) {
-        const steps = opts.steps || getTourSteps(dialog);
+        const defaultSteps = opts.steps || getTourSteps(dialog);
+        let steps = defaultSteps;
         const seenKey = opts.seenKey || TOUR_SEEN_LS;
         const promptTitle = opts.title || "Welcome to FlockMod Themer!";
         const promptText = opts.text || "Would you like a quick tour? It takes about 30 seconds.";
@@ -9407,9 +9564,11 @@ const safetyControls = setupSafetyPanel(dialog);
         }
 
         /* ---- Steps ---- */
-        function startTour() {
+        /* customSteps: a different (e.g. per-tab) tour on the same engine */
+        function startTour(customSteps) {
             closeTour();
             mode = "step";
+            steps = Array.isArray(customSteps) && customSteps.length ? customSteps : defaultSteps;
 
             ring = build('<div class="fmTourRing" aria-hidden="true"></div>');
             card = build(`
@@ -9531,6 +9690,31 @@ const safetyControls = setupSafetyPanel(dialog);
                 t = m;
             }
 
+            /* Something outside the window (e.g. a bottom bar button):
+               glow around it and put the card right above it */
+            if (target && !dialog.contains(target) && t !== m) {
+                const pad = 5;
+
+                Object.assign(ring.style, {
+                    left: `${t.left - pad}px`,
+                    top: `${t.top - pad}px`,
+                    width: `${t.width + pad * 2}px`,
+                    height: `${t.height + pad * 2}px`
+                });
+
+                const cw = card.offsetWidth;
+                const ch = card.offsetHeight;
+                const x = Math.min(Math.max(8, t.left + t.width / 2 - cw / 2), vw - cw - 8);
+                const above = t.top - ch - 14;
+
+                card.classList.remove("fmArrowLeft", "fmArrowRight", "fmArrowDown", "fmTourInside");
+                card.style.left = `${x}px`;
+                card.style.top = `${above >= 8 ? above : Math.min(t.bottom + 14, vh - ch - 8)}px`;
+                card.classList.toggle("fmArrowDown", above >= 8);
+                card.style.setProperty("--fm-arrow-x", `${Math.min(Math.max(20, t.left + t.width / 2 - x), cw - 20)}px`);
+                return;
+            }
+
             /* Keep the glow inside the menu (the target may be scrolled out) */
             const pad = 5;
             const top = Math.max(m.top, t.top - pad);
@@ -9589,8 +9773,10 @@ const safetyControls = setupSafetyPanel(dialog);
         });
         dialog.querySelector(".closeButton")?.addEventListener("click", closeTour);
 
-        /* Lets the window close the tour when it's closed another way */
+        /* Lets the window close the tour when it's closed another way,
+           and lets other buttons start a different tour on it */
         dialog._closeTour = closeTour;
+        dialog._startTour = startTour;
 
         if (localStorage.getItem(seenKey) !== "true") {
             /* Let the menu finish opening first */

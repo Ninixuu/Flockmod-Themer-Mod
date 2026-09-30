@@ -3889,3 +3889,35 @@ html.fmAnimMenu .dialog[name="themeModMenu"] .fmWhatsNew {
     width: 100%;
     justify-content: flex-end;
 }
+
+/* Minimized reference window: it's only a title bar, so keep the
+   ears/hat on top but hide tails and side/bottom decorations
+   (they'd hang off the bar). They come back when it's restored. */
+.dialog.themeModRefMinimized > .fmDeco .fmDecoPiece:not(.fmDecoEdge-top) {
+    display: none;
+}
+
+/* Header \u24D8 button: quick tour of the open tab */
+.dialog[name="themeModMenu"] .themeModPanelHelp {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #b4b6ba;
+    font-size: .8rem;
+    cursor: pointer;
+    outline: none;
+    transition: color .15s ease, text-shadow .15s ease;
+}
+
+.dialog[name="themeModMenu"] .themeModPanelHelp:hover {
+    color: #f7a1c0;
+    text-shadow: 0 0 6px rgba(244, 143, 177, .8);
+}
+
+.dialog[name="themeModMenu"].themeModSearching .themeModPanelHelp {
+    display: none;
+}
