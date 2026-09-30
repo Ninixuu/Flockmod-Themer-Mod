@@ -6645,6 +6645,7 @@ function buildSimpleColorRowsHTML() {
                         <div class="pull-left">
                             <i class="fas fa-palette"></i>
                             <span>Theme Mod Menu</span>
+                            <span class="themeModTitleVersion">v${getModVersion()}</span>
                         </div>
 
                         <div class="dialogTitleButtons">
@@ -6800,6 +6801,26 @@ function buildSimpleColorRowsHTML() {
                                 </div>
 
                             </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">
+                                        Version
+                                    </div>
+
+                                    <div class="themeModSettingDescription">
+                                        You're running FlockMod Themer <b>v${getModVersion()}</b>. Checking looks up the newest version on GitHub, only when you press the button. Nothing is sent to FlockMod.
+                                    </div>
+                                </div>
+
+                                <button type="button" class="themeModButton themeModUpdateButton">
+                                    <i class="fas fa-sync-alt"></i> Check for updates
+                                </button>
+
+                            </div>
+
+                            <div class="themeModUpdateStatus" style="display: none;"></div>
 
                         </div>
 
@@ -8170,6 +8191,8 @@ const safetyControls = setupSafetyPanel(dialog);
 
         setupTour(dialog);
 
+        setupUpdateCheck(dialog);
+
         return dialog;
     }
 
@@ -8321,6 +8344,117 @@ const safetyControls = setupSafetyPanel(dialog);
                     showNote(`${name} reset. Press Apply Changes to keep it.`);
                 });
             });
+        });
+    }
+
+    /* =========================================================
+       VERSION + UPDATE CHECK (General panel)
+       The version comes from manifest.json, so bumping "version"
+       there is all a release needs. "Check for updates" reads the
+       manifest.json on GitHub and compares. It only goes online
+       when the button is pressed, only talks to GitHub, and sends
+       nothing about you or FlockMod.
+
+       SETUP: UPDATE_REPO is your GitHub "username/repository",
+       UPDATE_MANIFEST_PATH is where manifest.json sits inside it.
+       If you ever move the files to the top of the repository,
+       change the path to just "manifest.json".
+       ========================================================= */
+
+    const UPDATE_REPO = "Ninixuu/Flockmod-Themer-Mod";
+    const UPDATE_BRANCH = "main";
+    const UPDATE_MANIFEST_PATH = "Flockmod Themer and Mod/manifest.json";
+    const UPDATE_DOWNLOAD_URL = "";      /* optional; defaults to the repo page */
+
+    function getModVersion() {
+        try {
+            return chrome.runtime.getManifest().version || "?";
+        } catch (error) {
+            return "?";
+        }
+    }
+
+    /* 1.10 > 1.9, 1.0 == 1.0.0 */
+    function compareVersions(a, b) {
+        const pa = String(a).split(".").map((n) => parseInt(n, 10) || 0);
+        const pb = String(b).split(".").map((n) => parseInt(n, 10) || 0);
+        const len = Math.max(pa.length, pb.length);
+
+        for (let i = 0; i < len; i++) {
+            const diff = (pa[i] || 0) - (pb[i] || 0);
+
+            if (diff !== 0) {
+                return diff > 0 ? 1 : -1;
+            }
+        }
+
+        return 0;
+    }
+
+    function setupUpdateCheck(dialog) {
+        const button = dialog.querySelector(".themeModUpdateButton");
+        const status = dialog.querySelector(".themeModUpdateStatus");
+
+        if (!button || !status) {
+            return;
+        }
+
+        const current = getModVersion();
+        const repo = UPDATE_REPO.trim().replace(/^https?:\/\/github\.com\//i, "").replace(/\/+$/, "");
+        const downloadUrl = UPDATE_DOWNLOAD_URL || (repo ? `https://github.com/${repo}` : "");
+
+        const show = (kind, html) => {
+            status.className = `themeModUpdateStatus themeModUpdate${kind}`;
+            status.innerHTML = html;
+            status.style.display = "flex";
+        };
+
+        const link = (text) =>
+            `<a href="${downloadUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+
+        button.addEventListener("click", async () => {
+            if (!repo) {
+                show("Error", '<i class="fas fa-circle-info"></i><span>Update checking isn\'t set up in this copy of the mod yet.</span>');
+                return;
+            }
+
+            button.disabled = true;
+            show("Checking", '<i class="fas fa-spinner fa-spin"></i><span>Checking for updates...</span>');
+
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 8000);
+
+            try {
+                const response = await fetch(
+                    `https://raw.githubusercontent.com/${repo}/${UPDATE_BRANCH}/${UPDATE_MANIFEST_PATH.split("/").map(encodeURIComponent).join("/")}`,
+                    { cache: "no-store", credentials: "omit", signal: controller.signal }
+                );
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const latest = String((await response.json()).version || "");
+
+                if (!/^\d+(\.\d+){0,3}$/.test(latest)) {
+                    throw new Error("No version found");
+                }
+
+                const result = compareVersions(latest, current);
+
+                if (result > 0) {
+                    show("Available", `<i class="fas fa-seedling"></i><span>Version <b>v${latest}</b> is out (you have v${current}). ${link("Get the update")}</span>`);
+                } else if (result === 0) {
+                    show("Current", `<i class="fas fa-check-circle"></i><span>You're up to date! (v${current})</span>`);
+                } else {
+                    show("Current", `<i class="fas fa-check-circle"></i><span>You're ahead of the latest release (v${current}, newest is v${latest}).</span>`);
+                }
+            } catch (error) {
+                show("Error", `<i class="fas fa-exclamation-circle"></i><span>Couldn't check right now. You might be offline. ${downloadUrl ? link("Open the download page") : ""}</span>`);
+            } finally {
+                clearTimeout(timer);
+                button.disabled = false;
+            }
         });
     }
 
