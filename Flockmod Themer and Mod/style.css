@@ -2621,3 +2621,59 @@ html.fmAnimMenu .dialog[name="themeModMenu"] .themeModApplyButton.fmApplyGlow {
     25%  { box-shadow: inset 0 0 0 2px rgba(244, 143, 177, .9), inset 0 0 24px rgba(244, 143, 177, .35); }
     100% { box-shadow: inset 0 0 0 0 rgba(244, 143, 177, 0); }
 }
+
+/* =========================================================
+   SECOND TOOL STRIP (new in FlockMod's update: Pan, Lasso,
+   Rectangle, Zoom In/Out in a ".toolbar > ul.sidemenu").
+   Colored exactly like the main tool strip (#drawingTools).
+   ========================================================= */
+
+html.flockmodSidebarSecondaryActive:not(.flockmodCustomizationsDisabled) .toolbar:has(> ul.sidemenu) {
+    background-color: var(--flockmod-custom-sidebar-secondary, #2f3136) !important;
+}
+
+html.flockmodSidebarSecondaryActive.flockmodGradSidebarSecondaryActive:not(.flockmodCustomizationsDisabled):not(.flockmodBgSidebarSeeThroughActive) .toolbar:has(> ul.sidemenu) {
+    background-image: var(--flockmod-grad-SidebarSecondary) !important;
+    background-attachment: fixed !important;
+}
+
+html.flockmodBgSidebarSeeThroughActive:not(.flockmodCustomizationsDisabled) .toolbar:has(> ul.sidemenu) {
+    background-color: color-mix(in srgb, var(--fmst-sbTools, var(--fmst-sbContent, transparent)) calc(100% - var(--flockmod-bg-sidebar-see, 0) * 1%), transparent) !important;
+}
+
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a,
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a i {
+    color: var(--flockmod-custom-sidebar-icon, #acb3ba) !important;
+}
+
+html.flockmodSelectedColorActive:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu .selectedTool {
+    background-color: var(--flockmod-custom-selected, #4f5156) !important;
+}
+
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a:not(.selectedTool):hover {
+    background-color: var(--flockmod-custom-hover, #4f5156) !important;
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* Animations: same lift/press/pop as the main tools */
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a {
+    transition-property: translate, scale, background-color, color;
+    transition-duration: calc(.12s * var(--fm-anim-speed, 1));
+    transition-timing-function: ease;
+}
+
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a:hover {
+    translate: 0 -2px;
+}
+
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu a:active {
+    translate: 0 0;
+    scale: .94;
+}
+
+html.fmAnimSelect:not(.flockmodCustomizationsDisabled) .toolbar > ul.sidemenu .selectedTool {
+    animation: fmPop calc(.22s * var(--fm-anim-speed, 1)) ease-out;
+}
