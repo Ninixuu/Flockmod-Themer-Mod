@@ -1,5 +1,5 @@
 # Flockmod-Themer-Mod
-A chrome extension made to mod flockmod and make it customizable
+An extension made to mod flockmod and make it customizable, you can use this for any broswer that accepts extensions, the example used here is for chrome, but general idea to dowmnload is the same (Chrome, edge..) One exception is Firefox.
 
 NOTE: Yes! this will work for the new update that just released!
 
