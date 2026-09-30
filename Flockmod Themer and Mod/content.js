@@ -1865,6 +1865,306 @@ function buildSimpleColorRowsHTML() {
         ).join("");
     }
 
+
+    /* =========================================================
+       ANIMATIONS (Animations tab)
+       Everything is CSS. The script only switches classes on
+       <html> and sets one speed variable, so an effect that is
+       OFF costs nothing. Only cheap properties are animated
+       (opacity, scale, translate, rotate), and every effect plays
+       once and stops, so nothing runs while you draw.
+       Personal setting: not part of share codes.
+       ========================================================= */
+
+    const ANIM_ENABLED_LS = "flockmodAnimEnabled";
+    const ANIM_SPEED_LS = "flockmodAnimSpeed";
+
+    const ANIM_EFFECTS = [
+        {
+            key: "Popups",
+            cls: "fmAnimPopups",
+            name: "Popups",
+            description: "FlockMod popups (chat, settings, room list...) gently scale and fade in when they open."
+        },
+        {
+            key: "Hover",
+            cls: "fmAnimHover",
+            name: "Hover & press",
+            description: "Buttons lift a little on hover and press in when clicked. Slider thumbs grow while you drag them."
+        },
+        {
+            key: "Select",
+            cls: "fmAnimSelect",
+            name: "Selections & alerts",
+            description: "A small pop when you pick a tool, and a wiggle when a notification badge appears."
+        },
+        {
+            key: "Menu",
+            cls: "fmAnimMenu",
+            name: "Mod menu effects",
+            description: "This menu opens with a fade, rows slide in, color swatches pulse when changed, and the Enable customizations switch blooms."
+        }
+    ].map((effect) => ({
+        ...effect,
+        ls: `flockmodAnim${effect.key}`,
+        toggleId: `themeModAnim${effect.key}`
+    }));
+
+    const reduceMotionQuery = window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : { matches: false };
+
+    function readSavedAnimSettings() {
+        const speed = Number(localStorage.getItem(ANIM_SPEED_LS));
+        const effects = {};
+
+        ANIM_EFFECTS.forEach((effect) => {
+            effects[effect.key] = localStorage.getItem(effect.ls) !== "false"; /* default ON */
+        });
+
+        return {
+            enabled: localStorage.getItem(ANIM_ENABLED_LS) !== "false",     /* default ON */
+            speed: Number.isInteger(speed) && speed >= 50 && speed <= 200 ? speed : 100,
+            effects
+        };
+    }
+
+    /* speed is a percentage: 200 = twice as fast (half the time) */
+    function applyAnimSettings(st) {
+        const root = document.documentElement;
+        const on = st.enabled && !reduceMotionQuery.matches;
+
+        ANIM_EFFECTS.forEach((effect) => {
+            root.classList.toggle(effect.cls, on && st.effects[effect.key]);
+        });
+
+        root.style.setProperty("--fm-anim-speed", String(100 / st.speed));
+    }
+
+    function applySavedAnimations() {
+        applyAnimSettings(readSavedAnimSettings());
+    }
+
+    function animToggleHTML(id) {
+        return `
+            <label class="themeModToggle">
+                <input type="checkbox" id="${id}">
+                <span class="themeModToggleTrack">
+                    <span class="themeModToggleOption themeModToggleOff">OFF</span>
+                    <span class="themeModToggleOption themeModToggleOn">ON</span>
+                    <span class="themeModToggleThumb"></span>
+                </span>
+            </label>`;
+    }
+
+    function buildAnimationsPanelHTML() {
+        return `
+                        <div class="themeModSectionContent" data-theme-panel="animations">
+
+                            <div class="themeModSubsectionTitle">
+                                Animations
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Enable animations</div>
+                                    <div class="themeModSettingDescription">
+                                        Turns every effect below on or off at once.
+                                    </div>
+                                </div>
+                                ${animToggleHTML("themeModAnimEnabled")}
+                            </div>
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Speed</div>
+                                    <div class="themeModSettingDescription">
+                                        Higher is snappier, lower is slower and softer.
+                                    </div>
+                                </div>
+                                <div class="themeModRangeControl">
+                                    <input type="range" id="themeModAnimSpeed" class="themeModRange" min="50" max="200" step="10" value="100">
+                                    <span id="themeModAnimSpeedValue" class="themeModRangeValue">1.0×</span>
+                                </div>
+                            </div>
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Effects
+                            </div>
+
+                            ${ANIM_EFFECTS.map((effect) => `
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">${effect.name}</div>
+                                    <div class="themeModSettingDescription">${effect.description}</div>
+                                </div>
+                                ${animToggleHTML(effect.toggleId)}
+                            </div>`).join("")}
+
+                            <div class="themeModLocalNote">
+                                <i class="fas fa-circle-info"></i>
+                                <span>Every effect plays once and stops, and only uses movement and fading, so it won't slow down drawing. If your computer's "reduce motion" setting is on, animations stay off automatically. Animations are a personal setting and aren't included in share codes.</span>
+                            </div>
+
+                            <div class="themeModReduceMotionNote themeModLocalNote" style="display: none;">
+                                <i class="fas fa-universal-access"></i>
+                                <span>Your computer's "reduce motion" setting is on, so animations are paused. The flower on the Enable customizations switch still shows, just without moving.</span>
+                            </div>
+
+                        </div>`;
+    }
+
+    function speedLabel(speed) {
+        return `${(speed / 100).toFixed(1)}×`;
+    }
+
+    function setupAnimationsPanel(dialog) {
+        const master = dialog.querySelector("#themeModAnimEnabled");
+        const speed = dialog.querySelector("#themeModAnimSpeed");
+        const speedValue = dialog.querySelector("#themeModAnimSpeedValue");
+        const effectToggles = ANIM_EFFECTS.map((effect) => ({
+            effect,
+            toggle: dialog.querySelector(`#${effect.toggleId}`)
+        }));
+        const reduceNote = dialog.querySelector(".themeModReduceMotionNote");
+
+        function fill(st) {
+            master.checked = st.enabled;
+            speed.value = String(st.speed);
+            speedValue.textContent = speedLabel(st.speed);
+            effectToggles.forEach(({ effect, toggle }) => {
+                toggle.checked = st.effects[effect.key];
+            });
+        }
+
+        function readInputs() {
+            const effects = {};
+            effectToggles.forEach(({ effect, toggle }) => {
+                effects[effect.key] = toggle.checked;
+            });
+            return { enabled: master.checked, speed: Number(speed.value), effects };
+        }
+
+        function preview() {
+            speedValue.textContent = speedLabel(Number(speed.value));
+            applyAnimSettings(readInputs());
+        }
+
+        fill(readSavedAnimSettings());
+        reduceNote.style.display = reduceMotionQuery.matches ? "" : "none";
+
+        master.addEventListener("change", preview);
+        speed.addEventListener("input", preview);
+        effectToggles.forEach(({ toggle }) => toggle.addEventListener("change", preview));
+
+        /* Swatch pulse: on "change" (when a pick is finished), not
+           "input", so dragging inside the picker doesn't spam it */
+        dialog.addEventListener("change", (event) => {
+            const el = event.target;
+
+            if (el instanceof HTMLInputElement && el.type === "color") {
+                playOnce(el, "fmPulse");
+            }
+        });
+
+        /* Bloom: plays only when the switch is turned ON by you */
+        const enabledToggle = dialog.querySelector("#themeModEnabled");
+        const bloomLabel = enabledToggle && enabledToggle.closest(".themeModToggle");
+
+        if (bloomLabel) {
+            bloomLabel.classList.add("themeModBloomToggle");
+            enabledToggle.addEventListener("change", () => {
+                if (enabledToggle.checked) {
+                    playOnce(bloomLabel, "fmBloomPlay");
+                } else {
+                    bloomLabel.classList.remove("fmBloomPlay");
+                }
+            });
+        }
+
+        return {
+            save() {
+                const st = readInputs();
+                localStorage.setItem(ANIM_ENABLED_LS, st.enabled);
+                localStorage.setItem(ANIM_SPEED_LS, st.speed);
+                ANIM_EFFECTS.forEach((effect) => {
+                    localStorage.setItem(effect.ls, st.effects[effect.key]);
+                });
+            },
+            reset() {
+                const st = { enabled: true, speed: 100, effects: {} };
+                ANIM_EFFECTS.forEach((effect) => { st.effects[effect.key] = true; });
+                fill(st);
+                applyAnimSettings(st);
+                this.save();
+            }
+        };
+    }
+
+    /* Restarts a one-shot CSS animation class and cleans it up after
+       (the longest animation inside it decides when it's removed) */
+    function playOnce(el, cls) {
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
+
+        clearTimeout(el._fmPlayTimer);
+        el._fmPlayTimer = setTimeout(() => el.classList.remove(cls), 2500);
+    }
+
+    /* =========================================================
+       MOD MENU SIZE + POSITION
+       Opens at a comfortable size (fitted to the window) and
+       remembers where you last left it.
+       ========================================================= */
+
+    const MENU_RECT_LS = "flockmodMenuRect";
+
+    function getInitialMenuRect() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        let rect = null;
+
+        try {
+            rect = JSON.parse(localStorage.getItem(MENU_RECT_LS) || "null");
+        } catch (error) {
+            rect = null;
+        }
+
+        let width = rect && Number(rect.width) ? rect.width : Math.min(760, vw * 0.85);
+        let height = rect && Number(rect.height) ? rect.height : Math.min(560, vh * 0.85);
+
+        width = Math.max(400, Math.min(width, vw - 20));
+        height = Math.max(300, Math.min(height, vh - 20));
+
+        let left = rect && Number.isFinite(rect.left) ? rect.left : (vw - width) / 2;
+        let top = rect && Number.isFinite(rect.top) ? rect.top : (vh - height) / 2;
+
+        /* Keep it on screen if the window got smaller since */
+        left = Math.max(0, Math.min(left, vw - width));
+        top = Math.max(0, Math.min(top, vh - height));
+
+        return {
+            width: `${Math.round(width)}px`,
+            height: `${Math.round(height)}px`,
+            left: `${Math.round(left)}px`,
+            top: `${Math.round(top)}px`
+        };
+    }
+
+    function rememberMenuRect(dialog) {
+        const rect = {
+            width: parseFloat(dialog.style.width),
+            height: parseFloat(dialog.style.height),
+            left: parseFloat(dialog.style.left),
+            top: parseFloat(dialog.style.top)
+        };
+
+        if (Object.values(rect).every(Number.isFinite)) {
+            localStorage.setItem(MENU_RECT_LS, JSON.stringify(rect));
+        }
+    }
+
     function setupThumbShape(dialog) {
         const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
         const select = dialog.querySelector("#themeModThumbShape");
@@ -3111,12 +3411,9 @@ function buildSimpleColorRowsHTML() {
         dialog.setAttribute("name", "themeModMenu");
 
         Object.assign(dialog.style, {
-            width: "500px",
-            height: "350px",
+            ...getInitialMenuRect(),
             minWidth: "400px",
-            minHeight: "300px",
-            top: "150px",
-            left: "250px"
+            minHeight: "300px"
         });
 
         dialog.innerHTML = `
@@ -3719,6 +4016,8 @@ function buildSimpleColorRowsHTML() {
 
                         </div>
 
+${buildAnimationsPanelHTML()}
+
                         <div class="themeModSectionContent" data-theme-panel="backgrounds">
 
                             <div class="themeModLocalNote">
@@ -4188,6 +4487,9 @@ simpleColorControls.forEach(({ toggle, input }) => {
 /* Gradient rows (under some detailed colors) */
 const gradientControls = setupGradientControls(dialog);
 
+/* Animations tab (bloom switch + swatch pulse live in here too) */
+const animationControls = setupAnimationsPanel(dialog);
+
         fontSelect.addEventListener("change", () => {
             applyFontValue(fontSelect.value);
         });
@@ -4327,6 +4629,7 @@ const gradientControls = setupGradientControls(dialog);
             });
 
             gradientControls.save();
+            animationControls.save();
         });
 
         /* ---------- Copy to detailed ----------
@@ -4462,6 +4765,8 @@ const gradientControls = setupGradientControls(dialog);
                 "flockmodCustomUIRadius",
                 "5"
             );
+
+            animationControls.reset();
 
             /* Reset only clears the colors of the mode you are in, so
                your detailed theme survives a reset in simple mode. */
@@ -5107,6 +5412,8 @@ const gradientControls = setupGradientControls(dialog);
                 /* Simple mode (if saved on) sits on top of the detailed colors */
                 applySavedSimpleColorsIfActive();
                 applySavedGradients();
+                applySavedAnimations();
+                rememberMenuRect(dialog);
 
                 dialog.remove();
             }
@@ -5472,7 +5779,8 @@ const gradientControls = setupGradientControls(dialog);
                         if (
                             sectionName === "interface" ||
                             sectionName === "colors" ||
-                            sectionName === "backgrounds"
+                            sectionName === "backgrounds" ||
+                            sectionName === "animations"
                         ) {
                             actions.style.display =
                                 "flex";
@@ -5539,6 +5847,7 @@ const gradientControls = setupGradientControls(dialog);
         applySavedSidebarColors();
         applySavedSimpleColorsIfActive();
         applySavedGradients();
+        applySavedAnimations();
         applySavedBackgrounds();
         applySavedThumbShape();
 

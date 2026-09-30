@@ -2294,3 +2294,238 @@ html.flockmodBgChatSeeThroughActive.flockmodPopupContentActive.flockmodGradPopup
 html.flockmodBgMessengerSeeThroughActive.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCustomizationsDisabled) .dialog[name="messenger"] .dynamicDialogArea {
     background-image: none !important;
 }
+
+/* =========================================================
+   ANIMATIONS (Animations tab)
+   Only opacity + the separate scale / translate / rotate
+   properties are animated. Those run on the graphics card and
+   don't fight FlockMod's own "transform" or positioning.
+   Every effect plays once. --fm-anim-speed: 1 = normal,
+   0.5 = twice as fast, 2 = half speed.
+   ========================================================= */
+
+@keyframes fmFadeScaleIn {
+    from { opacity: 0; scale: .96; }
+    to   { opacity: 1; scale: 1; }
+}
+
+@keyframes fmSlideIn {
+    from { opacity: 0; translate: 10px 0; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+@keyframes fmFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes fmPop {
+    50% { scale: 1.1; }
+}
+
+@keyframes fmNudge {
+    25% { rotate: -10deg; }
+    75% { rotate: 10deg; }
+}
+
+@keyframes fmPulseKf {
+    50% { scale: 1.18; }
+}
+
+/* ---------- Popups ---------- */
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) {
+    animation: fmFadeScaleIn calc(.18s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* ---------- Hover & press ---------- */
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) #drawingTools a,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .topbarButtons .nav-link,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .bottomNavbar .nav-link,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn {
+    transition-property: translate, scale, background-color, color;
+    transition-duration: calc(.12s * var(--fm-anim-speed, 1));
+    transition-timing-function: ease;
+}
+
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) #drawingTools a:hover,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .topbarButtons .nav-link:hover,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .bottomNavbar .nav-link:hover {
+    translate: 0 -2px;
+}
+
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) #drawingTools a:active,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .topbarButtons .nav-link:active,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .bottomNavbar .nav-link:active,
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .dialog:not([name="themeModMenu"]) .btn:active {
+    translate: 0 0;
+    scale: .94;
+}
+
+/* Thumbs grow while dragged (keeps Shape Size) */
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .fmSlider:not(.readOnly) > .fmThumb {
+    transition: scale calc(.12s * var(--fm-anim-speed, 1)) ease;
+}
+
+html.fmAnimHover:not(.flockmodCustomizationsDisabled) .fmSlider:not(.readOnly) > .fmThumb:active {
+    scale: calc(var(--flockmod-thumb-size, 1) * 1.15) !important;
+}
+
+/* ---------- Selections & alerts ---------- */
+html.fmAnimSelect:not(.flockmodCustomizationsDisabled) #drawingTools .selectedTool {
+    animation: fmPop calc(.22s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+html.fmAnimSelect:not(.flockmodCustomizationsDisabled) .topNavbar .badge-danger {
+    animation: fmNudge calc(.45s * var(--fm-anim-speed, 1)) ease-in-out;
+}
+
+/* ---------- Mod menu effects ---------- */
+html.fmAnimMenu .dialog[name="themeModMenu"] {
+    animation: fmFadeScaleIn calc(.2s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* A panel fades in when you switch tabs; its first rows slide in
+   one after another (capped at 8 so long lists don't drag) */
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent {
+    animation: fmFadeIn calc(.15s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(-n+8 of .themeModSetting) {
+    animation: fmSlideIn calc(.22s * var(--fm-anim-speed, 1)) ease-out backwards;
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(2 of .themeModSetting) { animation-delay: calc(25ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(3 of .themeModSetting) { animation-delay: calc(50ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(4 of .themeModSetting) { animation-delay: calc(75ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(5 of .themeModSetting) { animation-delay: calc(100ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(6 of .themeModSetting) { animation-delay: calc(125ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(7 of .themeModSetting) { animation-delay: calc(150ms * var(--fm-anim-speed, 1)); }
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModSectionContent > .themeModSetting:nth-child(8 of .themeModSetting) { animation-delay: calc(175ms * var(--fm-anim-speed, 1)); }
+
+/* Search shows every panel at once: skip the row cascade there */
+html.fmAnimMenu .dialog[name="themeModMenu"].themeModSearching .themeModSectionContent > .themeModSetting {
+    animation: none;
+}
+
+/* Color swatch pulse when a pick is finished */
+html.fmAnimMenu .dialog[name="themeModMenu"] input[type="color"].fmPulse {
+    animation: fmPulseKf calc(.28s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* =========================================================
+   SAKURA BLOOM SWITCH (General > Enable customizations)
+   While ON, the thumb is always a pink flower (no animation
+   needed for that). Turning it ON plays the bloom + glow once.
+   ========================================================= */
+
+.dialog[name="themeModMenu"] .themeModBloomToggle input:checked + .themeModToggleTrack .themeModToggleThumb {
+    border-radius: 0;
+    background: radial-gradient(circle, #ffe7a3 0 14%, #ffd1e0 24%, #f7a1c0 60%, #ec7fa7 100%);
+    -webkit-mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg transform='translate(50 50)'%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(72)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(144)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(216)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(288)'/%3E%3Ccircle r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg transform='translate(50 50)'%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(72)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(144)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(216)'/%3E%3Cellipse cx='0' cy='-25' rx='18' ry='25' transform='rotate(288)'/%3E%3Ccircle r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* The slide uses the separate "translate" property here (not
+   "transform"), so the spin turns around the flower's own center
+   instead of swinging it around its old spot. It rolls one full
+   turn while gliding across, and never grows past the track. */
+.dialog[name="themeModMenu"] .themeModBloomToggle .themeModToggleThumb {
+    transition: translate calc(.45s * var(--fm-anim-speed, 1)) cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dialog[name="themeModMenu"] .themeModBloomToggle input:checked + .themeModToggleTrack .themeModToggleThumb {
+    transform: none;
+    translate: 58px 0;
+}
+
+@keyframes fmBloom {
+    0%   { scale: .6;   rotate: -360deg; }
+    75%  { scale: 1.08; }
+    100% { scale: 1;    rotate: 0deg; }
+}
+
+@keyframes fmGlow {
+    0%   { box-shadow: 0 0 0 0 rgba(244, 143, 177, 0); }
+    30%  { box-shadow: 0 0 10px 3px rgba(244, 143, 177, .85); }
+    100% { box-shadow: 0 0 16px 8px rgba(244, 143, 177, 0); }
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModBloomToggle.fmBloomPlay .themeModToggleThumb {
+    animation: fmBloom calc(.45s * var(--fm-anim-speed, 1)) cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+html.fmAnimMenu .dialog[name="themeModMenu"] .themeModBloomToggle.fmBloomPlay .themeModToggleTrack {
+    animation: fmGlow calc(1.2s * var(--fm-anim-speed, 1)) ease-out;
+}
+
+/* Belt and braces for "reduce motion" (the script already keeps
+   the animation classes off): no movement, flower still shows */
+@media (prefers-reduced-motion: reduce) {
+    html[class*="fmAnim"] .dialog,
+    html[class*="fmAnim"] .dialog *,
+    html[class*="fmAnim"] #sidebar *,
+    html[class*="fmAnim"] .topNavbar *,
+    html[class*="fmAnim"] .bottomNavbar * {
+        animation: none !important;
+    }
+}
+
+
+/* =========================================================
+   LAYERS HEADER BUTTONS (clear layer, etc.)
+   The icon color was covered already; FlockMod's own grey
+   hover/focus background (it stays after clicking) and the
+   greyed-out "disabled" look were not.
+   ========================================================= */
+
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:hover,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:focus,
+html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:active {
+    background-color: var(--flockmod-custom-hover, #4f5156) !important;
+}
+
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:not(.disabled):hover,
+html.flockmodText1ColorActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link:not(.disabled):focus {
+    color: var(--flockmod-custom-text1, #fff) !important;
+}
+
+html.flockmodSidebarIconActive:not(.flockmodCustomizationsDisabled) #sidebar .sidebarNavbar .nav-link.disabled {
+    color: color-mix(in srgb, var(--flockmod-custom-sidebar-icon, #acb3ba) 40%, transparent) !important;
+}
+
+/* =========================================================
+   ALERTS (the "Saved!" style popups at the top right)
+   Box = Popup Background, border = Popup Border,
+   text = Popup Title Text, timer bar = Accent 1.
+   ========================================================= */
+
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage {
+    background-color: var(--flockmod-custom-popup-background, #1d1e22) !important;
+}
+
+html.flockmodPopupBorderActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage {
+    border-color: var(--flockmod-custom-popup-border, #707379) !important;
+}
+
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage,
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage p,
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage span {
+    color: var(--flockmod-custom-popup-titletext, #fff) !important;
+}
+
+html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage .alertProgress {
+    background-color: var(--flockmod-custom-sidebar-accent, #378de4) !important;
+}
+
+html.flockmodSidebarAccentActive.flockmodGradSidebarAccentActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage .alertProgress {
+    background-image: var(--flockmod-grad-SidebarAccent) !important;
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage {
+    border-radius: var(--flockmod-ui-radius, 5px) !important;
+}
+
+/* Popups animation also covers alerts: they fade/scale in */
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) #alertContainer .alertMessage {
+    animation: fmFadeScaleIn calc(.18s * var(--fm-anim-speed, 1)) ease-out;
+}
