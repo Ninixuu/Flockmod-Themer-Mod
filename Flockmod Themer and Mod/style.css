@@ -3007,3 +3007,251 @@ html.flockmodPopupContentActive.flockmodGradPopupContentActive:not(.flockmodCust
 .dialog[name="themeModReference"].themeModRefMinimized .dialogSize {
     display: none !important;
 }
+
+/* =========================================================
+   POPUP DECORATIONS (Interface > Popup Decorations)
+   4 color roles. "Match my theme" (default) uses the colors
+   read from your popups (--fmdeco-t-*); custom uses the pickers
+   (--fmdeco-c-*). Sparkle is a lighter Details unless picked.
+   ========================================================= */
+
+:root {
+    --fmdeco-main: var(--fmdeco-t-main, #4f4f55);
+    --fmdeco-outline: var(--fmdeco-t-outline, #707379);
+    --fmdeco-detail: var(--fmdeco-t-detail, #378de4);
+    --fmdeco-sparkle: color-mix(in srgb, var(--fmdeco-detail) 55%, #fff);
+}
+
+html.fmDecoCustomColors {
+    --fmdeco-main: var(--fmdeco-c-main);
+    --fmdeco-outline: var(--fmdeco-c-outline);
+    --fmdeco-detail: var(--fmdeco-c-detail);
+    --fmdeco-sparkle: var(--fmdeco-c-sparkle);
+}
+
+.fmDeco .fmdM  { fill: var(--fmdeco-main); }
+.fmDeco .fmdMs { fill: none; stroke: var(--fmdeco-main); }
+.fmDeco .fmdO  { stroke: var(--fmdeco-outline); }
+.fmDeco .fmdOs { fill: none; stroke: var(--fmdeco-outline); }
+.fmDeco .fmdD  { fill: var(--fmdeco-detail); }
+.fmDeco .fmdS  { fill: var(--fmdeco-sparkle); }
+
+/* Decorations sit outside the popup's box, so the popup must not
+   clip them. Its content keeps its own clipping. */
+.dialog.fmHasDeco {
+    overflow: visible !important;
+}
+
+.fmDeco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;      /* never blocks clicks, title buttons or resizing */
+    z-index: 10010;            /* drawn over FlockMod's resize frame, so ear/tail bases sit on it */
+}
+
+.fmDecoPiece {
+    position: absolute;
+    pointer-events: none;
+    scale: var(--fmdeco-size, 1);
+}
+
+.fmDecoPiece svg {
+    display: block;
+    overflow: visible;
+}
+
+/* Maximized (fullscreen) popups: hidden, back when restored */
+.dialog.dialogMaximized > .fmDeco {
+    display: none;
+}
+
+/* With animations on: decorations pop in when a popup opens, and
+   tails give one little wag */
+@keyframes fmDecoPop {
+    0%   { opacity: 0; scale: calc(var(--fmdeco-size, 1) * .5); }
+    70%  { opacity: 1; scale: calc(var(--fmdeco-size, 1) * 1.08); }
+    100% { opacity: 1; scale: var(--fmdeco-size, 1); }
+}
+
+@keyframes fmDecoWag {
+    0%, 100% { rotate: 0deg; }
+    30% { rotate: 12deg; }
+    65% { rotate: -8deg; }
+}
+
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmDecoPiece {
+    animation: fmDecoPop calc(.35s * var(--fm-anim-speed, 1)) ease-out backwards;
+}
+
+html.fmAnimPopups:not(.flockmodCustomizationsDisabled) .dialog > .fmDeco .fmDecoTail {
+    animation:
+        fmDecoPop calc(.35s * var(--fm-anim-speed, 1)) ease-out backwards,
+        fmDecoWag calc(.6s * var(--fm-anim-speed, 1)) ease-in-out calc(.3s * var(--fm-anim-speed, 1));
+}
+
+/* ---- menu rows + live preview ---- */
+
+.dialog[name="themeModMenu"] .themeModDecoPreviewWrap {
+    display: flex;
+    justify-content: center;
+    padding: 40px 60px 44px;
+}
+
+.dialog[name="themeModMenu"] .themeModDecoPreview {
+    position: relative;
+    width: 190px;
+    height: 96px;
+    border: 2px solid var(--fmdeco-outline);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .06);
+}
+
+.dialog[name="themeModMenu"] .themeModDecoPreviewBar {
+    height: 24px;
+    line-height: 24px;
+    padding-left: 8px;
+    font-size: .7rem;
+    background: var(--fmdeco-main);
+    border-radius: 4px 4px 0 0;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+.dialog[name="themeModMenu"] .themeModDecoPreview .fmDeco {
+    z-index: 1;
+}
+
+.dialog[name="themeModMenu"] .themeModDecoColorRow {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 14px;
+}
+
+/* =========================================================
+   SAFETY: TROLL DETECTION (your screen only)
+   ========================================================= */
+
+/* User list: flagged name in the highlight color with a ⚠ */
+html:not(.flockmodCustomizationsDisabled) #sidebar tr.fmTrollFlag td[class*="rank"] {
+    color: var(--fm-troll-color, #ff3b3b) !important;
+    font-weight: 700 !important;
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar tr.fmTrollFlag td[class*="rank"]::before {
+    content: "\26A0\FE0E  ";
+    color: var(--fm-troll-color, #ff3b3b);
+}
+
+html:not(.flockmodCustomizationsDisabled) #sidebar tr.fmTrollFlag,
+html:not(.flockmodCustomizationsDisabled) #sidebar tr.fmTrollFlag > td {
+    box-shadow: inset 3px 0 0 var(--fm-troll-color, #ff3b3b);
+}
+
+/* Chat: the name in their messages */
+html:not(.flockmodCustomizationsDisabled) .fmTrollName {
+    color: var(--fm-troll-color, #ff3b3b) !important;
+    font-weight: 700 !important;
+}
+
+/* Board: their cursor's name tag */
+html:not(.flockmodCustomizationsDisabled) .CursorContainer .cursor.fmTrollFlag .pointerLabel {
+    background-color: var(--fm-troll-color, #ff3b3b) !important;
+    color: #fff !important;
+    border-radius: 3px;
+    padding: 0 4px;
+}
+
+/* One glow when someone is first flagged (with Selections & alerts on) */
+@keyframes fmTrollPulseKf {
+    0%   { background-color: transparent; }
+    30%  { background-color: color-mix(in srgb, var(--fm-troll-color, #ff3b3b) 35%, transparent); }
+    100% { background-color: transparent; }
+}
+
+html.fmAnimSelect:not(.flockmodCustomizationsDisabled) #sidebar tr.fmTrollPulse > td {
+    animation: fmTrollPulseKf calc(1.2s * var(--fm-anim-speed, 1)) ease-out 2;
+}
+
+/* Warning popup (top right, below FlockMod's own alerts) */
+.fmTrollToasts {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 100002;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 270px;
+    pointer-events: none;
+}
+
+.fmTrollToast {
+    pointer-events: auto;
+    padding: 10px 12px 8px;
+    border: 2px solid var(--fm-troll-color, #ff3b3b);
+    border-left-width: 5px;
+    border-radius: 6px;
+    background-color: #1d1e22;
+    color: #fff;
+    font-size: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+}
+
+html.flockmodPopupBackgroundActive:not(.flockmodCustomizationsDisabled) .fmTrollToast {
+    background-color: var(--flockmod-custom-popup-background, #1d1e22);
+}
+
+html.flockmodPopupTitleTextActive:not(.flockmodCustomizationsDisabled) .fmTrollToast {
+    color: var(--flockmod-custom-popup-titletext, #fff);
+}
+
+html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .fmTrollToast {
+    border-radius: var(--flockmod-ui-radius, 5px);
+}
+
+.fmTrollToastTitle i {
+    color: var(--fm-troll-color, #ff3b3b);
+    margin-right: 4px;
+}
+
+.fmTrollToastWhy {
+    margin-top: 3px;
+    font-size: 11px;
+    opacity: .75;
+}
+
+.fmTrollToastButtons {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.fmTrollToastButtons button {
+    height: 24px;
+    padding: 0 9px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font-size: 11px;
+    opacity: .85;
+    cursor: pointer;
+}
+
+.fmTrollToastButtons button:hover {
+    opacity: 1;
+}
+
+.fmTrollToastButtons button[data-troll="close"] {
+    margin-left: auto;
+    border: 0;
+}
+
+@keyframes fmTrollToastIn {
+    from { opacity: 0; translate: 16px 0; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+html.fmAnimPopups .fmTrollToast {
+    animation: fmTrollToastIn calc(.22s * var(--fm-anim-speed, 1)) ease-out;
+}

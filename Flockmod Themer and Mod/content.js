@@ -2285,6 +2285,12 @@ function buildSimpleColorRowsHTML() {
             def: { enabled: false, sound: "builtin:pop", volume: 45 }
         },
         {
+            key: "Troll",
+            name: "Possible griefer",
+            description: "Troll detection (Safety tab) flagged someone. Needs troll detection turned on.",
+            def: { enabled: true, sound: "builtin:bell", volume: 70 }
+        },
+        {
             key: "JoinLeave",
             name: "Someone joins or leaves",
             description: "The grey \"has entered the room\" / left messages.",
@@ -2660,6 +2666,16 @@ function buildSimpleColorRowsHTML() {
     }
 
     function handleChatMutations(records, watch) {
+        /* Troll detection: color flagged names in new messages */
+        if (trollFlagged.size) {
+            records.forEach((record) => record.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) {
+                    const block = node.closest(".chatBlock") || node;
+                    markTrollChat(block);
+                }
+            }));
+        }
+
         if (!liveSoundSettings || !liveSoundSettings.enabled || Date.now() < watch.armedAt) {
             return;
         }
@@ -4632,6 +4648,548 @@ function buildSimpleColorRowsHTML() {
         };
     }
 
+
+    /* =========================================================
+       SAFETY: TROLL DETECTION (Safety tab)
+       Purely local. Only READS what FlockMod already shows you:
+       - user list: who is a guest (".rankUU") and the icon of the
+         tool each person is holding
+       - board cursors: each person's brush circle (its width is
+         their brush size in board pixels) and whether it's moving
+       A person is flagged when they keep using a risky tool (or a
+       huge brush) for a few seconds. Flags only change how names
+       look on YOUR screen, plus an optional small popup/sound.
+       Nothing is sent anywhere and nobody else sees any of it.
+       It can only warn: it never stops, undoes or kicks anyone.
+       ========================================================= */
+
+    const TROLL_LS = {
+        enabled: "flockmodTrollEnabled",
+        sensitivity: "flockmodTrollSensitivity",
+        guestsOnly: "flockmodTrollGuestsOnly",
+        eraser: "flockmodTrollWatchEraser",
+        fill: "flockmodTrollWatchFill",
+        selection: "flockmodTrollWatchSelection",
+        bigBrush: "flockmodTrollWatchBigBrush",
+        popup: "flockmodTrollPopup",
+        color: "flockmodTrollColor"
+    };
+
+    /* seconds of risky use before a flag, and what counts as a huge brush */
+    const TROLL_SENSITIVITY = {
+        relaxed: { label: "Relaxed", seconds: 10, bigBrush: 220 },
+        normal: { label: "Normal", seconds: 5, bigBrush: 150 },
+        strict: { label: "Strict", seconds: 2.5, bigBrush: 100 }
+    };
+
+    /* Which user-list tool icons count as which risky tool */
+    const TROLL_TOOL_ICONS = {
+        eraser: ["fa-eraser"],
+        fill: ["fa-fill-drip", "fa-fill", "fa-paint-roller", "fa-bucket"],
+        selection: ["fa-draw-polygon", "fa-vector-square", "fa-object-group", "fa-mouse-pointer",
+                    "fa-arrow-pointer", "fa-arrows-alt", "fa-up-down-left-right", "fa-expand-arrows-alt",
+                    "fa-crop", "fa-crop-alt", "fa-crop-simple"]
+    };
+
+    const TROLL_TOOL_NAMES = { eraser: "Eraser", fill: "Fill", selection: "Selection/move", bigBrush: "Huge brush" };
+
+    function readSavedTroll() {
+        const flag = (key, def) => {
+            const v = localStorage.getItem(TROLL_LS[key]);
+            return v === null ? def : v === "true";
+        };
+        const sens = localStorage.getItem(TROLL_LS.sensitivity);
+        const color = localStorage.getItem(TROLL_LS.color);
+
+        return {
+            enabled: flag("enabled", false),
+            sensitivity: TROLL_SENSITIVITY[sens] ? sens : "normal",
+            guestsOnly: flag("guestsOnly", true),
+            eraser: flag("eraser", true),
+            fill: flag("fill", true),
+            selection: flag("selection", true),
+            bigBrush: flag("bigBrush", true),
+            popup: flag("popup", true),
+            color: /^#[0-9a-f]{6}$/i.test(color || "") ? color : "#ff3b3b"
+        };
+    }
+
+    let liveTroll = null;
+
+    function applyTroll(st) {
+        liveTroll = st;
+        document.documentElement.style.setProperty("--fm-troll-color", st.color);
+
+        if (!st.enabled) {
+            clearAllTrollFlags();
+            watchTrollCursors(); /* disconnects the cursor watcher */
+        }
+    }
+
+    function applySavedTroll() {
+        applyTroll(readSavedTroll());
+    }
+
+    /* ---------- reading the page ---------- */
+
+    function trollNameFromCell(td) {
+        /* The name is the cell's own text; the status span is ignored */
+        return [...td.childNodes]
+            .filter((n) => n.nodeType === 3)
+            .map((n) => n.textContent)
+            .join("")
+            .trim();
+    }
+
+    function readUserRows() {
+        const users = new Map();
+
+        document.querySelectorAll("#sidebar tr.someoneelse").forEach((row) => {
+            const cell = row.querySelector('td[class*="rank"]');
+
+            if (!cell) {
+                return;
+            }
+
+            const name = trollNameFromCell(cell);
+
+            if (!name) {
+                return;
+            }
+
+            const icon = row.querySelector(".brushIcon i, .userlistIcon:not(.colorbox) i");
+            let tool = null;
+
+            if (icon) {
+                const classes = icon.className;
+                tool = Object.keys(TROLL_TOOL_ICONS).find((key) =>
+                    TROLL_TOOL_ICONS[key].some((c) => new RegExp(`(^|\\s)${c}(\\s|$)`).test(classes))
+                ) || null;
+            }
+
+            users.set(name, {
+                row,
+                cell,
+                guest: cell.classList.contains("rankUU"),
+                tool
+            });
+        });
+
+        return users;
+    }
+
+    function readCursors() {
+        const cursors = new Map();
+
+        document.querySelectorAll(".CursorContainer .cursor:not(.myself)").forEach((el) => {
+            const label = el.querySelector(".pointerLabel");
+            const name = label ? label.textContent.trim() : "";
+
+            if (!name || el.style.display === "none") {
+                return;
+            }
+
+            const circle = el.querySelector(".pointer");
+            cursors.set(name, {
+                el,
+                x: parseFloat(el.style.left) || 0,
+                y: parseFloat(el.style.top) || 0,
+                size: circle ? parseFloat(circle.style.width) || 0 : 0
+            });
+        });
+
+        return cursors;
+    }
+
+    /* ---------- tracking ---------- */
+
+    /* Movement is caught as it happens: FlockMod moves each person's
+       cursor by changing its style, so a watcher on the cursor box
+       just notes "this person moved just now". (Checking positions
+       twice a second alone could miss fast back-and-forth scribbles.) */
+    const trollMovedAt = new Map();
+    let trollCursorWatch = { el: null, observer: null };
+
+    function watchTrollCursors() {
+        const el = liveTroll && liveTroll.enabled ? document.querySelector(".CursorContainer") : null;
+
+        if (el === trollCursorWatch.el) {
+            return;
+        }
+
+        if (trollCursorWatch.observer) {
+            trollCursorWatch.observer.disconnect();
+        }
+
+        trollCursorWatch = { el, observer: null };
+
+        if (!el) {
+            return;
+        }
+
+        trollCursorWatch.observer = new MutationObserver((records) => {
+            const now = Date.now();
+
+            records.forEach((record) => {
+                const cursor = record.target.closest && record.target.closest(".cursor");
+
+                if (cursor && !cursor.classList.contains("myself")) {
+                    const label = cursor.querySelector(".pointerLabel");
+
+                    if (label) {
+                        trollMovedAt.set(label.textContent.trim(), now);
+                    }
+                }
+            });
+        });
+
+        trollCursorWatch.observer.observe(el, { attributes: true, attributeFilter: ["style"], subtree: true });
+    }
+
+    const trollState = new Map();      /* name -> { score, flagged, lastX, lastY, reason, lastPopupAt } */
+    const trollIgnored = new Set();    /* this session only */
+    let trollLastTick = 0;
+
+    function trollTick() {
+        const st = liveTroll;
+
+        if (!st || !st.enabled || !customizationsEnabled) {
+            return;
+        }
+
+        const now = Date.now();
+        const dt = trollLastTick ? Math.min(2, (now - trollLastTick) / 1000) : 0.5;
+        trollLastTick = now;
+
+        watchTrollCursors();
+
+        const sens = TROLL_SENSITIVITY[st.sensitivity];
+        const users = readUserRows();
+        const cursors = readCursors();
+
+        users.forEach((user, name) => {
+            if ((st.guestsOnly && !user.guest) || trollIgnored.has(name)) {
+                if (trollState.has(name)) {
+                    setTrollFlag(name, false);
+                    trollState.delete(name);
+                }
+                return;
+            }
+
+            const s = trollState.get(name) || { score: 0, flagged: false, lastX: null, lastY: null, reason: "", lastPopupAt: 0, calmFor: 0 };
+            const cursor = cursors.get(name);
+
+            /* "Active" = their cursor moved on the board in the last moment */
+            const moving = Boolean(cursor && (
+                now - (trollMovedAt.get(name) || 0) < 800 ||
+                (s.lastX !== null && Math.hypot(cursor.x - s.lastX, cursor.y - s.lastY) > 2)
+            ));
+
+            if (cursor) {
+                s.lastX = cursor.x;
+                s.lastY = cursor.y;
+            }
+
+            let reason = "";
+
+            if (moving && user.tool && st[user.tool]) {
+                reason = TROLL_TOOL_NAMES[user.tool];
+            } else if (moving && st.bigBrush && cursor && cursor.size >= sens.bigBrush) {
+                reason = `${TROLL_TOOL_NAMES.bigBrush} (${Math.round(cursor.size)}px)`;
+            }
+
+            if (reason) {
+                s.score += dt;
+                s.reason = reason;
+                s.calmFor = 0;
+            } else {
+                s.score = Math.max(0, s.score - dt * 0.5);
+                s.calmFor += dt;
+            }
+
+            if (!s.flagged && s.score >= sens.seconds) {
+                s.flagged = true;
+                setTrollFlag(name, true, user);
+                notifyTroll(name, s, st);
+            } else if (s.flagged && s.score === 0 && s.calmFor >= 30) {
+                /* Calm for 30s: the flag fades */
+                s.flagged = false;
+                setTrollFlag(name, false);
+            } else if (s.flagged) {
+                setTrollFlag(name, true, user); /* keep it on if FlockMod redrew the list */
+            }
+
+            trollState.set(name, s);
+        });
+
+        /* People who left the room */
+        [...trollState.keys()].forEach((name) => {
+            if (!users.has(name)) {
+                trollState.delete(name);
+                setTrollFlag(name, false);
+            }
+        });
+
+        /* Canvas name tags follow the flags */
+        cursors.forEach((cursor, name) => {
+            const s = trollState.get(name);
+            cursor.el.classList.toggle("fmTrollFlag", Boolean(s && s.flagged));
+        });
+    }
+
+    /* ---------- highlighting (your screen only) ---------- */
+
+    const trollFlagged = new Set();
+
+    function setTrollFlag(name, on, user) {
+        const was = trollFlagged.has(name);
+
+        if (on) {
+            trollFlagged.add(name);
+        } else {
+            trollFlagged.delete(name);
+        }
+
+        const u = user || readUserRows().get(name);
+
+        if (u) {
+            u.row.classList.toggle("fmTrollFlag", on);
+
+            if (on && !was) {
+                playOnce(u.row, "fmTrollPulse");
+            }
+        }
+
+        if (on !== was) {
+            markTrollChat(document.getElementById("chatMessages"));
+        }
+    }
+
+    function clearAllTrollFlags() {
+        trollFlagged.clear();
+        trollState.clear();
+        document.querySelectorAll(".fmTrollFlag").forEach((el) => el.classList.remove("fmTrollFlag"));
+        document.querySelectorAll(".fmTrollName").forEach((el) => el.classList.remove("fmTrollName"));
+        document.querySelectorAll(".fmTrollToast").forEach((el) => el.remove());
+    }
+
+    /* In chat, a person's name is a small element outside the message
+       text. Any such element whose text is a flagged name gets red.
+       Only runs when a flag changes, or on new messages. */
+    function markTrollChat(root) {
+        if (!root) {
+            return;
+        }
+
+        const blocks = root.matches && root.matches(".chatBlock")
+            ? [root]
+            : root.querySelectorAll(".chatBlock:not(.eventBlock):not(.motdBlock)");
+
+        blocks.forEach((block) => {
+            block.querySelectorAll("*").forEach((el) => {
+                if (el.children.length || el.closest(".msgText, .msgTime")) {
+                    return;
+                }
+
+                const text = el.textContent.trim().replace(/:$/, "");
+                el.classList.toggle("fmTrollName", text !== "" && trollFlagged.has(text));
+            });
+        });
+    }
+
+    /* ---------- popup ---------- */
+
+    function trollToastBox() {
+        let box = document.querySelector(".fmTrollToasts");
+
+        if (!box) {
+            box = document.createElement("div");
+            box.className = "fmTrollToasts";
+            document.body.appendChild(box);
+        }
+
+        return box;
+    }
+
+    function notifyTroll(name, s, st) {
+        const now = Date.now();
+
+        if (now - s.lastPopupAt < 60000) {
+            return; /* at most one warning per person per minute */
+        }
+
+        s.lastPopupAt = now;
+        fireSoundEvent("Troll");
+
+        if (!st.popup) {
+            return;
+        }
+
+        const box = trollToastBox();
+
+        while (box.children.length >= 3) {
+            box.firstElementChild.remove();
+        }
+
+        const toast = document.createElement("div");
+        toast.className = "fmTrollToast";
+        toast.innerHTML = `
+            <div class="fmTrollToastTitle">
+                <i class="fas fa-exclamation-triangle"></i>
+                <b>${escapeHTML(name)}</b> might be griefing
+            </div>
+            <div class="fmTrollToastWhy">${escapeHTML(s.reason)} for a few seconds</div>
+            <div class="fmTrollToastButtons">
+                <button type="button" data-troll="show">Show in list</button>
+                <button type="button" data-troll="ignore">Ignore</button>
+                <button type="button" data-troll="close" title="Close">✕</button>
+            </div>`;
+
+        toast.addEventListener("click", (event) => {
+            const action = event.target.closest("[data-troll]");
+
+            if (!action) {
+                return;
+            }
+
+            if (action.dataset.troll === "show") {
+                const u = readUserRows().get(name);
+
+                if (u) {
+                    u.row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                    playOnce(u.row, "fmTrollPulse");
+                }
+            } else if (action.dataset.troll === "ignore") {
+                trollIgnored.add(name);
+                setTrollFlag(name, false);
+                trollState.delete(name);
+            }
+
+            toast.remove();
+        });
+
+        box.appendChild(toast);
+        setTimeout(() => toast.remove(), 15000);
+    }
+
+    /* ---------- Safety panel ---------- */
+
+    function buildSafetyPanelHTML() {
+        const row = (id, name, desc) => `
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">${name}</div>
+                                    <div class="themeModSettingDescription">${desc}</div>
+                                </div>
+                                ${animToggleHTML(id)}
+                            </div>`;
+
+        return `
+                        <div class="themeModSectionContent" data-theme-panel="safety">
+
+                            <div class="themeModSubsectionTitle">
+                                Troll Detection
+                            </div>
+
+                            ${row("themeModTrollEnabled", "Troll detection",
+                                "Turns names red (user list, chat and their name tag on the board) when someone keeps using a risky tool, and can show a small warning.")}
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Sensitivity</div>
+                                    <div class="themeModSettingDescription">How quickly someone gets flagged, and how big a brush counts as huge.</div>
+                                </div>
+                                <select id="themeModTrollSensitivity" class="themeModSelect">
+                                    ${Object.entries(TROLL_SENSITIVITY).map(([k, v]) =>
+                                        `<option value="${k}">${v.label} (${v.seconds}s, ${v.bigBrush}px+)</option>`).join("")}
+                                </select>
+                            </div>
+
+                            ${row("themeModTrollGuestsOnly", "Guests only", "Only watch unregistered users. OFF watches everyone except you.")}
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Watch For
+                            </div>
+
+                            ${row("themeModTrollEraser", "Eraser", "Erasing across the board.")}
+                            ${row("themeModTrollFill", "Fill", "The fill (bucket) tool.")}
+                            ${row("themeModTrollSelection", "Selection / move", "Selecting and moving parts of the board.")}
+                            ${row("themeModTrollBigBrush", "Huge brush", "Any tool with a very big brush size.")}
+
+                            <div class="themeModSubsectionTitle themeModSpacingSubsection">
+                                Warnings
+                            </div>
+
+                            ${row("themeModTrollPopup", "Warning popup", "A small note in the top-right corner with the person's name. At most once a minute per person.")}
+
+                            <div class="themeModSetting themeModNoDivider">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Highlight color</div>
+                                    <div class="themeModSettingDescription">The color flagged names turn.</div>
+                                </div>
+                                <input type="color" id="themeModTrollColor" value="#ff3b3b">
+                            </div>
+
+                            <div class="themeModLocalNote">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Everything here happens only on your screen: nothing is sent to FlockMod and nobody else sees the red names or warnings. It's a guess based on tools and brush size (someone erasing their own drawing can get flagged too), so please check before acting. It can't stop anyone; use FlockMod's own moderation tools for that. For a sound, turn on "Possible griefer" in the Sounds tab.</span>
+                            </div>
+
+                        </div>`;
+    }
+
+    function setupSafetyPanel(dialog) {
+        const ids = {
+            enabled: "#themeModTrollEnabled",
+            guestsOnly: "#themeModTrollGuestsOnly",
+            eraser: "#themeModTrollEraser",
+            fill: "#themeModTrollFill",
+            selection: "#themeModTrollSelection",
+            bigBrush: "#themeModTrollBigBrush",
+            popup: "#themeModTrollPopup"
+        };
+        const toggles = {};
+        Object.entries(ids).forEach(([k, sel]) => { toggles[k] = dialog.querySelector(sel); });
+        const sens = dialog.querySelector("#themeModTrollSensitivity");
+        const color = dialog.querySelector("#themeModTrollColor");
+
+        function fill(st) {
+            Object.keys(toggles).forEach((k) => { toggles[k].checked = st[k]; });
+            sens.value = st.sensitivity;
+            color.value = st.color;
+        }
+
+        function readInputs() {
+            const st = { sensitivity: sens.value, color: color.value };
+            Object.keys(toggles).forEach((k) => { st[k] = toggles[k].checked; });
+            return st;
+        }
+
+        const preview = () => applyTroll(readInputs());
+
+        fill(readSavedTroll());
+        Object.values(toggles).forEach((t) => t.addEventListener("change", preview));
+        sens.addEventListener("change", preview);
+        color.addEventListener("input", preview);
+
+        return {
+            save() {
+                const st = readInputs();
+                Object.keys(TROLL_LS).forEach((k) => localStorage.setItem(TROLL_LS[k], st[k]));
+                applySavedTroll();
+            },
+            reset() {
+                const st = {
+                    enabled: false, sensitivity: "normal", guestsOnly: true, eraser: true, fill: true,
+                    selection: true, bigBrush: true, popup: true, color: "#ff3b3b"
+                };
+                fill(st);
+                Object.keys(TROLL_LS).forEach((k) => localStorage.setItem(TROLL_LS[k], st[k]));
+                applyTroll(st);
+            }
+        };
+    }
+
     function setupThumbShape(dialog) {
         const toggle = dialog.querySelector("#themeModThumbShapeEnabled");
         const select = dialog.querySelector("#themeModThumbShape");
@@ -5938,6 +6496,10 @@ function buildSimpleColorRowsHTML() {
                             Sounds
                         </button>
 
+                        <button class="themeModSidebarItem" data-theme-section="safety">
+                            Safety
+                        </button>
+
                         <button class="themeModSidebarItem" data-theme-section="backgrounds">
                             Backgrounds
                         </button>
@@ -6501,6 +7063,8 @@ ${buildAnimationsPanelHTML()}
 
 ${buildSoundsPanelHTML()}
 
+${buildSafetyPanelHTML()}
+
                         <div class="themeModSectionContent" data-theme-panel="backgrounds">
 
                             <div class="themeModLocalNote">
@@ -6979,6 +7543,9 @@ const soundControls = setupSoundsPanel(dialog);
 /* Popup decorations (Interface panel) */
 const decoControls = setupDecoControls(dialog);
 
+/* Safety tab */
+const safetyControls = setupSafetyPanel(dialog);
+
         fontSelect.addEventListener("change", () => {
             applyFontValue(fontSelect.value);
         });
@@ -7121,6 +7688,7 @@ const decoControls = setupDecoControls(dialog);
             animationControls.save();
             soundControls.save();
             decoControls.save();
+            safetyControls.save();
         });
 
         /* ---------- Copy to detailed ----------
@@ -7260,6 +7828,7 @@ const decoControls = setupDecoControls(dialog);
             animationControls.reset();
             soundControls.reset();
             decoControls.reset();
+            safetyControls.reset();
 
             /* Reset only clears the colors of the mode you are in, so
                your detailed theme survives a reset in simple mode. */
@@ -7906,6 +8475,7 @@ const decoControls = setupDecoControls(dialog);
                 applySavedAnimations();
                 applySavedSounds();
                 applySavedDeco();
+                applySavedTroll();
                 rememberMenuRect(dialog);
 
                 dialog.remove();
@@ -8274,7 +8844,8 @@ const decoControls = setupDecoControls(dialog);
                             sectionName === "colors" ||
                             sectionName === "backgrounds" ||
                             sectionName === "animations" ||
-                            sectionName === "sounds"
+                            sectionName === "sounds" ||
+                            sectionName === "safety"
                         ) {
                             actions.style.display =
                                 "flex";
@@ -8344,6 +8915,7 @@ const decoControls = setupDecoControls(dialog);
         applySavedAnimations();
         applySavedSounds();
         applySavedDeco();
+        applySavedTroll();
         applySavedBackgrounds();
         applySavedThumbShape();
 
@@ -8409,6 +8981,7 @@ const decoControls = setupDecoControls(dialog);
             makeThumbRoom();     /* for sliders in popups opened later */
             watchSoundTargets(); /* chat / Messenger boxes for sounds */
             updateDecorations(); /* ears/tails on popups opened later */
+            trollTick();         /* troll detection (only when turned on) */
         }, 500);
     }
 
