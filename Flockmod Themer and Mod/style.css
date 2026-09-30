@@ -2219,9 +2219,18 @@ html.flockmodSidebarAccentActive:not(.flockmodCustomizationsDisabled) .fmSwitch.
    text = Text 2, links = Accent 1.
    ========================================================= */
 
-html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .roomBox,
+html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .roomBox {
+    background-color: var(--flockmod-custom-popup-field, #43444a) !important;
+}
+
+/* FlockMod gives the description text box a fixed height, so long
+   text used to run past its colored bottom edge. Now the box
+   scrolls its own text (and the box around it is colored too), so
+   the color always reaches the bottom. */
 html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .descriptionBox {
     background-color: var(--flockmod-custom-popup-field, #43444a) !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
 }
 
 html.flockmodHoverColorActive:not(.flockmodCustomizationsDisabled) .roomBox:hover {
@@ -2242,10 +2251,10 @@ html.flockmodRadiusActive:not(.flockmodCustomizationsDisabled) .descriptionBox {
     border-radius: var(--flockmod-ui-radius, 5px) !important;
 }
 
-/* The box around the room description shows dark corners behind
-   the rounded description box: clear it and round it to match. */
+/* The scrolling box around the room description carries the field
+   color, so long descriptions are colored all the way down. */
 html.flockmodPopupFieldActive:not(.flockmodCustomizationsDisabled) .roomDescription {
-    background-color: transparent !important;
+    background-color: var(--flockmod-custom-popup-field, #43444a) !important;
     border-color: transparent !important;
     box-shadow: none !important;
 }
