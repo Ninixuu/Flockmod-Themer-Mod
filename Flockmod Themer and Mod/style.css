@@ -3531,3 +3531,10 @@ html.fmAnimMenu .fmTourRing.fmTourPulse { animation: fmTourPulse calc(1.1s * var
     .fmTourPrompt { flex-wrap: wrap; }
     .fmTourPrompt .fmTourButtons { width: 100%; justify-content: flex-end; }
 }
+
+/* General > Quick tour: two buttons side by side */
+.dialog[name="themeModMenu"] .themeModTourButtons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}

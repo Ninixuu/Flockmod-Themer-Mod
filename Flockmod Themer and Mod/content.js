@@ -6786,13 +6786,18 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        A short walkthrough of the basics: the on/off switch, simple coloring, colors, search and safety.
+                                        A short walkthrough of the basics: the on/off switch, simple coloring, colors, search and safety. Show welcome brings back the first-time popup.
                                     </div>
                                 </div>
 
-                                <button type="button" class="themeModButton themeModTourButton">
-                                    <i class="fas fa-play"></i> Replay tour
-                                </button>
+                                <div class="themeModTourButtons">
+                                    <button type="button" class="themeModButton themeModTourWelcomeButton" title="Show the welcome popup that asks if you'd like a tour">
+                                        <i class="fas fa-hand-sparkles"></i> Show welcome
+                                    </button>
+                                    <button type="button" class="themeModButton themeModTourButton" title="Start the tour right away">
+                                        <i class="fas fa-play"></i> Replay tour
+                                    </button>
+                                </div>
 
                             </div>
 
@@ -8671,6 +8676,7 @@ const safetyControls = setupSafetyPanel(dialog);
 
         /* ---- Wiring ---- */
         dialog.querySelector(".themeModTourButton")?.addEventListener("click", startTour);
+        dialog.querySelector(".themeModTourWelcomeButton")?.addEventListener("click", showPrompt);
         dialog.querySelector(".closeButton")?.addEventListener("click", closeTour);
 
         if (localStorage.getItem(TOUR_SEEN_LS) !== "true") {
