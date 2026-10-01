@@ -9,49 +9,46 @@
        ========================================================= */
     const CHANGELOG = [
         {
+            version: "1.5",
+            notes: [
+                "Fixed: FlockMod shortcuts (B, E...) work again with a picture in the reference window.",
+                "Interface, Safety and Backgrounds now use foldable cards, plus a fold-all button.",
+                "Fairer troll detection, with a Sensitivity setting and a Huge text check.",
+                "Shorter, simpler descriptions everywhere.",
+                "Pick popup and bubble styles from tiles, with filters and a Match switch.",
+                "Refreshed Cat, Bunny, Bear, Fox, Strawberry and Dragon styles.",
+                "Background images run much lighter now.",
+                "Fixed: chat bubble timestamps no longer overlap."
+            ]
+        },
+        {
             version: "1.4",
             notes: [
-                "A calmer Colors tab: every section is a card you can fold away (click its title), and the menu remembers what you folded.",
-                "Each section title shows how many of its colors are on.",
-                "All switches and color pickers line up on the right, and a color's picker fades while it's OFF.",
-                "Gradients are now a small Gradient button next to the color, instead of a full extra row.",
-                "Small labels split long sections into groups, and descriptions are one line (hover a row to read all of it).",
-                "Bigger, easier to read section titles in every tab.",
-                "A pink Unsaved changes note shows beside Apply until you apply or reset."
+                "A calmer Colors tab with foldable sections.",
+                "Gradients are now a small button next to each color.",
+                "A pink note reminds you to apply your changes."
             ]
         },
         {
             version: "1.3",
             notes: [
-                "13 new popup decoration styles: Glitch, Moth, Leaves, Strawberry, Dragon, Gothic lace, Night sky, Terminal, Ink, Spiderweb, Thorned rose, Deep sea and Minimal.",
-                "Decoration colors: match your theme, use the style's own colors, or pick your own. Title bar and border colors each have their own switch.",
-                "Chat Bubbles (Interface): 27 styles for your own messages, including cat, dog, bear, fox, stars, sakura and witch hat to match the popups.",
-                "Bubble options: your messages on the right, bubbles for everyone else, decorations on or off, and your own bubble colors.",
-                "Decorations and bubbles play a small animation once when they appear.",
-                "Mention sounds only match whole words now (so a short name no longer rings on longer words).",
-                "Clicking a Messenger conversation no longer plays the message sound.",
-                "The Apply Changes button is now pink, so it's easier to spot."
+                "13 new popup decoration styles.",
+                "Chat bubbles for your own messages (Interface).",
+                "A pink Apply button and sound fixes."
             ]
         },
         {
             version: "1.2",
             notes: [
-                "Every tab has its own quick tour. Press \u24D8 next to search.",
-                "The reference window has its own tour too (\u24D8 in its title bar).",
-                "The first-time tour now also shows Themes and the reference window.",
-                "Tails and side decorations hide while the reference window is minimized."
+                "A quick \u24D8 tour on every tab, including the reference window."
             ]
         },
         {
             version: "1.1",
             notes: [
-                "Reset buttons (\u21BA) on every section in Colors and Interface, so you can reset just one part.",
-                "Bigger section titles and thin divider lines between sections.",
-                "A quick tour of the basics. Find it in General > Quick tour.",
-                "The mod's version is shown in the menu, with a Check for updates button (and an optional automatic check).",
-                "Full backup file: save everything (themes, images, sounds, fonts) and load it on another browser or computer.",
-                "Long room descriptions are now colored all the way down.",
-                "Help links and a little thank-you note in General."
+                "Reset buttons for each section.",
+                "A quick tour, update checks and a full backup file.",
+                "Help links and What's new."
             ]
         }
     ];
@@ -82,7 +79,7 @@
             lsColor: "flockmodCustomSidebarSecondaryColor",
             defaultColor: "#2f3136",
             name: "Secondary Sidebar Color",
-            description: "Section backgrounds inside the sidebar (User list, Tool options, Layers, etc)."
+            description: "Boxes inside the sidebar (User list, Layers...)."
         },
         {
             cls: "flockmodSidebarCollapserActive",
@@ -93,7 +90,7 @@
             lsColor: "flockmodCustomSidebarCollapserColor",
             defaultColor: "#3a3c43",
             name: "Collapser Color",
-            description: "The bars at the bottom of each sidebar section (the ones with the grip lines)."
+            description: "The grip bars under each sidebar box."
         },
         {
             cls: "flockmodSidebarAccentActive",
@@ -104,7 +101,7 @@
             lsColor: "flockmodCustomSidebarAccentColor",
             defaultColor: "#378de4",
             name: "Accent 1",
-            description: "Sidebar border, and slider fills and switch on-states in the sidebar and popups."
+            description: "Sidebar border, slider fills and ON switches."
         },
         {
             cls: "flockmodSidebarInactiveActive",
@@ -115,7 +112,7 @@
             lsColor: "flockmodCustomSidebarInactiveColor",
             defaultColor: "#3a3c43",
             name: "Accent 2",
-            description: "Unselected layers, dropdowns, switch off states, empty slider tracks, and checkbox backgrounds."
+            description: "Unselected layers, dropdowns, OFF switches and empty sliders."
         },
         {
             cls: "flockmodSidebarIconActive",
@@ -126,7 +123,7 @@
             lsColor: "flockmodCustomSidebarIconColor",
             defaultColor: "#acb3ba",
             name: "Sidebar Icon Color",
-            description: "Section title icons, collapse arrows, and layer action icons."
+            description: "Sidebar icons, arrows and layer buttons."
         }
     ];
 
@@ -140,7 +137,7 @@
             lsColor: "flockmodCustomPopupBackgroundColor",
             defaultColor: "#1d1e22",
             name: "Popup Background",
-            description: "Popup window background, inactive title bars, dropdown and right-click menus."
+            description: "Popup windows, inactive title bars and menus."
         },
         {
             cls: "flockmodPopupContentActive",
@@ -151,7 +148,7 @@
             lsColor: "flockmodCustomPopupContentColor",
             defaultColor: "#2f3136",
             name: "Popup Content Color",
-            description: "The main content area inside popups, and the selected chat channel."
+            description: "The inside of popups and the selected chat channel."
         },
         {
             cls: "flockmodPopupTitleBarActive",
@@ -184,7 +181,7 @@
             lsColor: "flockmodCustomPopupBorderColor",
             defaultColor: "#707379",
             name: "Border Color",
-            description: "Popup borders and resize edges, menu borders, chat room tab edges."
+            description: "Popup and menu borders."
         },
         {
             cls: "flockmodPopupFieldActive",
@@ -195,7 +192,7 @@
             lsColor: "flockmodCustomPopupFieldColor",
             defaultColor: "#43444a",
             name: "Field Color",
-            description: "Text boxes, dropdowns, the chat input, and slider/switch tracks inside popups."
+            description: "Text boxes, dropdowns and the chat input."
         },
         {
             cls: "flockmodPopupButtonActive",
@@ -206,7 +203,7 @@
             lsColor: "flockmodCustomPopupButtonColor",
             defaultColor: "#7c7f87",
             name: "Button Color",
-            description: "Popup buttons (chat send/emoji, New PM, etc)."
+            description: "Popup buttons like Send and New PM."
         },
         {
             cls: "flockmodPopupButtonTextActive",
@@ -217,7 +214,7 @@
             lsColor: "flockmodCustomPopupButtonTextColor",
             defaultColor: "#ffffff",
             name: "Button Text & Icons",
-            description: "Text and icons on popup buttons, and the chat font size arrows."
+            description: "Text and icons on popup buttons."
         }
     ];
 
@@ -231,7 +228,7 @@
             lsColor: "flockmodCustomChatChannelsColor",
             defaultColor: "#1d1e22",
             name: "Channel List Color",
-            description: "Background of the channel list on the left of the chat, and the Messenger's contact list."
+            description: "The chat's channel list and the Messenger's contact list."
         },
         {
             cls: "flockmodChatMessageActive",
@@ -253,7 +250,7 @@
             lsColor: "flockmodCustomChatEventColor",
             defaultColor: "#808080",
             name: "System Message Text",
-            description: "Event messages like joins and friend requests. MOTD and GM messages keep their native colors."
+            description: "Joins and friend requests. MOTD and GM keep their colors."
         },
         {
             cls: "flockmodChatTimestampActive",
@@ -360,7 +357,7 @@
         lsColor: "flockmodCustomTopBarTextColor",
         defaultColor: "#ffffff",
         name: "Button Text Color",
-        description: "Override the top bar icon buttons (Configuration, Chat, Fullscreen, Leave room)."
+        description: "Top bar buttons like Chat and Fullscreen."
     },
     {
         cls: "flockmodTopBarHoverActive",
@@ -371,7 +368,7 @@
         lsColor: "flockmodCustomTopBarHoverColor",
         defaultColor: "#2e2f35",
         name: "Button Hover Color",
-        description: "Background of top bar buttons when hovered."
+        description: "Top bar buttons when hovered."
     },
     {
         cls: "flockmodTopBarBrandActive",
@@ -382,7 +379,7 @@
         lsColor: "flockmodCustomTopBarBrandColor",
         defaultColor: "#ffffff",
         name: "Brand Title Color",
-        description: "The FlockMod title and version tag in the top bar."
+        description: "The FlockMod title in the top bar."
     },
     {
         cls: "flockmodTopBarProgressActive",
@@ -404,7 +401,7 @@
         lsColor: "flockmodCustomTopBarActivityColor",
         defaultColor: "#2e2f35",
         name: "Activity Bar Color",
-        description: "The bar around the latest activity (PM/EVENT/MOTD tags keep their colors)."
+        description: "The bar showing the latest activity."
     }
 ];
 
@@ -482,7 +479,7 @@ const BOTTOMBAR_COLOR_SETTINGS = [
         lsColor: "flockmodCustomBottomBarTextColor",
         defaultColor: "#b4b6ba",
         name: "Button Text Color",
-        description: "Bottom bar buttons, icons and text (including the mod menu button)."
+        description: "Bottom bar buttons, icons and text."
     },
     {
         cls: "flockmodBottomBarHoverActive",
@@ -493,7 +490,7 @@ const BOTTOMBAR_COLOR_SETTINGS = [
         lsColor: "flockmodCustomBottomBarHoverColor",
         defaultColor: "#4b4a50",
         name: "Button Hover Color",
-        description: "Background of bottom bar buttons when hovered."
+        description: "Bottom bar buttons when hovered."
     },
     {
         cls: "flockmodBottomBarSelectedActive",
@@ -504,7 +501,7 @@ const BOTTOMBAR_COLOR_SETTINGS = [
         lsColor: "flockmodCustomBottomBarSelectedColor",
         defaultColor: "#999999",
         name: "Selected Button Color",
-        description: "Background of a selected/active bottom bar button."
+        description: "The selected bottom bar button."
     }
 ];
 
@@ -583,7 +580,7 @@ function gradientRowHTML(setting) {
             </div>
 
             <div class="themeModSettingDescription">
-                Blends ${setting.name} into a second color. The slider sets the direction.
+                Blends into a second color. The slider sets the direction.
             </div>
         </div>
 
@@ -745,7 +742,7 @@ const SIMPLE_COLOR_SETTINGS = [
         lsColor: "flockmodSimpleBackgroundColor",
         defaultColor: "#1d1e22",
         name: "Background",
-        description: "Sidebar background, top bar, bottom bar, popup windows, menus and the chat channel list."
+        description: "The sidebar, bars, popups and menus."
     },
     {
         key: "surface",
@@ -755,7 +752,7 @@ const SIMPLE_COLOR_SETTINGS = [
         lsColor: "flockmodSimpleSurfaceColor",
         defaultColor: "#2f3136",
         name: "Surface",
-        description: "Section boxes, unselected layers, dropdowns, collapsers, bar button hovers, the activity bar, plus popup content, title bars, fields, buttons and borders."
+        description: "Boxes, layers, dropdowns, popup insides and buttons."
     },
     {
         key: "accent",
@@ -765,7 +762,7 @@ const SIMPLE_COLOR_SETTINGS = [
         lsColor: "flockmodSimpleAccentColor",
         defaultColor: "#378de4",
         name: "Accent",
-        description: "Selected states, slider fills, switches, progress bar. Hover is made from it automatically."
+        description: "Selected things, sliders and switches. Hover is made from it."
     },
     {
         key: "text",
@@ -775,7 +772,7 @@ const SIMPLE_COLOR_SETTINGS = [
         lsColor: "flockmodSimpleTextColor",
         defaultColor: "#ffffff",
         name: "Text",
-        description: "Headings, bar text, popup titles, buttons and chat messages. Smaller text, timestamps and system messages use softer versions."
+        description: "Headings, buttons and chat text. Small text uses a softer version."
     },
     {
         key: "icons",
@@ -785,7 +782,7 @@ const SIMPLE_COLOR_SETTINGS = [
         lsColor: "flockmodSimpleIconsColor",
         defaultColor: "#acb3ba",
         name: "Icons",
-        description: "Sidebar icons, grippers, tool icons and the color switch button."
+        description: "Sidebar and tool icons."
     }
 ];
 
@@ -1142,8 +1139,9 @@ function buildSimpleColorRowsHTML() {
             cls: "flockmodBgSidebarActive",
             seeCls: "flockmodBgSidebarSeeThroughActive",
             cssVar: "--flockmod-bg-sidebar",
+            host: "#sidebar",
             imageText: "Shown behind the whole sidebar.",
-            seeText: "Lets the image show through the section boxes, layer rows, user list rows and tool strip.",
+            seeText: "Lets the image show through the sidebar boxes.",
             /* id, how to find one to read its color */
             see: [
                 { id: "sbContent", detect: "#sidebar .boxBgContainer .containerContent" },
@@ -1166,6 +1164,7 @@ function buildSimpleColorRowsHTML() {
             cls: "flockmodBgChatActive",
             seeCls: "flockmodBgChatSeeThroughActive",
             cssVar: "--flockmod-bg-chat",
+            host: '.dialog[name="chat"] .modal-body',
             imageText: "Shown behind the chat window (messages and channel list).",
             seeText: "Lets the image show through the main message area.",
             sideName: "Channel List",
@@ -1184,6 +1183,7 @@ function buildSimpleColorRowsHTML() {
             cls: "flockmodBgMessengerActive",
             seeCls: "flockmodBgMessengerSeeThroughActive",
             cssVar: "--flockmod-bg-messenger",
+            host: '.dialog[name="messenger"] .modal-body',
             imageText: "Shown behind the Messenger window (conversation and contact list).",
             seeText: "Lets the image show through the conversation area.",
             sideName: "Contact List",
@@ -1440,15 +1440,64 @@ function buildSimpleColorRowsHTML() {
             return;
         }
 
-        if (url) {
-            root.style.setProperty(`${place.cssVar}-image`, `url("${url}")`);
-        } else {
-            root.style.removeProperty(`${place.cssVar}-image`);
-        }
+        setBgImageRule(place, url);
 
         root.classList.toggle(place.cls, Boolean(url));
+        markBgHosts();
         root.classList.toggle(place.seeCls, Boolean(url) && (st.SeeThrough > 0 || (st.ChannelSeeThrough || 0) > 0));
         refreshSeeThrough();
+    }
+
+    /* The image address goes in its own small <style>, set only on
+       the section that shows it. (On <html> it was copied to every
+       element on the page, and a big image address made every
+       other color change slow.) */
+    const bgImageStyles = new Map();   /* place key -> <style> */
+
+    function setBgImageRule(place, url) {
+        document.documentElement.style.removeProperty(`${place.cssVar}-image`);   /* older versions */
+
+        let el = bgImageStyles.get(place.key);
+
+        if (!el) {
+            el = document.createElement("style");
+            el.dataset.fmBgImage = place.key;
+            (document.head || document.documentElement).appendChild(el);
+            bgImageStyles.set(place.key, el);
+        }
+
+        el.textContent = url
+            ? `${place.host}, ${place.host}::before { ${place.cssVar}-image: url("${url}"); }`
+            : "";
+    }
+
+    /* Marks each section that shows an image once, so the image can
+       go on its own layer (see style.css "BACKGROUND IMAGES: SPEED").
+       Sections that scroll by themselves keep the old way. Cheap:
+       up to 3 lookups, each element is only measured once. */
+    function markBgHosts() {
+        const root = document.documentElement;
+
+        BACKGROUND_PLACES.forEach((place) => {
+            if (!root.classList.contains(place.cls)) {
+                return;
+            }
+
+            document.querySelectorAll(place.host).forEach((el) => {
+                if (el.dataset.fmBgChecked) {
+                    return;
+                }
+
+                el.dataset.fmBgChecked = "1";
+                const cs = getComputedStyle(el);
+
+                if (/auto|scroll/.test(cs.overflowY + cs.overflowX)) {
+                    return;
+                }
+
+                el.dataset.fmBgLayer = cs.position === "static" ? "rel" : "on";
+            });
+        });
     }
 
     function applySavedBackgrounds() {
@@ -1487,6 +1536,8 @@ function buildSimpleColorRowsHTML() {
        Cheap check, run from the existing 500 ms loop. */
     function checkSeeThroughTargets() {
         const root = document.documentElement;
+
+        markBgHosts();   /* chat / Messenger windows opened later */
 
         const missing = BACKGROUND_PLACES.some((place) =>
             root.classList.contains(place.seeCls) &&
@@ -1564,8 +1615,8 @@ function buildSimpleColorRowsHTML() {
                 [["cover", "Fill"], ["contain", "Fit"], ["tile", "Tile"]])}
             ${select(`${p}Shade`, "Shade", "Darken for dark themes, lighten for light ones.",
                 [["dark", "Darken"], ["light", "Lighten"]])}
-            ${range(`${p}Dim`, "Shade Amount", "How much to darken/lighten the image so text stays readable.", 0, 90, "%")}
-            ${range(`${p}Blur`, "Blur", "Softens the image. (Animated GIFs aren't blurred, so they keep moving.)", 0, 20, "px")}
+            ${range(`${p}Dim`, "Shade Amount", "Keeps text readable over the image.", 0, 90, "%")}
+            ${range(`${p}Blur`, "Blur", "Softens the image (GIFs stay sharp).", 0, 20, "px")}
             ${place.key === "sidebar"
                 ? range(`${p}SeeThrough`, "See-through Sections", place.seeText, 0, 100, "%")
                 : range(`${p}SeeThrough`, "See-through Message Area", place.seeText, 0, 100, "%") +
@@ -1742,15 +1793,18 @@ function buildSimpleColorRowsHTML() {
         });
 
         /* Changing a color while see-through is on: re-read panel colors */
-        let seeQueued = false;
+        /* Waits until you pause for a moment (not every frame), and
+           does nothing when no section is see-through */
+        let seeTimer = 0;
         const queueSee = () => {
-            if (!seeQueued) {
-                seeQueued = true;
-                requestAnimationFrame(() => {
-                    seeQueued = false;
-                    refreshSeeThrough();
-                });
+            const root = document.documentElement;
+
+            if (!BACKGROUND_PLACES.some((p) => root.classList.contains(p.seeCls))) {
+                return;
             }
+
+            clearTimeout(seeTimer);
+            seeTimer = setTimeout(refreshSeeThrough, 120);
         };
 
         dialog.addEventListener("input", queueSee);
@@ -1941,25 +1995,25 @@ function buildSimpleColorRowsHTML() {
             key: "Popups",
             cls: "fmAnimPopups",
             name: "Popups",
-            description: "FlockMod popups (chat, settings, room list...) gently scale and fade in when they open."
+            description: "FlockMod popups fade in when they open."
         },
         {
             key: "Hover",
             cls: "fmAnimHover",
             name: "Hover & press",
-            description: "Buttons lift a little on hover and press in when clicked. Slider thumbs grow while you drag them."
+            description: "Buttons lift on hover and press in when clicked."
         },
         {
             key: "Select",
             cls: "fmAnimSelect",
             name: "Selections & alerts",
-            description: "A small pop when you pick a tool, and a wiggle when a notification badge appears."
+            description: "A pop when you pick a tool, a wiggle on new badges."
         },
         {
             key: "Menu",
             cls: "fmAnimMenu",
             name: "Mod menu effects",
-            description: "This menu opens with a fade, rows slide in, color swatches pulse when changed, and the Enable customizations switch blooms."
+            description: "This menu fades in, swatches pulse and the main switch blooms."
         }
     ].map((effect) => ({
         ...effect,
@@ -2060,7 +2114,7 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-circle-info"></i>
-                                <span>Every effect plays once and stops, and only uses movement and fading, so it won't slow down drawing. If your computer's "reduce motion" setting is on, animations stay off automatically. Animations are a personal setting and aren't included in share codes.</span>
+                                <span>Effects play once and stop, so drawing never slows down. They stay off if your computer's "reduce motion" setting is on.</span>
                             </div>
 
                             <div class="themeModReduceMotionNote themeModLocalNote" style="display: none;">
@@ -2320,31 +2374,31 @@ function buildSimpleColorRowsHTML() {
         {
             key: "Mention",
             name: "Your name mentioned",
-            description: "Someone says your name, or one of your extra words below, in public or staff chat.",
+            description: "Someone says your name (or an extra word below) in chat.",
             def: { enabled: true, sound: "builtin:petal", volume: 80 }
         },
         {
             key: "Private",
             name: "Private chat message",
-            description: "A new message in a private chat tab. (FlockMod's own: \"Private message tone\")",
+            description: "A new private chat message. (FlockMod's own: \"Private message tone\")",
             def: { enabled: true, sound: "builtin:chime", volume: 70 }
         },
         {
             key: "Messenger",
             name: "Messenger message",
-            description: "A new message in the Messenger, open or closed (when its unread badge goes up). (FlockMod's own: \"Messenger message tone\")",
+            description: "A new Messenger message, even while it's closed. (FlockMod's own: \"Messenger message tone\")",
             def: { enabled: true, sound: "builtin:bell", volume: 70 }
         },
         {
             key: "Chat",
             name: "Any chat message",
-            description: "Every new message in public or staff chat. Busy rooms get noisy! (FlockMod's own: \"Public/Staff chat message tone\")",
+            description: "Every public or staff chat message. Gets noisy! (FlockMod's own: \"Public/Staff chat message tone\")",
             def: { enabled: false, sound: "builtin:pop", volume: 45 }
         },
         {
             key: "Troll",
             name: "Possible griefer",
-            description: "Troll detection (Safety tab) flagged someone. Needs troll detection turned on.",
+            description: "Troll detection flagged someone (Safety tab).",
             def: { enabled: true, sound: "builtin:bell", volume: 70 }
         },
         {
@@ -2935,7 +2989,7 @@ function buildSimpleColorRowsHTML() {
                             <div class="themeModSetting themeModNoDivider">
                                 <div class="themeModSettingText">
                                     <div class="themeModSettingName">Quiet while drawing</div>
-                                    <div class="themeModSettingDescription">Skip sounds while your pen or mouse is pressed on the canvas.</div>
+                                    <div class="themeModSettingDescription">No sounds while you're drawing.</div>
                                 </div>
                                 ${soundToggleHTML("themeModSoundsQuietDrawing")}
                             </div>
@@ -2984,7 +3038,7 @@ function buildSimpleColorRowsHTML() {
                             <div class="themeModSetting themeModNoDivider">
                                 <div class="themeModSettingText">
                                     <div class="themeModSettingName">Upload a sound</div>
-                                    <div class="themeModSettingDescription">An .mp3, .wav or .ogg file up to 1 MB. Short sounds (under 2 seconds) work best. Uploaded sounds show up in every sound list above.</div>
+                                    <div class="themeModSettingDescription">An .mp3, .wav or .ogg up to 1 MB. Short sounds work best.</div>
                                 </div>
                                 <button type="button" class="themeModButton themeModSoundUpload">
                                     <i class="fas fa-upload"></i> Upload sound
@@ -2998,7 +3052,7 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-circle-info"></i>
-                                <span>Sounds only play on your computer, and nothing is sent to FlockMod. Uploaded sounds are saved only in this browser, so nobody else hears them. Sound settings aren't included in share codes, and clearing your browser's data for FlockMod removes your uploads. The Messenger sound plays when its unread badge goes up, even with the Messenger closed.</span>
+                                <span>Sounds play only on your computer. Uploaded sounds stay in this browser, and nobody else hears them.</span>
                             </div>
 
                         </div>`;
@@ -4261,26 +4315,29 @@ function buildSimpleColorRowsHTML() {
         fox: { w: 56, h: 76, side: "30%", bottom: "62%", inset: 1,
             svg: '<path d="M0 72 C42 68 56 32 40 2 C36 28 24 44 0 46Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
                  '<path d="M40 2 C44 12 44 20 41 27 C36 25 34 16 40 2Z" class="fmdS"/>' },
-        bunny: { w: 30, h: 30, side: "62%", bottom: "48%", inset: 0,
-            svg: '<circle cx="15" cy="15" r="13" class="fmdS fmdO" stroke-width="2"/>' +
-                 '<circle cx="11" cy="11" r="4.5" fill="#fff" opacity=".55"/>' },
+        /* v1.5: fluffy cloud-puff tail (outline layer, then the fluff) */
+        bunny: { w: 36, h: 36, side: "60%", bottom: "48%", inset: 0,
+            svg: '<g class="fmdOf fmdO" stroke-width="3.2"><circle cx="29.0" cy="21.4" r="5.8"/><circle cx="24.2" cy="27.7" r="5.8"/><circle cx="16.6" cy="29.4" r="5.8"/><circle cx="9.6" cy="25.8" r="5.8"/><circle cx="6.5" cy="18.6" r="5.8"/><circle cx="8.8" cy="11.0" r="5.8"/><circle cx="15.4" cy="6.8" r="5.8"/><circle cx="23.3" cy="7.8" r="5.8"/><circle cx="28.6" cy="13.5" r="5.8"/><circle cx="18" cy="18" r="11"/></g>' +
+                 '<g class="fmdS"><circle cx="29.0" cy="21.4" r="5.8"/><circle cx="24.2" cy="27.7" r="5.8"/><circle cx="16.6" cy="29.4" r="5.8"/><circle cx="9.6" cy="25.8" r="5.8"/><circle cx="6.5" cy="18.6" r="5.8"/><circle cx="8.8" cy="11.0" r="5.8"/><circle cx="15.4" cy="6.8" r="5.8"/><circle cx="23.3" cy="7.8" r="5.8"/><circle cx="28.6" cy="13.5" r="5.8"/><circle cx="18" cy="18" r="11"/></g>' },
         bear: { w: 24, h: 24, side: "58%", bottom: "48%", inset: 0,
             svg: '<circle cx="12" cy="12" r="10" class="fmdM fmdO" stroke-width="2"/>' }
     };
 
     /* Ear shapes sit on the top edge (their bottom at y = h) */
+    /* v1.5 "Tidy": softer, rounded cat ears */
     const EAR_CAT = { w: 40, h: 32, inset: 2,
-        svg: '<path d="M2 32 L16 6 Q20 -1 24 6 L38 32Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
-             '<path d="M10 31 L18 15 Q20 12 22 15 L30 31Z" class="fmdD"/>' };
+        svg: '<path d="M3 32 C5 21 11 10 16.5 5 Q20 1.5 23.5 5 C29 10 35 21 37 32Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+             '<path d="M11 31.5 C12.5 24 15.5 17 18.6 13.2 Q20 11.8 21.4 13.2 C24.5 17 27.5 24 29 31.5Z" class="fmdD"/>' };
     const EAR_FOX = { w: 40, h: 38, inset: 2,
         svg: '<path d="M2 38 L17 5 Q20 0 23 5 L38 38Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
              '<path d="M11 37 L19 17 Q20 15 21 17 L29 37Z" class="fmdD"/>' };
     const EAR_BEAR = { w: 34, h: 18, inset: 1,
         svg: '<path d="M1 18 A16 16 0 0 1 33 18Z" class="fmdM fmdO" stroke-width="2"/>' +
              '<path d="M9 18 A8 8 0 0 1 25 18Z" class="fmdD"/>' };
-    const EAR_BUNNY = { w: 30, h: 58, inset: 6,
-        svg: '<g transform="rotate(-12 15 58)"><ellipse cx="15" cy="31" rx="10" ry="25" class="fmdM fmdO" stroke-width="2"/>' +
-             '<ellipse cx="15" cy="33" rx="5" ry="17" class="fmdD"/></g>' };
+    /* v1.5: fuller bunny ears that sit on the title bar */
+    const EAR_BUNNY = { w: 30, h: 58, inset: 4,
+        svg: '<g transform="rotate(-10 15 58)"><path d="M7 58 C2 44 0.5 26 3 14 C5 5 10 1 15 1 C20 1 25 5 27 14 C29.5 26 28 44 23 58Z" class="fmdM fmdO" stroke-width="2" stroke-linejoin="round"/>' +
+             '<path d="M10.5 56 C7.5 44 7 30 9 19 C10.5 12 13 8.5 15 8.5 C17 8.5 19.5 12 21 19 C23 30 22.5 44 19.5 56Z" class="fmdD"/></g>' };
     const EAR_DOG = { w: 30, h: 66,
         svg: '<path d="M26 2 C12 -2 2 10 2 28 C2 50 8 64 16 64 C23 64 26 52 27 40 C28 26 32 6 26 2Z" class="fmdM fmdO" stroke-width="2"/>' };
 
@@ -5066,23 +5123,25 @@ function buildSimpleColorRowsHTML() {
     Popup Decorations
 </div>
 
-<div class="themeModSetting themeModNoDivider">
+<div class="themeModSetting themeModNoDivider fmStyleRow">
     <div class="themeModSettingText">
         <div class="themeModSettingName">Style</div>
         <div class="themeModSettingDescription">
-            Ears, tails, flowers, moths, dragons, glitches and more on every popup. They move and resize with it, hide while a popup is maximized, and never block clicks.
+            Ears, tails, flowers and more on every popup. They never block clicks.
         </div>
     </div>
-    <select id="themeModDecoStyle" class="themeModSelect">
+    <select id="themeModDecoStyle" class="themeModSelect fmStyleHiddenSelect" tabindex="-1" aria-hidden="true">
         ${DECO_STYLE_CHOICES.map((k) => `<option value="${k}">${DECO_STYLES[k].label}</option>`).join("")}
     </select>
 </div>
 
 <div class="themeModDecoPreviewWrap">
-    <div class="themeModDecoPreview">
-        <div class="themeModDecoPreviewBar">Chat</div>
-        <div class="themeModDecoPreviewBody"></div>
-        <div class="fmDeco" aria-hidden="true"></div>
+    <div class="themeModDecoStage">
+        <div class="themeModDecoPreview">
+            <div class="themeModDecoPreviewBar">Chat</div>
+            <div class="themeModDecoPreviewBody"></div>
+            <div class="fmDeco" aria-hidden="true"></div>
+        </div>
     </div>
 </div>
 
@@ -5117,11 +5176,11 @@ function buildSimpleColorRowsHTML() {
     <div class="themeModSettingText">
         <div class="themeModSettingName">Decoration colors</div>
         <div class="themeModSettingDescription themeModDecoModeText">${DECO_COLOR_MODE_TEXT.theme}</div>
-        <div class="themeModDecoSeg" id="themeModDecoColorMode" role="radiogroup" aria-label="Decoration colors">
-            <button type="button" role="radio" data-deco-mode="theme">Match my theme</button>
-            <button type="button" role="radio" data-deco-mode="style">Style colors</button>
-            <button type="button" role="radio" data-deco-mode="own">My own</button>
-        </div>
+    </div>
+    <div class="themeModDecoSeg" id="themeModDecoColorMode" role="radiogroup" aria-label="Decoration colors">
+        <button type="button" role="radio" data-deco-mode="theme">Match my theme</button>
+        <button type="button" role="radio" data-deco-mode="style">Style colors</button>
+        <button type="button" role="radio" data-deco-mode="own">My own</button>
     </div>
 </div>
 
@@ -5253,7 +5312,7 @@ function buildSimpleColorRowsHTML() {
             });
 
             previewDeco.innerHTML = on ? buildDecoHTML(st) : "";
-            previewDeco.parentElement.parentElement.style.display = on ? "" : "none";
+            previewDeco.closest(".themeModDecoPreviewWrap").style.display = on ? "" : "none";
         }
 
         function preview() {
@@ -5445,9 +5504,10 @@ function buildSimpleColorRowsHTML() {
         return `<svg viewBox="-10 -10 20 20" width="${w}"><g transform="rotate(12)">${petals}</g><circle r="2" class="fmbC"/></svg>`;
     };
     /* Classic set (matches the older popup decorations) */
-    const bubCatEar = (flip) => `<svg viewBox="0 0 14 12" width="14"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M1 12 L6 2 Q7 0 8 2 L13 12Z" class="fmbA fmbBs" stroke-width="1.3" stroke-linejoin="round"/><path d="M4.2 11.4 L7 5.5 L9.8 11.4Z" class="fmbC"/></svg>`;
-    const bubFoxEar = (flip) => `<svg viewBox="0 0 14 14" width="14"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M1 14 L6 1.5 Q7 0 8 1.5 L13 14Z" class="fmbA fmbBs" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.1 5.5 L6.3 2.3 Q7 1.3 7.7 2.3 L8.9 5.5Z" class="fmbB"/><path d="M4.6 13.4 L7 7.4 L9.4 13.4Z" class="fmbC"/></svg>`;
-    const bubBearEar = '<svg viewBox="0 0 12 11" width="13"><circle cx="6" cy="6" r="5.2" class="fmbA fmbBs" stroke-width="1.2"/><circle cx="6" cy="6.6" r="2.5" class="fmbC"/></svg>';
+    /* Same soft ear as the popups (v1.5 "Tidy") */
+    const bubCatEar = (flip) => `<svg viewBox="-2 -2 44 36" width="21"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M3 32 C5 21 11 10 16.5 5 Q20 1.5 23.5 5 C29 10 35 21 37 32Z" class="fmbA fmbBs" stroke-width="2" stroke-linejoin="round"/><path d="M11 31.5 C12.5 24 15.5 17 18.6 13.2 Q20 11.8 21.4 13.2 C24.5 17 27.5 24 29 31.5Z" class="fmbC"/></svg>`;
+    const bubFoxEar = (flip) => `<svg viewBox="0 0 14 14" width="18"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M1 14 L6 1.5 Q7 0 8 1.5 L13 14Z" class="fmbA fmbBs" stroke-width="1.2" stroke-linejoin="round"/><path d="M5.1 5.5 L6.3 2.3 Q7 1.3 7.7 2.3 L8.9 5.5Z" class="fmbB"/><path d="M4.6 13.4 L7 7.4 L9.4 13.4Z" class="fmbC"/></svg>`;
+    const bubBearEar = '<svg viewBox="0 0 12 11" width="17"><circle cx="6" cy="6" r="5.2" class="fmbA fmbBs" stroke-width="1.2"/><circle cx="6" cy="6.6" r="2.5" class="fmbC"/></svg>';
     const bubPaw = '<svg viewBox="0 0 12 8" width="13"><ellipse cx="6" cy="4" rx="5.4" ry="3.6" class="fmbA fmbBs" stroke-width="1.1"/><circle cx="3.7" cy="3.4" r=".95" class="fmbC"/><circle cx="6" cy="2.7" r=".95" class="fmbC"/><circle cx="8.3" cy="3.4" r=".95" class="fmbC"/></svg>';
     const bubDogEar = (flip) => `<svg viewBox="0 0 10 20" width="10"${flip ? ' style="transform: scaleX(-1)"' : ""}><path d="M8 1 C3 0 0 5 1 12 C2 18 5 20 7 19 C9 18 9 12 9 7 C9 4 10 2 8 1Z" class="fmbA fmbBs" stroke-width="1"/></svg>`;
 
@@ -5459,31 +5519,31 @@ function buildSimpleColorRowsHTML() {
         simple: { label: "Simple", group: "Basic",
             c: { bg: "#f48fb1", text: "#3a1020", border: "#f48fb1" } },
 
-        glitch: { label: "Glitch", group: "Dark & neutral",
+        glitch: { label: "Glitch", group: "Dark",
             c: { bg: "#12121a", text: "#e6e6f0", border: "#2a2a3a", a: "#00e5ff", b: "#ff2bd6" },
             deco: bubAt("top: -9px; right: -9px", '<svg viewBox="0 0 22 22" width="15"><rect x="8" y="0" width="6" height="6" class="fmbB"/><rect x="14" y="6" width="6" height="6" class="fmbA"/><rect x="2" y="10" width="4" height="4" fill="#fff" opacity=".55"/></svg>') },
-        moth: { label: "Moth / butterfly", group: "Dark & neutral",
+        moth: { label: "Moth / butterfly", group: "Neutral",
             c: { bg: "#352d3d", text: "#efe6f5", border: "#56495f", a: "#b9a2cf", b: "#8d7aa3", c: "#5b4a6e", d: "#2d2533" },
             deco: bubAt("top: -15px; right: -12px", bubButterfly(28)) },
-        leaves: { label: "Leaves", group: "Dark & neutral",
+        leaves: { label: "Leaves", group: "Neutral",
             c: { bg: "#2c4534", text: "#e3f1e6", border: "#4b6e55", a: "#7fb58c", b: "#4f8a5e" },
             deco: bubAt("bottom: -8px; left: -12px", bubLeaf(22, "fmbA", -150)) + bubAt("top: -11px; right: 12px", bubLeaf(16, "fmbB", -60)) },
-        strawberry: { label: "Strawberry", group: "Dark & neutral",
+        strawberry: { label: "Strawberry", group: "Neutral",
             c: { bg: "#d8465a", text: "#ffffff", border: "#b33447", a: "#4f9e4a", b: "#2f6e30", c: "#ffe39a" },
             deco: bubAt("top: -11px; right: 12px", '<svg viewBox="0 0 44 22" width="30"><path d="M22 8 L15 2 L17 9 L6 7 L13 12 L3 16 L16 14 L22 21 L28 14 L41 16 L31 12 L38 7 L27 9 L29 2Z" class="fmbA fmbBs" stroke-width="1" stroke-linejoin="round"/><rect x="20.8" y="0" width="2.6" height="9" rx="1.3" class="fmbB"/></svg>') },
-        dragon: { label: "Dragon", group: "Dark & neutral",
+        dragon: { label: "Dragon", group: "Dark",
             c: { bg: "#2e1210", text: "#f5dccb", border: "#7a2b1c", a: "#8a3a26", b: "#d9532c", c: "#e2a57c" },
             deco: bubAt("top: -13px; left: 10px", bubHorn(false)) + bubAt("top: -13px; right: 10px", bubHorn(true)) +
                   bubAt("bottom: -14px; left: -24px", '<svg viewBox="0 0 64 40" width="34"><path d="M62 2 C44 4 34 28 14 29" class="fmbAs" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M15 29 L3 20 L7 31 L0 39 L16 34Z" class="fmbB"/></svg>') },
-        gothic: { label: "Gothic lace", group: "Dark & neutral",
+        gothic: { label: "Gothic lace", group: "Dark",
             c: { bg: "#2a1119", text: "#f1dfe5", border: "#6b1e33", a: "#9a8290", c: "#e05a78" },
             deco: bubAt("top: -12px; right: -6px", '<svg viewBox="0 0 60 26" width="30"><path d="M30 10 C24 2 12 2 2 8 C8 9 10 12 10 16 C14 13 18 14 20 18 C22 14 26 13 30 16 C34 13 38 14 40 18 C42 14 46 13 50 16 C50 12 52 9 58 8 C48 2 36 2 30 10Z" class="fmbA"/><path d="M26.5 9 L27 4 L29 8 L31 8 L33 4 L33.5 9 Q30 15 26.5 9Z" class="fmbA"/><circle cx="28.6" cy="9.3" r=".8" class="fmbC"/><circle cx="31.4" cy="9.3" r=".8" class="fmbC"/></svg>') },
-        nightsky: { label: "Night sky", group: "Dark & neutral",
+        nightsky: { label: "Night sky", group: "Neutral",
             c: { bg: "#1c2a55", text: "#eef1fb", border: "#8a7a55", a: "#e8c97a" },
             deco: bubAt("top: -9px; right: -8px", '<svg viewBox="0 0 20 20" width="18"><path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8Z" class="fmbA fmbTwinkle"/></svg>') },
-        terminal: { label: "Terminal", group: "Dark & neutral",
+        terminal: { label: "Terminal", group: "Dark",
             c: { bg: "#0b120b", text: "#6dff9a", border: "#2f7a45" } },
-        ink: { label: "Ink (sumi-e)", group: "Dark & neutral",
+        ink: { label: "Ink (sumi-e)", group: "Neutral",
             c: { bg: "#ece4d3", text: "#1a1917", border: "#1a1917", a: "#c23b2e", b: "#1a1917", c: "#f6efe2" },
             /* an ink blot on the corner + the red seal stamp */
             deco: bubAt("top: -9px; right: -9px", '<svg viewBox="0 0 24 22" width="22"><g class="fmbB">' +
@@ -5492,16 +5552,16 @@ function buildSimpleColorRowsHTML() {
                   bubAt("bottom: -9px; left: -12px", '<svg viewBox="0 0 22 22" width="22"><circle cx="-1" cy="4" r="1.2" class="fmbB"/><circle cx="2" cy="1" r=".8" class="fmbB"/>' +
                       '<g transform="rotate(-6 8 13)"><rect x="0" y="5" width="16" height="16" rx="2" class="fmbA"/>' +
                       '<text x="8" y="17" text-anchor="middle" font-size="10.5" font-family="Yu Mincho, MS Mincho, Noto Serif CJK JP, serif" class="fmbC">印</text></g></svg>') },
-        spiderweb: { label: "Spiderweb", group: "Dark & neutral",
+        spiderweb: { label: "Spiderweb", group: "Dark",
             c: { bg: "#2c2c32", text: "#ececf0", border: "#4a4a54", a: "#9a9aa6" },
             deco: bubAt("top: -3px; left: -3px", '<svg viewBox="0 0 50 50" width="22" opacity=".85"><g class="fmbAs" stroke-width=".9" fill="none"><path d="M0 0 L50 10 M0 0 L40 30 M0 0 L25 45 M0 0 L8 50"/><path d="M15 3 Q12 5 12 9 Q9 10 7.5 13.5 Q4 13 2.4 15"/><path d="M30 6 Q23 10 24 18 Q17 20 15 27 Q8 27 4.8 30"/></g></svg>') },
-        rose: { label: "Thorned rose", group: "Dark & neutral",
+        rose: { label: "Thorned rose", group: "Dark",
             c: { bg: "#321820", text: "#f6e1e6", border: "#7a2a3b", a: "#a8213b", b: "#3d6b3f", c: "#5e0f20" },
             deco: bubAt("top: -10px; left: -10px", '<svg viewBox="0 0 30 30" width="20"><path d="M4 22 C2 18 6 16 10 19Z" class="fmbB"/><path d="M26 22 C28 18 24 16 20 19Z" class="fmbB"/><circle cx="15" cy="14" r="10" class="fmbA"/><path d="M15 14 m-2.5 0 a2.5 2.5 0 1 1 5 0 a5 5 0 1 1 -10 0 a7.5 7.5 0 1 1 15 0" class="fmbCs" stroke-width="1.4" fill="none"/></svg>') },
-        deepsea: { label: "Deep sea", group: "Dark & neutral",
+        deepsea: { label: "Deep sea", group: "Neutral",
             c: { bg: "#0d2533", text: "#dff9f6", border: "#2a8f93", a: "#3fe0d0" },
             deco: bubAt("top: -18px; left: -10px", '<svg viewBox="0 0 16 40" width="9"><g class="fmbAs" fill="none" opacity=".75"><circle cx="8" cy="34" r="4"/><circle cx="4" cy="20" r="2.5"/><circle cx="10" cy="8" r="3"/></g></svg>') },
-        minimal: { label: "Minimal", group: "Dark & neutral",
+        minimal: { label: "Minimal", group: "Neutral",
             c: { bg: "#2a2c30", text: "#e8e9ec", border: "#3a3d43", a: "#8fa3bf" } },
 
         hearts: { label: "Hearts", group: "Cute",
@@ -5515,21 +5575,26 @@ function buildSimpleColorRowsHTML() {
             deco: bubAt("top: -9px; left: -8px", '<svg viewBox="0 0 20 22" width="18"><path d="M2 20 L2 10 A8 8 0 0 1 18 10 L18 20 L15 17 L12 20 L9 17 L6 20 L4 18Z" class="fmbA fmbBs" stroke-width="1"/><circle cx="7.5" cy="10" r="1.4" class="fmbC"/><circle cx="12.5" cy="10" r="1.4" class="fmbC"/></svg>') },
         bunny: { label: "Bunny", group: "Cute",
             c: { bg: "#fff0f3", text: "#6b3b48", border: "#f3c1cc", a: "#fff0f3", b: "#f3c1cc", c: "#ffc2d1" },
-            deco: bubAt("top: -30px; left: 18px", '<svg viewBox="0 0 30 26" width="40"><g transform="rotate(-12 9 24)"><ellipse cx="9" cy="13" rx="4.5" ry="12" class="fmbA fmbBs" stroke-width="1.3"/><ellipse cx="9" cy="14" rx="2" ry="8" class="fmbC"/></g><g transform="rotate(12 21 24)"><ellipse cx="21" cy="13" rx="4.5" ry="12" class="fmbA fmbBs" stroke-width="1.3"/><ellipse cx="21" cy="14" rx="2" ry="8" class="fmbC"/></g></svg>') },
+            /* v1.5: ears centered on any bubble + fluffy tail */
+            deco: bubAt("top: -31px; left: calc(50% - 17px)", '<svg viewBox="-4 -2 66 62" width="34" style="overflow: visible"><g transform="rotate(-12 15 58)"><path d="M7 58 C2 44 0.5 26 3 14 C5 5 10 1 15 1 C20 1 25 5 27 14 C29.5 26 28 44 23 58Z" class="fmbA fmbBs" stroke-width="2" stroke-linejoin="round"/><path d="M10.5 56 C7.5 44 7 30 9 19 C10.5 12 13 8.5 15 8.5 C17 8.5 19.5 12 21 19 C23 30 22.5 44 19.5 56Z" class="fmbC"/></g><g transform="translate(58 0) scale(-1 1) rotate(-12 15 58)"><path d="M7 58 C2 44 0.5 26 3 14 C5 5 10 1 15 1 C20 1 25 5 27 14 C29.5 26 28 44 23 58Z" class="fmbA fmbBs" stroke-width="2" stroke-linejoin="round"/><path d="M10.5 56 C7.5 44 7 30 9 19 C10.5 12 13 8.5 15 8.5 C17 8.5 19.5 12 21 19 C23 30 22.5 44 19.5 56Z" class="fmbC"/></g></svg>') +
+                  bubAt("bottom: -6px; right: -10px", '<svg viewBox="-1 -1 38 38" width="18"><g class="fmbB fmbBs" stroke-width="3.2"><circle cx="29.0" cy="21.4" r="5.8"/><circle cx="24.2" cy="27.7" r="5.8"/><circle cx="16.6" cy="29.4" r="5.8"/><circle cx="9.6" cy="25.8" r="5.8"/><circle cx="6.5" cy="18.6" r="5.8"/><circle cx="8.8" cy="11.0" r="5.8"/><circle cx="15.4" cy="6.8" r="5.8"/><circle cx="23.3" cy="7.8" r="5.8"/><circle cx="28.6" cy="13.5" r="5.8"/><circle cx="18" cy="18" r="11"/></g><g class="fmbA"><circle cx="29.0" cy="21.4" r="5.8"/><circle cx="24.2" cy="27.7" r="5.8"/><circle cx="16.6" cy="29.4" r="5.8"/><circle cx="9.6" cy="25.8" r="5.8"/><circle cx="6.5" cy="18.6" r="5.8"/><circle cx="8.8" cy="11.0" r="5.8"/><circle cx="15.4" cy="6.8" r="5.8"/><circle cx="23.3" cy="7.8" r="5.8"/><circle cx="28.6" cy="13.5" r="5.8"/><circle cx="18" cy="18" r="11"/></g></svg>') },
         cat: { label: "Cat", group: "Cute",
             c: { bg: "#f1e2d3", text: "#4a3326", border: "#c9a58c", a: "#f1e2d3", b: "#b98f74", c: "#f4a7b9" },
-            deco: bubAt("top: -10px; left: 12px", bubCatEar(false)) + bubAt("top: -10px; left: 30px", bubCatEar(true)) +
-                  bubAt("bottom: 2px; right: -12px", '<svg viewBox="0 0 14 22" width="13"><path d="M1 20 C10 20 12 13 8 9 C4 5 7 1 12 2" class="fmbBs" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg>') },
+            /* ears at each end of the bubble; tail cream + outline like the popup tail */
+            deco: bubAt("top: -14px; left: 5px", bubCatEar(false)) + bubAt("top: -14px; right: 7px", bubCatEar(true)) +
+                  bubAt("bottom: 2px; right: -12px", '<svg viewBox="0 0 14 22" width="13" style="overflow: visible"><path d="M1 20 C10 20 12 13 8 9 C4 5 7 1 12 2" class="fmbBs" stroke-width="4.2" fill="none" stroke-linecap="round"/><path d="M1 20 C10 20 12 13 8 9 C4 5 7 1 12 2" class="fmbAs" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>') },
         dog: { label: "Dog", group: "Cute",
             c: { bg: "#f3e3cf", text: "#4a3322", border: "#c89b6d", a: "#a8764c", b: "#6e4b30" },
             deco: bubAt("top: -2px; left: -5px", bubDogEar(false)) + bubAt("top: -2px; right: -5px", bubDogEar(true)) },
         bear: { label: "Bear", group: "Cute",
             c: { bg: "#ead2b8", text: "#4a3020", border: "#9a6b4b", a: "#9a6b4b", b: "#6e4a32", c: "#f3dcc4" },
-            deco: bubAt("top: -7px; left: 10px", bubBearEar) + bubAt("top: -7px; left: 28px", bubBearEar) +
-                  bubAt("bottom: -6px; left: 12px", bubPaw) + bubAt("bottom: -6px; left: 30px", bubPaw) },
+            /* v1.5: ears and paws at both ends, so they fit any bubble */
+            deco: bubAt("top: -10px; left: 6px", bubBearEar) + bubAt("top: -10px; right: 6px", bubBearEar) +
+                  bubAt("bottom: -6px; left: 10px", bubPaw) + bubAt("bottom: -6px; right: 10px", bubPaw) },
         fox: { label: "Fox", group: "Cute",
             c: { bg: "#e8894d", text: "#fffaf5", border: "#c2622b", a: "#e07a3c", b: "#5a2e14", c: "#fff1e6" },
-            deco: bubAt("top: -12px; left: 11px", bubFoxEar(false)) + bubAt("top: -12px; left: 29px", bubFoxEar(true)) +
+            /* v1.5: bigger ears at both ends of the bubble */
+            deco: bubAt("top: -16px; left: 5px", bubFoxEar(false)) + bubAt("top: -16px; right: 7px", bubFoxEar(true)) +
                   bubAt("bottom: 1px; right: -16px", '<svg viewBox="0 0 18 16" width="18"><path d="M0 12 C6 14 14 12 17 4 C13 6 9 6 6 5 C3 6 1 9 0 12Z" class="fmbA fmbBs" stroke-width="1"/><path d="M17 4 C14.5 5.5 13 6 11.5 6.3 C13 8 15 7 17 4Z" class="fmbC"/></svg>') },
         stars: { label: "Stars", group: "Cute",
             c: { bg: "#232a4d", text: "#fff3d0", border: "#c9a95a", a: "#ffe08a", b: "#fff3b8" },
@@ -5621,7 +5686,7 @@ function buildSimpleColorRowsHTML() {
        colors and decorations), so it always shows the style you
        picked, even while bubbles aren't on in the real chat */
     function paintBubblePreview(dialog, st) {
-        const box = dialog.querySelector(".themeModBubblePreview");
+        const box = dialog.querySelector(".themeModBubblePreview:not(.fmThumbChat)");
 
         if (!box) {
             return;
@@ -5785,22 +5850,30 @@ function buildSimpleColorRowsHTML() {
     Chat Bubbles
 </div>
 
-<div class="themeModSetting themeModNoDivider">
+<div class="themeModSetting themeModNoDivider fmStyleRow">
     <div class="themeModSettingText">
         <div class="themeModSettingName">Bubble style</div>
         <div class="themeModSettingDescription">
-            Puts chat messages in bubbles, with your own in a special style. Only you see this.
+            Chat in bubbles, yours in a special style. Only you see it.
         </div>
     </div>
-    <select id="themeModBubbleStyle" class="themeModSelect" data-default="none">${options}</select>
+    <select id="themeModBubbleStyle" class="themeModSelect fmStyleHiddenSelect" data-default="none" tabindex="-1" aria-hidden="true">${options}</select>
+</div>
+
+<div class="themeModSetting themeModNoDivider">
+    <div class="themeModSettingText">
+        <div class="themeModSettingName"><i class="fas fa-link"></i> Match popups and bubbles</div>
+        <div class="themeModSettingDescription">Picking a style in one picks it in the other too.</div>
+    </div>
+    ${toggle("themeModStyleMatch", true)}
 </div>
 
 <div class="themeModBubblePreviewWrap themeModBubbleOptionRow">
     <div class="themeModBubblePreview">
-        ${msg(false, "mochi", ["anyone want to collab?"])}
-        ${msg(true, "you", ["me!! what should we draw?"])}
-        ${msg(false, "mochi", ["cats in a garden?"])}
-        ${msg(true, "you", ["yesss", "i'll start the sketch"])}
+        ${msg(false, '<i class="fas fa-star themeModBubbleAnonStar"></i>Anonymous', ["hi nene!!! can we rp? match me with cat ears :3"])}
+        ${msg(true, "nene2nd", ["heyy anon!", "yes let's match"])}
+        ${msg(false, '<i class="fas fa-star themeModBubbleAnonStar"></i>Anonymous', ["yay!"])}
+        ${msg(true, "nene2nd", ["what colors should we pick? :3"])}
     </div>
 </div>
 
@@ -5815,7 +5888,7 @@ function buildSimpleColorRowsHTML() {
 <div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
     <div class="themeModSettingText">
         <div class="themeModSettingName">Bubble everyone else</div>
-        <div class="themeModSettingDescription">Simple bubbles for other people's messages. Their text keeps your chat colors, and names keep their role colors.</div>
+        <div class="themeModSettingDescription">Plain bubbles for everyone else's messages.</div>
     </div>
     ${toggle("themeModBubbleOthers", true)}
 </div>
@@ -5823,7 +5896,7 @@ function buildSimpleColorRowsHTML() {
 <div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
     <div class="themeModSettingText">
         <div class="themeModSettingName">Bubble decorations</div>
-        <div class="themeModSettingDescription">The little extras (moth, horns, hearts...) on the first message of each of your message groups.</div>
+        <div class="themeModSettingDescription">Little extras like moths, horns or hearts on your messages.</div>
     </div>
     ${toggle("themeModBubbleDeco", true)}
 </div>
@@ -5831,7 +5904,7 @@ function buildSimpleColorRowsHTML() {
 <div class="themeModSetting themeModNoDivider themeModBubbleOptionRow">
     <div class="themeModSettingText">
         <div class="themeModSettingName">Custom bubble colors</div>
-        <div class="themeModSettingDescription">OFF uses the style's own colors. ON lets you pick your bubble, text and border colors.</div>
+        <div class="themeModSettingDescription">Pick your own bubble, text and border colors.</div>
     </div>
     ${toggle("themeModBubbleCustom", false)}
 </div>
@@ -5973,7 +6046,11 @@ function buildSimpleColorRowsHTML() {
         bigBrush: "flockmodTrollWatchBigBrush",
         scribble: "flockmodTrollWatchScribble",
         popup: "flockmodTrollPopup",
-        color: "flockmodTrollColor"
+        color: "flockmodTrollColor",
+        /* v1.4 */
+        sensitivity: "flockmodTrollSensitivity", /* relaxed | normal | strict */
+        bigText: "flockmodTrollWatchBigText",
+        bigTextPx: "flockmodTrollBigTextPx"
     };
 
     const TROLL_DEFAULTS = {
@@ -5988,8 +6065,23 @@ function buildSimpleColorRowsHTML() {
         bigBrush: true,
         scribble: true,
         popup: true,
-        color: "#ff3b3b"
+        color: "#ff3b3b",
+        sensitivity: "normal",
+        bigText: true,
+        bigTextPx: 100
     };
+
+    /* Sensitivity = how much of the board (in the last 10 seconds)
+       someone has to cover with scribbles, the eraser or fill */
+    const TROLL_SENSITIVITY = {
+        relaxed: { label: "Relaxed", cover: 0.45 },
+        normal: { label: "Normal", cover: 0.30 },
+        strict: { label: "Strict", cover: 0.18 }
+    };
+
+    /* Board coverage: the board is split into a grid; every square
+       someone's brush/eraser passes over is remembered for 10s */
+    const TROLL_COVER = { cols: 32, rows: 18, windowMs: 10000, maxJump: 260 };
 
     const TROLL_STAY_CHOICES = [
         [15, "15 seconds"], [30, "30 seconds"], [60, "1 minute"],
@@ -5997,7 +6089,6 @@ function buildSimpleColorRowsHTML() {
     ];
 
     /* Movement patterns (board pixels; the board is usually 1280 wide) */
-    const TROLL_SCRIBBLE = { windowMs: 1500, path: 2200, span: 350, turns: 4 };
     const TROLL_SWEEP = { windowMs: 1500, span: 450 };
 
     /* Which user-list tool icons count as which risky tool */
@@ -6028,13 +6119,17 @@ function buildSimpleColorRowsHTML() {
             } else if (typeof def === "number") {
                 const n = Number(raw);
                 if (Number.isFinite(n)) st[key] = n;
+            } else if (key === "sensitivity") {
+                if (TROLL_SENSITIVITY[raw]) st[key] = raw;
             } else if (/^#[0-9a-f]{6}$/i.test(raw)) {
                 st[key] = raw;
             }
         });
 
         st.flagAfter = Math.min(80, Math.max(5, Math.round(st.flagAfter)));
-        st.bigBrushPx = Math.min(400, Math.max(40, Math.round(st.bigBrushPx)));
+        /* 140 is FlockMod's biggest brush/text size */
+        st.bigBrushPx = Math.min(140, Math.max(40, Math.round(st.bigBrushPx)));
+        st.bigTextPx = Math.min(140, Math.max(30, Math.round(st.bigTextPx)));
         st.stay = TROLL_STAY_CHOICES.some(([v]) => v === st.stay) ? st.stay : TROLL_DEFAULTS.stay;
         return st;
     }
@@ -6112,7 +6207,11 @@ function buildSimpleColorRowsHTML() {
             }
 
             const circle = el.querySelector(".pointer");
-            cursors.set(name, { el, size: circle ? parseFloat(circle.style.width) || 0 : 0 });
+            /* With the text tool, FlockMod adds a .textfield showing
+               the person's real text size */
+            const text = el.querySelector(".textfield");
+            const textPx = text && text.style.display !== "none" ? parseFloat(text.style.fontSize) || 0 : 0;
+            cursors.set(name, { el, size: circle ? parseFloat(circle.style.width) || 0 : 0, textPx });
         });
 
         return cursors;
@@ -6124,7 +6223,74 @@ function buildSimpleColorRowsHTML() {
        only), so fast scribbles and big sweeps can be measured. */
 
     const trollHistory = new Map();   /* name -> [{t, x, y}] */
+    const trollCoverage = new Map();  /* name -> Map(cell index -> last time) */
+    const trollWatched = new Set();   /* names being watched right now (guests only, if that's on) */
     let trollCursorWatch = { el: null, observer: null };
+
+    function trollBoardSize() {
+        const board = document.querySelector(".boardContainer");
+        const w = board ? parseFloat(board.style.width) : 0;
+        const h = board ? parseFloat(board.style.height) : 0;
+        return { w: w > 0 ? w : 1280, h: h > 0 ? h : 720 };
+    }
+
+    /* Marks the grid squares a brush of this size passes over
+       between two points (a big jump = pen lifted: only the end) */
+    function trollStamp(name, from, to, sizePx, now) {
+        const { w, h } = trollBoardSize();
+        const cw = w / TROLL_COVER.cols;
+        const ch = h / TROLL_COVER.rows;
+        const r = Math.max(4, sizePx / 2);
+        let cells = trollCoverage.get(name);
+
+        if (!cells) {
+            cells = new Map();
+            trollCoverage.set(name, cells);
+        }
+
+        const mark = (x, y) => {
+            const c0 = Math.max(0, Math.floor((x - r) / cw));
+            const c1 = Math.min(TROLL_COVER.cols - 1, Math.floor((x + r) / cw));
+            const r0 = Math.max(0, Math.floor((y - r) / ch));
+            const r1 = Math.min(TROLL_COVER.rows - 1, Math.floor((y + r) / ch));
+
+            for (let row = r0; row <= r1; row++) {
+                for (let col = c0; col <= c1; col++) {
+                    cells.set(row * TROLL_COVER.cols + col, now);
+                }
+            }
+        };
+
+        const dist = from ? Math.hypot(to.x - from.x, to.y - from.y) : 0;
+
+        if (!from || dist > TROLL_COVER.maxJump) {
+            mark(to.x, to.y);
+            return;
+        }
+
+        const steps = Math.max(1, Math.ceil(dist / (Math.min(cw, ch) / 2)));
+
+        for (let i = 1; i <= steps; i++) {
+            mark(from.x + (to.x - from.x) * i / steps, from.y + (to.y - from.y) * i / steps);
+        }
+    }
+
+    /* Share of the board (0..1) covered in the last 10 seconds */
+    function trollCoverageShare(name, now) {
+        const cells = trollCoverage.get(name);
+
+        if (!cells) {
+            return 0;
+        }
+
+        cells.forEach((t, key) => {
+            if (now - t > TROLL_COVER.windowMs) {
+                cells.delete(key);
+            }
+        });
+
+        return cells.size / (TROLL_COVER.cols * TROLL_COVER.rows);
+    }
 
     function watchTrollCursors() {
         const el = liveTroll && liveTroll.enabled && customizationsEnabled
@@ -6161,12 +6327,26 @@ function buildSimpleColorRowsHTML() {
                 const label = cursor.querySelector(".pointerLabel");
                 const name = label ? label.textContent.trim() : "";
 
-                if (!name) {
+                /* Only people being watched are recorded at all */
+                if (!name || !trollWatched.has(name)) {
                     return;
                 }
 
                 const list = trollHistory.get(name) || [];
-                list.push({ t: now, x: parseFloat(cursor.style.left) || 0, y: parseFloat(cursor.style.top) || 0 });
+                const point = { t: now, x: parseFloat(cursor.style.left) || 0, y: parseFloat(cursor.style.top) || 0 };
+                const circle = cursor.querySelector(".pointer");
+                const text = cursor.querySelector(".textfield");
+                /* text tool: the text size; otherwise the brush size */
+                const size = text && text.style.display !== "none"
+                    ? parseFloat(text.style.fontSize) || 0
+                    : (circle ? parseFloat(circle.style.width) || 0 : 0);
+                const prev = list[list.length - 1];
+
+                if (!prev || prev.x !== point.x || prev.y !== point.y) {
+                    trollStamp(name, prev && now - prev.t < 500 ? prev : null, point, size, now);
+                }
+
+                list.push(point);
 
                 while (list.length && now - list[0].t > 3000) {
                     list.shift();
@@ -6244,6 +6424,21 @@ function buildSimpleColorRowsHTML() {
         const flagAfter = st.flagAfter / 10;
         const users = readUserRows();
         const cursors = readCursors();
+        const coverNeeded = (TROLL_SENSITIVITY[st.sensitivity] || TROLL_SENSITIVITY.normal).cover;
+
+        /* Who to record: guests only (if that's on), never ignored people */
+        trollWatched.clear();
+        users.forEach((user, name) => {
+            if (!(st.guestsOnly && !user.guest) && !trollIgnored.has(name)) {
+                trollWatched.add(name);
+            }
+        });
+        [...trollHistory.keys()].forEach((name) => {
+            if (!trollWatched.has(name)) {
+                trollHistory.delete(name);
+                trollCoverage.delete(name);
+            }
+        });
 
         users.forEach((user, name) => {
             if ((st.guestsOnly && !user.guest) || trollIgnored.has(name)) {
@@ -6256,25 +6451,33 @@ function buildSimpleColorRowsHTML() {
 
             const s = trollState.get(name) || { score: 0, flagged: false, calmFor: 0, reason: "", lastPopupAt: 0 };
             const cursor = cursors.get(name);
-            const m = cursor ? trollMotion(name, TROLL_SCRIBBLE.windowMs, now) : { moving: false };
+            const m = cursor ? trollMotion(name, TROLL_SWEEP.windowMs, now) : { moving: false };
+            const covered = trollCoverageShare(name, now);
+            const pct = Math.round(covered * 100);
+            const textPx = cursor ? cursor.textPx : 0;
             let reason = "";
             let instant = false;
 
-            if (m.moving) {
-                const sweep = trollMotion(name, TROLL_SWEEP.windowMs, now);
-
-                if (user.tool === "selection" && st.selection && sweep.span >= TROLL_SWEEP.span) {
-                    /* select-all style sweep: flag right away */
-                    reason = "Selected a big part of the board";
-                    instant = true;
-                } else if (st.scribble && m.path >= TROLL_SCRIBBLE.path && m.span >= TROLL_SCRIBBLE.span && m.turns >= TROLL_SCRIBBLE.turns) {
-                    reason = "Wild scribbling across the board";
-                    instant = true;
-                } else if (user.tool && st[user.tool]) {
-                    reason = TROLL_TOOL_NAMES[user.tool];
-                } else if (st.bigBrush && cursor.size >= st.bigBrushPx) {
-                    reason = `Huge brush (${Math.round(cursor.size)}px)`;
+            if (m.moving && user.tool === "selection" && st.selection && m.span >= TROLL_SWEEP.span) {
+                /* select-all style sweep: the only thing flagged right away */
+                reason = "Selected a big part of the board";
+                instant = true;
+            } else if (st.bigText && textPx >= st.bigTextPx) {
+                reason = `Huge text (${Math.round(textPx)}px)`;
+            } else if (m.moving && covered >= coverNeeded) {
+                if (textPx > 0 && st.bigText) {
+                    reason = `Placed text across ${pct}% of the board`;
+                } else if (user.tool === "eraser" && st.eraser) {
+                    reason = `Erased ${pct}% of the board`;
+                } else if (user.tool === "fill" && st.fill) {
+                    reason = `Used fill across ${pct}% of the board`;
+                } else if (!user.tool && st.scribble) {
+                    reason = `Scribbled over ${pct}% of the board`;
                 }
+            }
+
+            if (!reason && m.moving && st.bigBrush && cursor && !textPx && user.tool !== "selection" && cursor.size >= st.bigBrushPx) {
+                reason = `Huge brush (${Math.round(cursor.size)}px)`;
             }
 
             if (reason) {
@@ -6306,6 +6509,7 @@ function buildSimpleColorRowsHTML() {
             if (!users.has(name)) {
                 trollState.delete(name);
                 trollHistory.delete(name);
+                trollCoverage.delete(name);
                 setTrollFlag(name, false);
             }
         });
@@ -6500,11 +6704,27 @@ function buildSimpleColorRowsHTML() {
                 trollState.delete(name);
             }
 
-            toast.remove();
+            fadeOutTrollToast(toast);
         });
 
         box.appendChild(toast);
-        setTimeout(() => toast.remove(), 15000);
+        setTimeout(() => fadeOutTrollToast(toast), 15000);
+    }
+
+    /* Fades the warning out (with Animations > Popups on), then removes it */
+    function fadeOutTrollToast(toast) {
+        if (!toast.isConnected || toast.classList.contains("fmTrollToastOut")) {
+            return;
+        }
+
+        if (!document.documentElement.classList.contains("fmAnimPopups")) {
+            toast.remove();
+            return;
+        }
+
+        toast.classList.add("fmTrollToastOut");
+        toast.addEventListener("animationend", () => toast.remove(), { once: true });
+        setTimeout(() => toast.remove(), 600 * animSpeedFactor());   /* backup */
     }
 
     /* ---------- Safety panel ---------- */
@@ -6539,16 +6759,26 @@ function buildSimpleColorRowsHTML() {
                             </div>
 
                             ${row("themeModTrollEnabled", "Troll detection",
-                                "Turns names red (user list, chat and their name tag on the board) when someone seems to be griefing, and can show a small warning.")}
+                                "Turns a possible griefer's name red and can show a small warning.")}
 
-                            ${row("themeModTrollGuestsOnly", "Guests only", "Only watch unregistered users. OFF watches everyone except you.")}
+                            ${row("themeModTrollGuestsOnly", "Guests only", "Only watch guests. OFF watches everyone except you.")}
+
+                            <div class="themeModSetting themeModNoDivider themeModTrollSensRow">
+                                <div class="themeModSettingText">
+                                    <div class="themeModSettingName">Sensitivity</div>
+                                    <div class="themeModSettingDescription themeModTrollSensText"></div>
+                                </div>
+                                <div class="themeModDecoSeg themeModTrollSens" role="radiogroup" aria-label="Sensitivity">
+                                    ${Object.entries(TROLL_SENSITIVITY).map(([k, v]) => `<button type="button" role="radio" data-troll-sens="${k}">${v.label}</button>`).join("")}
+                                </div>
+                            </div>
 
                             <div class="themeModSubsectionTitle themeModSpacingSubsection">
                                 Timing
                             </div>
 
                             ${range("themeModTrollFlagAfter", "Flag after",
-                                "How long someone has to keep going before they're flagged. Big selections and wild scribbling are flagged right away.",
+                                "How long they have to keep it up. Giant select-alls are flagged right away.",
                                 5, 80, 5, 15, "1.5s")}
 
                             <div class="themeModSetting themeModNoDivider">
@@ -6565,20 +6795,22 @@ function buildSimpleColorRowsHTML() {
                                 Watch For
                             </div>
 
-                            ${row("themeModTrollSelection", "Selection / move",
-                                "Using the selection or move tool. Selecting a big part of the board is flagged instantly (select-all-and-delete).")}
-                            ${row("themeModTrollScribble", "Wild scribbling",
-                                "Fast zig-zags covering a big part of the board, with any brush size. Quick shading in one spot doesn't count.")}
-                            ${row("themeModTrollEraser", "Eraser", "Erasing across the board.")}
-                            ${row("themeModTrollFill", "Fill", "The fill (bucket) tool.")}
+                            ${row("themeModTrollSelection", "Big selections",
+                                "Selecting most of the board (select-all-and-delete).")}
+                            ${row("themeModTrollScribble", "Scribbling",
+                                "Scribbling over a big part of the board.")}
+                            ${row("themeModTrollEraser", "Eraser", "Erasing a big part of the board. Small fixes don't count.")}
+                            ${row("themeModTrollFill", "Fill", "Filling all over the board.")}
                             ${row("themeModTrollBigBrush", "Huge brush", "Drawing with a very big brush.")}
-                            ${range("themeModTrollBigBrushPx", "Huge brush from", "The brush size that counts as huge (board pixels).", 40, 400, 10, 140, "140px")}
+                            ${range("themeModTrollBigBrushPx", "Huge brush from", "The size that counts as huge (140 is the max).", 40, 140, 10, 140, "140px")}
+                            ${row("themeModTrollBigText", "Huge text", "A very big text size, or text all over the board.")}
+                            ${range("themeModTrollBigTextPx", "Huge text from", "The size that counts as huge (140 is the max).", 30, 140, 10, 100, "100px")}
 
                             <div class="themeModSubsectionTitle themeModSpacingSubsection">
                                 Warnings
                             </div>
 
-                            ${row("themeModTrollPopup", "Warning popup", "A small note in the top-right corner with the person's name. At most once a minute per person.")}
+                            ${row("themeModTrollPopup", "Warning popup", "A small note with their name, at most once a minute each.")}
 
                             <div class="themeModSetting themeModNoDivider">
                                 <div class="themeModSettingText">
@@ -6590,7 +6822,7 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-shield-alt"></i>
-                                <span>Everything here happens only on your screen: nothing is sent to FlockMod and nobody else sees the red names or warnings. It's a guess based on tools, brush size and movement (someone erasing their own drawing can get flagged too), so please check before acting. It can't stop anyone; use FlockMod's own moderation tools for that. For a sound, turn on "Possible griefer" in the Sounds tab.</span>
+                                <span>Only you see this, and nothing is sent to FlockMod. It's a best guess from people's cursors, so please check before acting. For a sound, turn on "Possible griefer" in Sounds.</span>
                             </div>
 
                         </div>`;
@@ -6605,6 +6837,7 @@ function buildSimpleColorRowsHTML() {
             selection: "#themeModTrollSelection",
             bigBrush: "#themeModTrollBigBrush",
             scribble: "#themeModTrollScribble",
+            bigText: "#themeModTrollBigText",
             popup: "#themeModTrollPopup"
         };
         const toggles = {};
@@ -6615,16 +6848,35 @@ function buildSimpleColorRowsHTML() {
         const bigPxValue = dialog.querySelector("#themeModTrollBigBrushPxValue");
         const stay = dialog.querySelector("#themeModTrollStay");
         const color = dialog.querySelector("#themeModTrollColor");
+        const textPx = dialog.querySelector("#themeModTrollBigTextPx");
+        const textPxValue = dialog.querySelector("#themeModTrollBigTextPxValue");
+        const sensBox = dialog.querySelector(".themeModTrollSens");
+        const sensText = dialog.querySelector(".themeModTrollSensText");
+        let sensitivity = TROLL_DEFAULTS.sensitivity;
+
+        function setSens(value) {
+            sensitivity = TROLL_SENSITIVITY[value] ? value : "normal";
+            sensBox.querySelectorAll("[data-troll-sens]").forEach((b) => {
+                const on = b.dataset.trollSens === sensitivity;
+                b.classList.toggle("themeModDecoSegOn", on);
+                b.setAttribute("aria-checked", String(on));
+            });
+            const s = TROLL_SENSITIVITY[sensitivity];
+            sensText.innerHTML = `<b>${s.label}:</b> flags someone covering about <b>${Math.round(s.cover * 100)}%</b> of the board in 10 seconds.`;
+        }
 
         function labels() {
             flagAfterValue.textContent = `${(Number(flagAfter.value) / 10).toFixed(1)}s`;
             bigPxValue.textContent = `${bigPx.value}px`;
+            textPxValue.textContent = `${textPx.value}px`;
         }
 
         function fill(st) {
             Object.keys(toggles).forEach((k) => { toggles[k].checked = st[k]; });
             flagAfter.value = String(st.flagAfter);
             bigPx.value = String(st.bigBrushPx);
+            textPx.value = String(st.bigTextPx);
+            setSens(st.sensitivity);
             stay.value = String(st.stay);
             color.value = st.color;
             labels();
@@ -6634,6 +6886,8 @@ function buildSimpleColorRowsHTML() {
             const st = {
                 flagAfter: Number(flagAfter.value),
                 bigBrushPx: Number(bigPx.value),
+                bigTextPx: Number(textPx.value),
+                sensitivity,
                 stay: Number(stay.value),
                 color: color.value
             };
@@ -6648,7 +6902,14 @@ function buildSimpleColorRowsHTML() {
 
         fill(readSavedTroll());
         Object.values(toggles).forEach((t) => t.addEventListener("change", preview));
-        [flagAfter, bigPx].forEach((r) => r.addEventListener("input", preview));
+        [flagAfter, bigPx, textPx].forEach((r) => r.addEventListener("input", preview));
+        sensBox.addEventListener("click", (event) => {
+            const b = event.target.closest("[data-troll-sens]");
+            if (b && b.dataset.trollSens !== sensitivity) {
+                setSens(b.dataset.trollSens);
+                preview();
+            }
+        });
         stay.addEventListener("change", preview);
         color.addEventListener("input", preview);
 
@@ -8069,7 +8330,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Theme with a few main colors instead of every detailed one. Your detailed colors are kept and come back when this is off.
+                                        Theme with just a few main colors. Your detailed colors are kept for later.
                                     </div>
                                 </div>
 
@@ -8092,7 +8353,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        A short walkthrough of the basics: the on/off switch, simple coloring, colors, search and safety. Show welcome brings back the first-time popup.
+                                        A short walkthrough of the basics. Show welcome brings back the first popup.
                                     </div>
                                 </div>
 
@@ -8115,7 +8376,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        You're running FlockMod Themer <b>v${getModVersion()}</b>. Checking looks up the newest version on GitHub, only when you press the button. Nothing is sent to FlockMod.
+                                        You're running FlockMod Themer <b>v${getModVersion()}</b>. Checking only talks to GitHub.
                                     </div>
                                 </div>
 
@@ -8140,7 +8401,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        At most once a day, when you open this menu. A pink dot shows up on General if a new version is out. Only talks to GitHub.
+                                        Once a day at most. A pink dot on General means an update is out.
                                     </div>
                                 </div>
 
@@ -8167,7 +8428,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Saves everything to one file: your theme, saved themes, settings, background images, sounds, fonts and reference images. Load it on a new browser or computer to get it all back.
+                                        Saves everything (themes, settings, images, sounds, fonts) to one file you can load on another computer.
                                     </div>
                                 </div>
 
@@ -8251,7 +8512,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Choose the font used by the FlockMod interface.
+                                        The font FlockMod uses.
                                     </div>
                                 </div>
 
@@ -8268,7 +8529,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Type any font name from fonts.google.com, or upload a font file (.ttf, .otf, .woff, .woff2). Added fonts show up in the UI Font list.
+                                        Type a font name from fonts.google.com, or upload a font file.
                                     </div>
                                 </div>
 
@@ -8291,7 +8552,7 @@ function buildSimpleColorRowsHTML() {
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-circle-info"></i>
-                                <span>Uploaded fonts are saved only in this browser on this computer. Nobody else sees them, and nothing is sent to FlockMod. They aren't included in share codes, and clearing your browser's data for FlockMod removes them.</span>
+                                <span>Uploaded fonts stay in this browser only. Nobody else sees them.</span>
                             </div>
 
 
@@ -8303,7 +8564,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Adjust the size used by the FlockMod interface.
+                                        How big FlockMod's text is.
                                     </div>
                                 </div>
 
@@ -8336,7 +8597,7 @@ function buildSimpleColorRowsHTML() {
                                     </div>
 
                                     <div class="themeModSettingDescription">
-                                        Choose the weight used by the FlockMod interface.
+                                        How bold FlockMod's text is.
                                     </div>
                                 </div>
 
@@ -8361,7 +8622,7 @@ function buildSimpleColorRowsHTML() {
         </div>
 
         <div class="themeModSettingDescription">
-            Adjust the spacing and density of the FlockMod interface.
+            How roomy or compact FlockMod looks.
         </div>
     </div>
 
@@ -8394,7 +8655,7 @@ function buildSimpleColorRowsHTML() {
         </div>
 
         <div class="themeModSettingDescription">
-            Rounds the corners of buttons, text boxes, sliders, section boxes, layers and menus. 5 = FlockMod's own shapes.
+            How round corners are. 5 = FlockMod's own.
         </div>
     </div>
 
@@ -8431,7 +8692,7 @@ function buildSimpleColorRowsHTML() {
         </div>
 
         <div class="themeModSettingDescription">
-            Turns the draggable slider and switch thumbs into a shape (circle, heart, star, diamond, flower, cat, dog, fish). OFF keeps normal thumbs (which Border Radius rounds).
+            Turns slider and switch thumbs into shapes like hearts, stars or cats.
         </div>
     </div>
 
@@ -8460,7 +8721,7 @@ function buildSimpleColorRowsHTML() {
         </div>
 
         <div class="themeModSettingDescription">
-            Makes shaped thumbs bigger so numbers fit better. Only used while a shape is on.
+            Makes shaped thumbs bigger.
         </div>
     </div>
 
@@ -8511,7 +8772,7 @@ ${buildBubbleRowsHTML()}
             </div>
 
             <div class="themeModSettingDescription">
-                Override primary heading-style text (section titles, "Special thanks," native headings).
+                Headings and section titles.
             </div>
         </div>
 
@@ -8536,7 +8797,7 @@ ${buildBubbleRowsHTML()}
             </div>
 
             <div class="themeModSettingDescription">
-                Override most other text (tool options, popups and menus, text boxes, checkbox labels). Excludes the top bar brand title, chat messages, and user list names.
+                Most other text. Chat, usernames and the FlockMod title aren't changed.
             </div>
         </div>
 
@@ -8561,7 +8822,7 @@ ${buildBubbleRowsHTML()}
             </div>
 
             <div class="themeModSettingDescription">
-                Selected states (layer, tool, user row, pagination, pressed popup buttons). OFF = native selected look.
+                Selected layers, tools and rows. OFF = FlockMod's look.
             </div>
         </div>
 
@@ -8586,7 +8847,7 @@ ${buildBubbleRowsHTML()}
             </div>
 
             <div class="themeModSettingDescription">
-                Hover states across FlockMod, including popup buttons, menus and chat channels. OFF = native hovers.
+                Hover states everywhere. OFF = FlockMod's look.
             </div>
         </div>
 
@@ -8654,7 +8915,7 @@ ${buildBubbleRowsHTML()}
                                 <div class="themeModSettingText">
                                     <div class="themeModSettingName">Export theme</div>
                                     <div class="themeModSettingDescription">
-                                        Copies a code of your applied look (colors, fonts, spacing) to share with friends.
+                                        Copy a code of your look to share with friends.
                                     </div>
                                 </div>
                                 <button type="button" class="themeModButton themeModExportButton">Copy code</button>
@@ -8666,7 +8927,7 @@ ${buildBubbleRowsHTML()}
                                 <div class="themeModSettingText">
                                     <div class="themeModSettingName">Import theme</div>
                                     <div class="themeModSettingDescription">
-                                        Paste a theme code below. It replaces your current look (you can undo it).
+                                        Paste a code below to use it. You can undo.
                                     </div>
                                 </div>
                                 <button type="button" class="themeModButton themeModImportButton">Import</button>
@@ -8698,7 +8959,7 @@ ${buildBubbleRowsHTML()}
                             </div>
 
                             <div class="themeModSettingDescription themeModPresetNote">
-                                Presets use simple coloring, so your detailed colors and Interface settings stay as they are.
+                                Presets only change your simple colors.
                             </div>
 
                             <div class="themeModPresetGrid">
@@ -8717,7 +8978,7 @@ ${buildSafetyPanelHTML()}
 
                             <div class="themeModLocalNote">
                                 <i class="fas fa-circle-info"></i>
-                                <span>Background images are saved only in this browser on this computer. Nobody else sees them, and nothing is sent to FlockMod. They aren't included in share codes, and clearing your browser's data for FlockMod removes them.</span>
+                                <span>Images stay in this browser only. Nobody else sees them, and they aren't in share codes.</span>
                             </div>
 
                             ${buildBackgroundRowsHTML()}
@@ -9609,7 +9870,9 @@ const safetyControls = setupSafetyPanel(dialog);
             decoControls
         });
 
-        enhanceColorsLayout(dialog);
+        setupStylePickers(dialog);
+
+        enhanceCardsLayout(dialog);
         setupUnsavedNote(dialog);
 
         setupTour(dialog);
@@ -9692,6 +9955,232 @@ const safetyControls = setupSafetyPanel(dialog);
         }
 
         return elements;
+    }
+
+    /* =========================================================
+       STYLE PICKERS (Interface > Popup Decorations / Chat Bubbles)
+       Tiles instead of long dropdowns. The dropdowns are still
+       there (hidden) and still hold the value, so Apply, theme
+       codes, backups, resets and search all work like before.
+       Kept cheap: tiles are built once when the menu is made,
+       never animate, and only change on a click.
+       ========================================================= */
+
+    const STYLE_MATCH_LS = "flockmodStyleMatch";
+    const STYLE_GROUP_ORDER = ["Basic", "Cute", "Dark", "Neutral"];
+
+    /* Popup decoration groups (bubbles keep theirs in BUB_STYLES).
+       Anything not clearly dark goes in Neutral. */
+    const DECO_STYLE_GROUPS = {
+        cat: "Cute", dog: "Cute", bunny: "Cute", bear: "Cute", fox: "Cute",
+        stars: "Cute", sakura: "Cute", witch: "Cute",
+        glitch: "Dark", dragon: "Dark", gothic: "Dark", terminal: "Dark", spiderweb: "Dark", rose: "Dark",
+        moth: "Neutral", leaves: "Neutral", strawberry: "Neutral", nightsky: "Neutral",
+        ink: "Neutral", deepsea: "Neutral", minimal: "Neutral"
+    };
+
+    const STYLE_LABEL_SHORT = { "Off (FlockMod's normal chat)": "Off", "Butterfly (pastel)": "Butterfly", "Ink (sumi-e)": "Ink", "Pixel / 8-bit": "Pixel" };
+
+    function decoThumbHTML(key) {
+        const style = DECO_STYLES[key];
+
+        if (key === "none" || !style) {
+            return '<span class="fmThumbPopup"><span class="fmThumbBar"></span></span>';
+        }
+
+        const f = style.frame || {};
+        const p = { ...DECO_COLOR_DEFAULTS, ...(style.palette || {}) };
+        const vars = `--fmdeco-main:${p.main};--fmdeco-outline:${p.outline};--fmdeco-detail:${p.detail};--fmdeco-sparkle:${p.sparkle}`;
+        const frame = `background:${f.bg || "#232428"};border-color:${f.border || DECO_FRAME_FALLBACK.border}`;
+
+        return `<span class="fmThumbPopup" style="${vars};${frame}">` +
+               `<span class="fmThumbBar" style="background:${f.title || DECO_FRAME_FALLBACK.title}"></span>` +
+               `<span class="fmDeco">${buildDecoHTML({ style: key, placement: style.placements[0] || "side" })}</span></span>`;
+    }
+
+    function bubbleThumbHTML(key) {
+        const style = BUB_STYLES[key];
+
+        if (key === "none" || !style) {
+            return '<span class="fmThumbPlain"><i></i><i></i></span>';
+        }
+
+        const c = bubbleColors({ style: key, custom: false });
+        const vars = BUB_ROLE_KEYS.map((k) => `--fmbub-${k}:${c[k]}`).join(";");
+        const deco = style.deco ? `<span class="fmBubDeco">${style.deco}</span>` : "";
+
+        return `<span class="themeModBubblePreview fmPrevOn fmBubRight fmThumbChat" data-fm-bub="${key}" style="${vars}">` +
+               '<span class="chatBlock messageBlock" data-type="MYMSG"><span class="msgContent"><span class="msgLine">' +
+               `<span class="msgText${deco ? " fmBubHasDeco" : ""}">hi!${deco}</span>` +
+               "</span></span></span></span>";
+    }
+
+    function setupStylePickers(dialog) {
+        const deco = makeStylePicker(dialog, "#themeModDecoStyle", DECO_STYLES,
+            (k) => DECO_STYLE_GROUPS[k] || "", decoThumbHTML);
+        const bub = makeStylePicker(dialog, "#themeModBubbleStyle", BUB_STYLES,
+            (k) => BUB_STYLES[k].group || "", bubbleThumbHTML);
+        const matchToggle = dialog.querySelector("#themeModStyleMatch");
+
+        if (!deco || !bub) {
+            return;
+        }
+
+        /* Match switch: saved right away (it doesn't change any looks) */
+        const showMatch = () => dialog.classList.toggle("fmStyleMatchOn", Boolean(matchToggle && matchToggle.checked));
+
+        if (matchToggle) {
+            matchToggle.checked = localStorage.getItem(STYLE_MATCH_LS) !== "false";
+            matchToggle.addEventListener("change", () => {
+                localStorage.setItem(STYLE_MATCH_LS, String(matchToggle.checked));
+                showMatch();
+            });
+        }
+
+        showMatch();
+
+        const link = (from, to) => {
+            from.onPick = (key) => {
+                if (matchToggle && matchToggle.checked && key !== "none" && to.has(key) && to.select.value !== key) {
+                    to.pick(key);
+                }
+            };
+        };
+
+        link(deco, bub);
+        link(bub, deco);
+
+        /* Link icons only on tiles that have a partner */
+        deco.grid.querySelectorAll(".fmStyleTile").forEach((t) => t.classList.toggle("fmStyleHasPair", bub.has(t.dataset.key) && t.dataset.key !== "none"));
+        bub.grid.querySelectorAll(".fmStyleTile").forEach((t) => t.classList.toggle("fmStyleHasPair", deco.has(t.dataset.key) && t.dataset.key !== "none"));
+    }
+
+    function makeStylePicker(dialog, selector, styles, groupOf, thumb) {
+        const select = dialog.querySelector(selector);
+        const row = select && select.closest(".themeModSetting");
+
+        if (!row || row.querySelector(".fmStylePick")) {
+            return null;
+        }
+
+        const keys = Array.from(select.options).map((o) => o.value).filter((k) => styles[k]);
+        const counts = {};
+        keys.forEach((k) => {
+            const g = groupOf(k);
+            if (g) counts[g] = (counts[g] || 0) + 1;
+        });
+
+        const groups = STYLE_GROUP_ORDER.filter((g) => counts[g]);
+        const label = (k) => STYLE_LABEL_SHORT[styles[k].label] || styles[k].label;
+
+        const pick = document.createElement("div");
+        pick.className = "fmStylePick";
+        pick.innerHTML =
+            '<div class="fmStyleChips">' +
+            `<button type="button" class="fmStyleChip fmStyleChipOn" data-group="all">All <span>${keys.length - 1}</span></button>` +
+            groups.map((g) => `<button type="button" class="fmStyleChip" data-group="${g}">${g} <span>${counts[g]}</span></button>`).join("") +
+            "</div>" +
+            '<div class="fmStyleGrid" role="listbox">' +
+            keys.map((k) =>
+                `<div class="fmStyleTile" role="option" tabindex="0" data-key="${k}" data-group="${groupOf(k)}" title="${styles[k].label}">` +
+                `<span class="fmStyleThumb" aria-hidden="true">${thumb(k)}</span>` +
+                `<span class="fmStyleName">${label(k)}</span>` +
+                '<i class="fas fa-link fmStyleLink" aria-hidden="true"></i></div>'
+            ).join("") +
+            "</div>";
+
+        row.appendChild(pick);
+
+        const grid = pick.querySelector(".fmStyleGrid");
+        const tiles = Array.from(grid.children);
+        let lastKey = null;
+
+        /* Where "Current: …" shows (the card title, also when folded).
+           Drawn with CSS from a data attribute, so chips/search don't read it. */
+        let titleLabel = null;
+        const findTitle = () => {
+            if (titleLabel) return titleLabel;
+            let node = row.previousElementSibling;
+            while (node && !node.classList.contains("themeModSubsectionTitle")) node = node.previousElementSibling;
+            titleLabel = node ? (node.querySelector(".themeModSubsectionLabel") || node) : null;
+            return titleLabel;
+        };
+
+        function sync() {
+            const key = select.value;
+
+            if (key === lastKey) {
+                return;
+            }
+
+            lastKey = key;
+            tiles.forEach((t) => {
+                const on = t.dataset.key === key;
+                t.classList.toggle("fmStyleOn", on);
+                t.setAttribute("aria-selected", String(on));
+            });
+
+            const title = findTitle();
+            if (title) {
+                if (key && key !== "none" && styles[key]) title.dataset.fmCurrent = label(key);
+                else delete title.dataset.fmCurrent;
+            }
+        }
+
+        /* Every way the value changes (load, theme codes, resets)
+           sets select.value, so catch that and keep tiles in sync */
+        const native = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+        Object.defineProperty(select, "value", {
+            configurable: true,
+            get() { return native.get.call(this); },
+            set(v) { native.set.call(this, v); sync(); }
+        });
+        select.addEventListener("change", sync);
+
+        const api = {
+            select,
+            grid,
+            onPick: null,
+            has: (k) => Boolean(styles[k]) && keys.includes(k),
+            pick(key) {
+                select.value = key;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        };
+
+        const choose = (tile) => {
+            const key = tile.dataset.key;
+            if (key === select.value) return;
+            api.pick(key);
+            if (api.onPick) api.onPick(key);
+        };
+
+        grid.addEventListener("click", (event) => {
+            const tile = event.target.closest(".fmStyleTile");
+            if (tile) choose(tile);
+        });
+
+        grid.addEventListener("keydown", (event) => {
+            const tile = event.target.closest(".fmStyleTile");
+            if (tile && (event.key === "Enter" || event.key === " ")) {
+                event.preventDefault();
+                choose(tile);
+            }
+        });
+
+        /* Filter chips. "Off/None" stays in every filter. */
+        pick.querySelector(".fmStyleChips").addEventListener("click", (event) => {
+            const chip = event.target.closest(".fmStyleChip");
+            if (!chip) return;
+            const g = chip.dataset.group;
+            pick.querySelectorAll(".fmStyleChip").forEach((c) => c.classList.toggle("fmStyleChipOn", c === chip));
+            tiles.forEach((t) => {
+                t.hidden = g !== "all" && t.dataset.key !== "none" && t.dataset.group !== g;
+            });
+        });
+
+        sync();
+        return api;
     }
 
     function setupSubsectionResets(dialog, { actionsNote, decoControls }) {
@@ -11551,22 +12040,82 @@ const safetyControls = setupSafetyPanel(dialog);
         }
     }
 
-    function enhanceColorsLayout(dialog) {
-        const panel = dialog.querySelector('.themeModSectionContent[data-theme-panel="colors"]');
+    /* Cards for every settings tab that has sections. Colors also
+       gets group labels, Gradient pills, "N settings · M on" counts
+       and one-line descriptions. */
+    const CARD_PANELS = ["colors", "interface", "safety", "backgrounds"];
+
+    function enhanceCardsLayout(dialog) {
+        CARD_PANELS.forEach((name) => enhancePanelCards(dialog, name));
+        setupFoldAllButton(dialog);
+    }
+
+    /* One button next to ⓘ: folds every section of the open tab,
+       or unfolds them all when everything is already folded */
+    function setupFoldAllButton(dialog) {
+        const help = dialog.querySelector(".themeModPanelHelp");
+
+        if (!help || dialog.querySelector(".themeModFoldAll")) {
+            return;
+        }
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "themeModFoldAll";
+        help.before(button);
+
+        const currentPanel = () => [...dialog.querySelectorAll(".themeModSectionContent.fmCardsPanel")]
+            .find((p) => getComputedStyle(p).display !== "none");
+
+        const update = () => {
+            const panel = currentPanel();
+            const api = panel && panel._fmCards;
+
+            button.style.display = api ? "" : "none";
+
+            if (!api) {
+                return;
+            }
+
+            const open = api.anyOpen();
+            const label = open ? "Fold all sections" : "Unfold all sections";
+            button.innerHTML = `<i class="fas ${open ? "fa-compress-alt" : "fa-expand-alt"}"></i>`;
+            button.title = label;
+            button.setAttribute("aria-label", label);
+        };
+
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const panel = currentPanel();
+
+            if (panel && panel._fmCards) {
+                panel._fmCards.setAll(panel._fmCards.anyOpen());
+                update();
+            }
+        });
+
+        dialog.addEventListener("click", () => requestAnimationFrame(update));
+        update();
+    }
+
+    function enhancePanelCards(dialog, panelName) {
+        const panel = dialog.querySelector(`.themeModSectionContent[data-theme-panel="${panelName}"]`);
+        const isColors = panelName === "colors";
 
         if (!panel || panel.classList.contains("fmCardsPanel")) {
             return;
         }
 
         panel.classList.add("fmCardsPanel");
+        panel.classList.toggle("fmCardsColors", isColors);
 
         const folded = readFoldedSections();
         const saveFolded = () => {
             localStorage.setItem(FOLDED_SECTIONS_LS, JSON.stringify([...folded]));
         };
 
-        /* ---- group labels ---- */
-        Object.entries(COLOR_GROUP_LABELS).forEach(([id, text]) => {
+        /* ---- group labels (Colors only) ---- */
+        Object.entries(isColors ? COLOR_GROUP_LABELS : {}).forEach(([id, text]) => {
             const input = panel.querySelector(`#${id}`);
             const row = input && input.closest(".themeModSetting");
 
@@ -11579,7 +12128,7 @@ const safetyControls = setupSafetyPanel(dialog);
         });
 
         /* ---- one-line descriptions: the full text shows on hover ---- */
-        panel.querySelectorAll(".themeModSetting").forEach((row) => {
+        panel.querySelectorAll(isColors ? ".themeModSetting" : ":scope > .fmNothing").forEach((row) => {
             const text = row.querySelector(".themeModSettingText");
             const desc = row.querySelector(".themeModSettingDescription");
 
@@ -11592,7 +12141,7 @@ const safetyControls = setupSafetyPanel(dialog);
            the pill just flips it ---- */
         const gradients = [];
 
-        panel.querySelectorAll(".themeModGradientRow").forEach((gradRow) => {
+        panel.querySelectorAll(isColors ? ".themeModGradientRow" : ":scope > .fmNothing").forEach((gradRow) => {
             let mainRow = gradRow.previousElementSibling;
 
             while (mainRow && !mainRow.classList.contains("themeModSetting")) {
@@ -11634,8 +12183,19 @@ const safetyControls = setupSafetyPanel(dialog);
 
         panel.querySelectorAll(".themeModSubsectionTitle").forEach((title) => {
             const items = getSubsectionElements(title);
-            const labelEl = title.querySelector(".themeModSubsectionLabel");
-            const key = (labelEl || title).textContent.replace(/\s+/g, " ").trim();
+            let labelEl = title.querySelector(".themeModSubsectionLabel");
+
+            /* Tabs without per-section resets: wrap the title text so it
+               can be clicked to fold (chips still read the same text) */
+            if (!labelEl) {
+                labelEl = document.createElement("span");
+                labelEl.className = "themeModSubsectionLabel";
+                [...title.childNodes].forEach((n) => labelEl.appendChild(n));
+                title.appendChild(labelEl);
+            }
+
+            const label = labelEl.textContent.replace(/\s+/g, " ").trim();
+            const key = `${panelName}:${label}`;
 
             title.classList.add("fmCardHead");
             items.forEach((el) => el.classList.add("fmCardItem"));
@@ -11648,7 +12208,7 @@ const safetyControls = setupSafetyPanel(dialog);
             fold.innerHTML = '<i class="fas fa-chevron-down"></i>';
             title.appendChild(fold);
 
-            const card = { title, items, key, labelEl, fold };
+            const card = { title, items, key, label, labelEl, fold };
             cards.push(card);
 
             const toggleFold = (event) => {
@@ -11695,7 +12255,7 @@ const safetyControls = setupSafetyPanel(dialog);
                     .filter(Boolean);
                 const on = switches.filter((input) => input.checked).length;
 
-                if (labelEl && switches.length) {
+                if (isColors && labelEl && switches.length) {
                     labelEl.dataset.fmCount = `${switches.length} setting${switches.length === 1 ? "" : "s"} · ${on ? `${on} on` : "none on"}`;
                 }
 
@@ -11715,6 +12275,19 @@ const safetyControls = setupSafetyPanel(dialog);
             });
         }
 
+        /* For the fold-all button */
+        panel._fmCards = {
+            anyOpen: () => cards.some((c) => c.title.offsetParent !== null && !c.title.classList.contains("fmFolded")),
+            setAll(isFolded) {
+                cards.forEach((c) => {
+                    setFolded(c, isFolded);
+                    folded[isFolded ? "add" : "delete"](c.key);
+                });
+                saveFolded();
+                refresh();
+            }
+        };
+
         /* Opening a section from its jump chip unfolds it first
            (capture: runs before the chip scrolls) */
         const jumpBar = dialog.querySelector(".themeModJumpBar");
@@ -11722,7 +12295,7 @@ const safetyControls = setupSafetyPanel(dialog);
         if (jumpBar) {
             jumpBar.addEventListener("click", (event) => {
                 const chip = event.target.closest(".themeModJumpChip");
-                const card = chip && cards.find((c) => c.key === chip.textContent.trim() && c.title.offsetParent !== null);
+                const card = chip && cards.find((c) => c.label === chip.textContent.trim() && c.title.offsetParent !== null);
 
                 if (card && card.title.classList.contains("fmFolded")) {
                     setFolded(card, false);
@@ -12247,6 +12820,9 @@ const safetyControls = setupSafetyPanel(dialog);
        doesn't block the letter from being typed.
        ========================================================= */
 
+    /* Keys the reference window uses while its picture is focused */
+    const REF_WINDOW_KEYS = ["ArrowLeft", "ArrowRight", "+", "=", "-", "0"];
+
     function setupKeyboardShield() {
         const shield = (event) => {
             const target = event.target;
@@ -12264,9 +12840,20 @@ const safetyControls = setupSafetyPanel(dialog);
                 target.dispatchEvent(new CustomEvent("themeModEnter"));
             }
 
-            /* Reference window: hand its keys over as a custom event */
-            if (event.type === "keydown" && target.closest(REF_SELECTOR) && !target.matches("input")) {
-                target.dispatchEvent(new CustomEvent("themeModRefKey", { detail: { key: event.key } }));
+            /* Reference window: it only keeps its own keys (arrows and
+               zoom). Every other key (B, E, Ctrl+Z...) goes on to
+               FlockMod as normal, so its hotkeys keep working. */
+            if (target.closest(REF_SELECTOR) && !target.matches("input, textarea, select")) {
+                const own = REF_WINDOW_KEYS.includes(event.key) &&
+                    !event.ctrlKey && !event.metaKey && !event.altKey;
+
+                if (!own) {
+                    return;
+                }
+
+                if (event.type === "keydown") {
+                    target.dispatchEvent(new CustomEvent("themeModRefKey", { detail: { key: event.key } }));
+                }
             }
 
             event.stopImmediatePropagation();
@@ -12275,6 +12862,19 @@ const safetyControls = setupSafetyPanel(dialog);
         ["keydown", "keypress", "keyup"].forEach((type) => {
             window.addEventListener(type, shield, true);
         });
+
+        /* Clicking anywhere outside the mod menu / reference window
+           (like the canvas) hands the keyboard back to FlockMod.
+           FlockMod's canvas doesn't take focus by itself, so without
+           this a focused picture kept catching keys. */
+        window.addEventListener("pointerdown", (event) => {
+            const active = document.activeElement;
+            const inside = (el) => el instanceof Element && el.closest(`${MOD_DIALOG_SELECTOR}, ${REF_SELECTOR}`);
+
+            if (inside(active) && !inside(event.target)) {
+                active.blur();
+            }
+        }, true);
     }
 
     function initialize() {
