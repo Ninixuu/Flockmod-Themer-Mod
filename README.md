@@ -1,5 +1,5 @@
 # FlockTheme
-An extension to customize your Flockmod. you can use this for any broswer that accepts extensions, the example used here is for chrome, but general idea to download is the same (Chrome, edge..) One exception is Firefox.
+An extension to customize your Flockmod [maintainer=@Ninixuu]. you can use this for any broswer that accepts extensions, the example used here is for chrome, but general idea to download is the same (Chrome, edge..) One exception is Firefox.
 
 NOTE: Yes! this will work for the new update that just released!
 
