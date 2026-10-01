@@ -11093,7 +11093,9 @@ const safetyControls = setupSafetyPanel(dialog);
                 step("fa-font", "Font", "Change the font, its size and weight. You can add any Google Font by name, or upload your own.", title("Font")),
                 step("fa-arrows-alt-v", "Spacing and corners", "Make FlockMod roomier or more compact, and round the corners of buttons and boxes.", title("Spacing")),
                 step("fa-heart", "Slider thumbs", "Turn slider and switch thumbs into shapes like hearts, stars or cats.", title("Slider Thumbs")),
-                step("fa-cat", "Popup decorations", "Add ears, tails, flowers, dragons, moths and more to every popup. The preview shows how it looks.", title("Popup Decorations")),
+                step("fa-cat", "Popup decorations", "Ears, tails, flowers and more on every popup. Click a tile to try one, and use the chips to show Cute, Dark or Neutral styles.", el(".fmStylePick")),
+                step("fa-comment-dots", "Chat bubbles", "Put chat in bubbles, with your own messages in a special style. Only you see it.", title("Chat Bubbles")),
+                step("fa-link", "Match them", "With this ON, picking a style for popups also picks it for bubbles, and the other way around.", row("Match popups")),
                 step("fa-undo-alt", "Reset one part", "\u21BA next to a section title resets just that section.", el(".themeModSubsectionReset"))
             ],
             colors: simple ? [
