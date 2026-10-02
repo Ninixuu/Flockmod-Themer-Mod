@@ -9,6 +9,13 @@
        ========================================================= */
     const CHANGELOG = [
         {
+            version: "1.6.1",
+            notes: [
+                "Troll detection adjusts to the board's size (S to XL).",
+                "It now also catches fast zig-zags, huge erasers and slow erasing."
+            ]
+        },
+        {
             version: "1.6",
             notes: [
                 "Canvas colors: paper, surroundings and a dimmer (Colors > Canvas).",
@@ -6516,7 +6523,27 @@ function buildSimpleColorRowsHTML() {
 
     /* Board coverage: the board is split into a grid; every square
        someone's brush/eraser passes over is remembered for 10s */
-    const TROLL_COVER = { cols: 32, rows: 18, windowMs: 10000, maxJump: 260 };
+    const TROLL_COVER = { cols: 32, rows: 18, windowMs: 10000, slowMs: 60000, maxJump: 260 };
+
+    /* v1.6: rooms come in many board sizes (640x360 up to 1920x2160 and
+       more). Every size limit above was tuned on a 1280x720 board, so
+       they're scaled by the board's size: k = 0.5 on a 640x360 board,
+       about 2.1 on 1920x2160. The coverage grid keeps ~576 roughly
+       square cells whatever the board's shape. */
+    const TROLL_BASE_AREA = 1280 * 720;
+    let trollGrid = { w: 0, h: 0, cols: 32, rows: 18, k: 1 };
+
+    function trollBoard() {
+        const { w, h } = trollBoardSize();
+        if (w !== trollGrid.w || h !== trollGrid.h) {
+            const cols = Math.max(8, Math.min(48, Math.round(Math.sqrt(576 * w / h))));
+            const rows = Math.max(8, Math.min(48, Math.round(576 / cols)));
+            const k = Math.min(3, Math.max(0.4, Math.sqrt((w * h) / TROLL_BASE_AREA)));
+            trollGrid = { w, h, cols, rows, k };
+            trollCoverage.clear(); /* old squares don't match the new grid */
+        }
+        return trollGrid;
+    }
 
     const TROLL_STAY_CHOICES = [
         [15, "15 seconds"], [30, "30 seconds"], [60, "1 minute"],
@@ -6672,9 +6699,9 @@ function buildSimpleColorRowsHTML() {
     /* Marks the grid squares a brush of this size passes over
        between two points (a big jump = pen lifted: only the end) */
     function trollStamp(name, from, to, sizePx, now) {
-        const { w, h } = trollBoardSize();
-        const cw = w / TROLL_COVER.cols;
-        const ch = h / TROLL_COVER.rows;
+        const { w, h, cols, rows, k } = trollBoard();
+        const cw = w / cols;
+        const ch = h / rows;
         const r = Math.max(4, sizePx / 2);
         let cells = trollCoverage.get(name);
 
@@ -6685,20 +6712,20 @@ function buildSimpleColorRowsHTML() {
 
         const mark = (x, y) => {
             const c0 = Math.max(0, Math.floor((x - r) / cw));
-            const c1 = Math.min(TROLL_COVER.cols - 1, Math.floor((x + r) / cw));
+            const c1 = Math.min(cols - 1, Math.floor((x + r) / cw));
             const r0 = Math.max(0, Math.floor((y - r) / ch));
-            const r1 = Math.min(TROLL_COVER.rows - 1, Math.floor((y + r) / ch));
+            const r1 = Math.min(rows - 1, Math.floor((y + r) / ch));
 
             for (let row = r0; row <= r1; row++) {
                 for (let col = c0; col <= c1; col++) {
-                    cells.set(row * TROLL_COVER.cols + col, now);
+                    cells.set(row * cols + col, now);
                 }
             }
         };
 
         const dist = from ? Math.hypot(to.x - from.x, to.y - from.y) : 0;
 
-        if (!from || dist > TROLL_COVER.maxJump) {
+        if (!from || dist > TROLL_COVER.maxJump * k) {
             mark(to.x, to.y);
             return;
         }
@@ -6710,21 +6737,27 @@ function buildSimpleColorRowsHTML() {
         }
     }
 
-    /* Share of the board (0..1) covered in the last 10 seconds */
-    function trollCoverageShare(name, now) {
+    /* Share of the board (0..1) covered in the last windowMs (10s by
+       default; v1.6.1: squares are kept 60s for the slow check) */
+    function trollCoverageShare(name, now, windowMs = TROLL_COVER.windowMs) {
         const cells = trollCoverage.get(name);
 
         if (!cells) {
             return 0;
         }
 
+        let count = 0;
+
         cells.forEach((t, key) => {
-            if (now - t > TROLL_COVER.windowMs) {
+            if (now - t > TROLL_COVER.slowMs) {
                 cells.delete(key);
+            } else if (now - t <= windowMs) {
+                count++;
             }
         });
 
-        return cells.size / (TROLL_COVER.cols * TROLL_COVER.rows);
+        const g = trollBoard();
+        return count / (g.cols * g.rows);
     }
 
     function watchTrollCursors() {
@@ -6859,7 +6892,26 @@ function buildSimpleColorRowsHTML() {
         const flagAfter = st.flagAfter / 10;
         const users = readUserRows();
         const cursors = readCursors();
-        const coverNeeded = (TROLL_SENSITIVITY[st.sensitivity] || TROLL_SENSITIVITY.normal).cover;
+        /* v1.6: sizes follow the board. Coverage meets in the middle: a
+           big board needs a smaller share (it's a lot more area), a small
+           board a bigger one (normal sketching covers it fast). */
+        const k = trollBoard().k;
+        const baseCover = (TROLL_SENSITIVITY[st.sensitivity] || TROLL_SENSITIVITY.normal).cover;
+        const coverNeeded = Math.min(0.85, Math.max(baseCover * 0.45, baseCover / k));
+        const sweepSpan = TROLL_SWEEP.span * k;
+        /* Brushes and text stop at 140, so these only scale DOWN (small
+           boards). On bigger boards a huge brush/eraser also has to make
+           long, fast strokes, so painting a background calmly is fine. */
+        const hugeBrushPx = st.bigBrushPx * Math.min(1, k);
+        const hugeTextPx = st.bigTextPx * Math.min(1, k);
+        const bigStroke = k <= 1 ? 0 : 450 * k;   /* path in the last 1.5s */
+        const zigPath = 1200 * k;                  /* fast, long zig-zags */
+        const zigSpan = 250 * k;
+        /* v1.6.1 slow check (last minute): slowly erasing or drawing over
+           a big part of the board. Erasing needs less than drawing, since
+           drawing a lot over a minute is normal for artists. */
+        const slowEraseNeeded = Math.min(0.85, coverNeeded * 1.5);
+        const slowDrawNeeded = Math.min(0.9, coverNeeded * 2.5);
 
         /* Who to record: guests only (if that's on), never ignored people */
         trollWatched.clear();
@@ -6888,16 +6940,17 @@ function buildSimpleColorRowsHTML() {
             const cursor = cursors.get(name);
             const m = cursor ? trollMotion(name, TROLL_SWEEP.windowMs, now) : { moving: false };
             const covered = trollCoverageShare(name, now);
+            const coveredSlow = trollCoverageShare(name, now, TROLL_COVER.slowMs);
             const pct = Math.round(covered * 100);
             const textPx = cursor ? cursor.textPx : 0;
             let reason = "";
             let instant = false;
 
-            if (m.moving && user.tool === "selection" && st.selection && m.span >= TROLL_SWEEP.span) {
+            if (m.moving && user.tool === "selection" && st.selection && m.span >= sweepSpan) {
                 /* select-all style sweep: the only thing flagged right away */
                 reason = "Selected a big part of the board";
                 instant = true;
-            } else if (st.bigText && textPx >= st.bigTextPx) {
+            } else if (st.bigText && textPx >= hugeTextPx) {
                 reason = `Huge text (${Math.round(textPx)}px)`;
             } else if (m.moving && covered >= coverNeeded) {
                 if (textPx > 0 && st.bigText) {
@@ -6911,8 +6964,34 @@ function buildSimpleColorRowsHTML() {
                 }
             }
 
-            if (!reason && m.moving && st.bigBrush && cursor && !textPx && user.tool !== "selection" && cursor.size >= st.bigBrushPx) {
-                reason = `Huge brush (${Math.round(cursor.size)}px)`;
+            /* v1.6.1: slowly erasing / drawing over a big part of the board */
+            if (!reason && m.moving && !textPx && user.tool !== "selection" && user.tool !== "fill") {
+                const slowPct = Math.round(coveredSlow * 100);
+                if (user.tool === "eraser" && st.eraser && coveredSlow >= slowEraseNeeded) {
+                    reason = `Erased ${slowPct}% of the board in the last minute`;
+                } else if (!user.tool && st.scribble && coveredSlow >= slowDrawNeeded) {
+                    reason = `Drew over ${slowPct}% of the board in the last minute`;
+                }
+            }
+
+            /* v1.6.1: fast, long zig-zags (lots of sharp turns over a wide area) */
+            if (!reason && m.moving && !textPx && user.tool !== "selection" && user.tool !== "fill" &&
+                m.turns >= 6 && m.path >= zigPath && m.span >= zigSpan) {
+                if (user.tool === "eraser" && st.eraser) {
+                    reason = "Fast zig-zag erasing";
+                } else if (!user.tool && st.scribble) {
+                    reason = "Fast zig-zag scribbles";
+                }
+            }
+
+            /* Huge brush or eraser (on big boards: only with long, fast strokes) */
+            if (!reason && m.moving && cursor && !textPx && user.tool !== "selection" && user.tool !== "fill" &&
+                cursor.size >= hugeBrushPx && m.path >= bigStroke) {
+                if (user.tool === "eraser" && (st.eraser || st.bigBrush)) {
+                    reason = `Huge eraser (${Math.round(cursor.size)}px)`;
+                } else if (!user.tool && st.bigBrush) {
+                    reason = `Huge brush (${Math.round(cursor.size)}px)`;
+                }
             }
 
             if (reason) {
@@ -7237,9 +7316,9 @@ function buildSimpleColorRowsHTML() {
                             ${row("themeModTrollEraser", "Eraser", "Erasing a big part of the board. Small fixes don't count.")}
                             ${row("themeModTrollFill", "Fill", "Filling all over the board.")}
                             ${row("themeModTrollBigBrush", "Huge brush", "Drawing with a very big brush.")}
-                            ${range("themeModTrollBigBrushPx", "Huge brush from", "The size that counts as huge (140 is the max).", 40, 140, 10, 140, "140px")}
+                            ${range("themeModTrollBigBrushPx", "Huge brush from", "On a normal-size board. Scales with the board's size.", 40, 140, 10, 140, "140px")}
                             ${row("themeModTrollBigText", "Huge text", "A very big text size, or text all over the board.")}
-                            ${range("themeModTrollBigTextPx", "Huge text from", "The size that counts as huge (140 is the max).", 30, 140, 10, 100, "100px")}
+                            ${range("themeModTrollBigTextPx", "Huge text from", "On a normal-size board. Scales with the board's size.", 30, 140, 10, 100, "100px")}
 
                             <div class="themeModSubsectionTitle themeModSpacingSubsection">
                                 Warnings
