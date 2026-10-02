@@ -1,7 +1,7 @@
 # FlockTheme
-An extension to customize your Flockmod. you can use this for any broswer that accepts extensions, the example used here is for chrome, but general idea to download is the same (Chrome, edge..) One exception is Firefox.
+An extension to customize your Flockmod. you can use this for any broswer that accepts extensions, the example used here is for chrome, but general idea to download is the same (Chrome, edge..) Firefox requires some extra steps.
 
-NOTE: Yes! this will work for the new update that just released!
+NOTE: Yes! this will work for the new update that just released! 
 
 How to download:
 
@@ -16,3 +16,5 @@ How to download:
   9. Make sure the extension is turned on
   10. Reload FM
   11. Enjoy!
+
+  12. If you need to update, remove your old extension files and follow steps 1-11 again with the new update. *Your saved themes and settings should still be the same even after updating*
