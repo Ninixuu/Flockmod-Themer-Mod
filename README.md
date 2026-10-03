@@ -17,4 +17,4 @@ How to download:
   10. Reload FM
   11. Enjoy!
 
-  12. If you need to update, remove your old extension files and follow steps 1-11 again with the new update. *Your saved themes and settings should still be the same even after updating*
+  12. If you need to update, remove/delete your old extension files and follow steps 1-11 again with the new update. *Your saved themes and settings should still be the same even after updating*
